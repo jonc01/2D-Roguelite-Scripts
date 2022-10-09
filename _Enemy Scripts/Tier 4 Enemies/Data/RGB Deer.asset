@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8c19f877c81e98418af271500705c39, type: 3}
+  m_Name: RGB Deer
+  m_EditorClassIdentifier: 
+  Name: 
+  Type: 2
+  Tier: 4
+  Base_MaxHP: 999
+  Base_MoveSpeed: 2
+  Base_JumpHeight: 2
+  Base_AttackDamage: 0
+  Base_AttackSpeed: 0
+  Base_Defense: 99
+  Base_CritChance: 0
+  Base_CritMultiplier: 0
