@@ -29,12 +29,19 @@ public class DoorController : MonoBehaviour
     {
         PlayAnim(0);
         collider.enabled = true;
+        collider.isTrigger = false;
     }
 
     void OpenDoor()
     {
         PlayAnim(1);
-        collider.enabled = false;
+        collider.isTrigger = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("Player entered door");
+        //TODO: Move player to new connected scene
     }
 
     private void PlayAnim(int index)
