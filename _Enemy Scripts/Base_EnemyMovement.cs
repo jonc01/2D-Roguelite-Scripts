@@ -19,7 +19,8 @@ public class Base_EnemyMovement : MonoBehaviour
 
     private void Awake()
     {
-        moveSpeed = character.Base_MoveSpeed;
+        if(character != null)
+            moveSpeed = character.Base_MoveSpeed;
     }
 
     void Start()

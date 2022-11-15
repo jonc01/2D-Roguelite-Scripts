@@ -26,8 +26,9 @@ public class Base_PlayerMovement : MonoBehaviour
 
     //Drop-through platforms
     private GameObject currentOneWayPlatform;
-    [SerializeField] private CapsuleCollider2D playerCollider;
-    //private BoxCollider2D playerCollider;
+    [SerializeField] public bool canDropThrough;
+    //[SerializeField] private CapsuleCollider2D playerCollider;
+    [SerializeField] private BoxCollider2D playerCollider;
 
     //Stats
     public float moveSpeed = 3f; //default, set by Base_Character
@@ -67,7 +68,7 @@ public class Base_PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        playerCollider = GetComponent<CapsuleCollider2D>();
+        playerCollider = GetComponent<BoxCollider2D>();
         if(character != null)
         {
             moveSpeed = character.Base_MoveSpeed;
@@ -123,7 +124,9 @@ public class Base_PlayerMovement : MonoBehaviour
             if (Input.GetButtonDown("Crouch"))
             {
                 //Allow dropping through platforms
-                if(currentOneWayPlatform != null) StartCoroutine(DisableCollision());
+                if(!canDropThrough) return;
+                if(currentOneWayPlatform != null)
+                    StartCoroutine(DisableCollision());
             }
             CheckPlatform();
         }
@@ -175,6 +178,11 @@ public class Base_PlayerMovement : MonoBehaviour
     #region Drop-through Platform
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        /*if(collision.gameObject.CompareTag("SolidPlatform"))
+        {
+            currentOneWayPlatform = null;
+        }*/
+
         if (collision.gameObject.CompareTag("OneWayPlatform"))
         {
             currentOneWayPlatform = collision.gameObject;
@@ -186,6 +194,7 @@ public class Base_PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("OneWayPlatform"))
         {
             currentOneWayPlatform = null;
+            canDropThrough = true;
         }
     }
 

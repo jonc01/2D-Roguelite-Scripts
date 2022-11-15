@@ -56,7 +56,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float maxHP;
     public float currentHP;
     public float defense;
-
+    public float kbResist; //Knockback resist
 
     [SerializeField]
     float attackDamage,
@@ -79,10 +79,12 @@ public class Base_PlayerCombat : MonoBehaviour
     //Bools
     public bool isStunned;
     public bool isAlive;
+    public bool isKnockedback;
 
     //Coroutines - Stored to allow interrupts
     Coroutine AttackingCO;
     Coroutine StunnedCO;
+    Coroutine KnockbackCO;
 
 
     void Start()
@@ -285,10 +287,46 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
-    public void TakeKnockback(bool pushToRight, float kbPower = 3f, float kbDuration = 5f)
+    public void GetKnockback(bool enemyToRight, float strength = 8, float delay = .5f)
     {
+        return; //TODO: TEMP, function needs testing
         if (!isAlive) return;
-        //
+        KnockbackNullCheckCO();
+
+        if (kbResist > 0) strength -= kbResist;
+        if (strength <= 0) return;
+
+        isKnockedback = true;
+        Debug.Log("Knockback on player");
+        //movement.ToggleFlip(false); //TODO; can just stun player
+        //TODO: player canMove is toggled to false in attackCO, need to allow rb.velocity to change for knockback
+        //GetStunned(.1f); 
+
+        float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        KnockbackCO = StartCoroutine(KnockbackReset(delay));
+    }
+
+    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
+    {
+        yield return new WaitForSeconds(delay);
+        movement.rb.velocity = Vector3.zero;
+        movement.canMove = false;
+        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
+        movement.canMove = true;
+        //movement.ToggleFlip(true); //TODO: can just stun player
+        isKnockedback = false;
+    }
+
+    void KnockbackNullCheckCO()
+    {
+        if (KnockbackCO == null) return;
+        StopCoroutine(KnockbackCO);
+        movement.canMove = true;
+        //movement.ToggleFlip(true); //TODO: can just stun player
+        isKnockedback = false;
     }
 
     public void GetStunned(float stunDuration)
