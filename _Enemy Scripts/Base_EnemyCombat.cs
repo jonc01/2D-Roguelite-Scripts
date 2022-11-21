@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Base_EnemyCombat : MonoBehaviour
+public class Base_EnemyCombat : MonoBehaviour, IDamageable
 {
     [Header("References/Setup")]
     public Base_EnemyMovement movement;
@@ -40,7 +40,7 @@ public class Base_EnemyCombat : MonoBehaviour
     [Space(10)]
 
     //HealthBar
-    
+
     //Stats
     [Header("=== Stats (char optional) ===")]
     public Base_Character character;
@@ -50,8 +50,10 @@ public class Base_EnemyCombat : MonoBehaviour
 
     [SerializeField] float attackDamage;
     [SerializeField] float attackSpeed;
+    [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
     public float attackRange;
+    [SerializeField] float knockbackStrength = 0; //4 is moderate
     [Space(10)]
     float timeSinceAttack;
     //float critChance;
@@ -86,7 +88,7 @@ public class Base_EnemyCombat : MonoBehaviour
             attackRange = character.Base_AttackRange;
             maxHP = character.Base_MaxHP;
         }
-        
+
         currentHP = maxHP;
         isAlive = true;
         isStunned = false;
@@ -115,7 +117,7 @@ public class Base_EnemyCombat : MonoBehaviour
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         textPopups = GameObject.FindGameObjectWithTag("TextPopupsHandler").GetComponent<TextPopupsHandler>();
         hitEffects = GameObject.FindGameObjectWithTag("HitEffectsHandler").GetComponent<HitEffectsHandler>();
-        if(orbHolder == null) orbHolder = GetComponentInChildren<OrbHolder>();
+        if (orbHolder == null) orbHolder = GetComponentInChildren<OrbHolder>();
         enemyStageManager = GetComponentInParent<EnemyStageManager>();
     }
 
@@ -142,7 +144,7 @@ public class Base_EnemyCombat : MonoBehaviour
     public virtual void Attack()
     {
         if (!isAlive || isAttacking) return;
-        if(timeSinceAttack > attackSpeed)
+        if (timeSinceAttack > attackSpeed)
         {
             timeSinceAttack = 0;
             AttackingCO = StartCoroutine(Attacking());
@@ -160,6 +162,7 @@ public class Base_EnemyCombat : MonoBehaviour
         CheckHit();
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
         isAttacking = false;
+        yield return new WaitForSeconds(attackEndDelay);
         movement.canMove = true;
         movement.ToggleFlip(true);
     }
@@ -167,12 +170,12 @@ public class Base_EnemyCombat : MonoBehaviour
     public virtual void CheckHit()
     {
         Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playerLayer);
-        foreach(Collider2D player in hitPlayers)
+        foreach (Collider2D player in hitPlayers)
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
                 player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage);
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight);
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
                 //knockback
             }
         }
@@ -241,7 +244,7 @@ public class Base_EnemyCombat : MonoBehaviour
 
     void StopAttack(bool toggleFlip = false)
     {
-        if(AttackingCO != null) StopCoroutine(AttackingCO);
+        if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;
         movement.canMove = true;
         movement.ToggleFlip(toggleFlip);
@@ -254,7 +257,7 @@ public class Base_EnemyCombat : MonoBehaviour
         if (!isAlive) return;
 
         HitFlash(); //Set material to white, short delay before resetting
-        
+
         float totalDamage = damageTaken - defense;
         if (totalDamage <= 0)
         {

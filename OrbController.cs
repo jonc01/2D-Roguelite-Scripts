@@ -22,6 +22,8 @@ public class OrbController : MonoBehaviour
     public float direction = -1f; //-1 = left, 1 = right
     float xV, yV;
 
+    private bool hitDone;
+
     private void Awake()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -36,6 +38,7 @@ public class OrbController : MonoBehaviour
         player = GameManager.Instance.PlayerTargetOffset;
         inventory = GameManager.Instance.Inventory;
         animator = GetComponent<Animator>();
+        hitDone = false;
     }
 
     private void OnEnable()
@@ -47,7 +50,7 @@ public class OrbController : MonoBehaviour
         StartCoroutine(MoveToPlayer());
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!findPlayer) return;
 
@@ -79,6 +82,9 @@ public class OrbController : MonoBehaviour
 
     void HitPlayer()
     {
+        //Check to make sure hits aren't registered multiple times on collision
+        if (hitDone) return;
+        hitDone = true;
         inventory.GiveGold(1);
         animator.Play("PuffOfSmoke");
         Invoke("DestroyObject", 0.67f);

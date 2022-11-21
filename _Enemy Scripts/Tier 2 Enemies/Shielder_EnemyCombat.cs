@@ -30,7 +30,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight);
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, .2f);
             }
         }
     }

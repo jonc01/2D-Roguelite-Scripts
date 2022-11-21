@@ -8,6 +8,7 @@ public class DoorController : MonoBehaviour
     [SerializeField] Collider2D collider;
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
+    [SerializeField] GameObject doorLight;
 
     [Header("Variables")]
     public bool isOpen;
@@ -17,6 +18,7 @@ public class DoorController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         collider = GetComponent<Collider2D>();
+        if (doorLight != null) doorLight.SetActive(false);
     }
     
     void Update()
@@ -36,6 +38,8 @@ public class DoorController : MonoBehaviour
     {
         PlayAnim(1);
         collider.isTrigger = true;
+        if (doorLight != null)
+            doorLight.SetActive(true);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

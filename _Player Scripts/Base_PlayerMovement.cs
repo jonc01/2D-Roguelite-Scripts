@@ -96,6 +96,7 @@ public class Base_PlayerMovement : MonoBehaviour
         VelocityCheck(); //Checks for grounded, falling, jumping, landing
 
         if (combat.isStunned) return;
+        if (combat.isKnockedback) return;
         if (isDashing || isFloating) return;
 
         if (!canMove || !canAirMove) return; //priority less than isDashing, allow immunity while dashing
@@ -144,6 +145,8 @@ public class Base_PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(0, rb.velocity.y); //The other options didn't work
             return;
         }
+
+        if (combat.isKnockedback) return; //prevent movement inputs when knockedback
         
         //if (combat.isStunned) return; //priority over dash, prevent dash while stunned
         if (isDashing || isFloating) return;
@@ -255,7 +258,7 @@ public class Base_PlayerMovement : MonoBehaviour
     IEnumerator FalltoLandAnim()
     {
         isLanding = true;
-        yield return new WaitForSeconds(.18f); //TODO: test
+        yield return new WaitForSeconds(.18f);
         isLanding = false;
         isFalling = false;
     }

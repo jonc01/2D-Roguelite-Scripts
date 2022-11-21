@@ -31,7 +31,7 @@ public class ObjectPoolerList : MonoBehaviour
     public GameObject GetObject()
     {
         if (freeList.Count == 0 && !expandable) return null;
-        else if (freeList.Count == 0) GenerateNewObject(); 
+        else if (freeList.Count == 0) GenerateNewObject();
 
         int totalFree = freeList.Count;
         GameObject g = freeList[totalFree - 1];

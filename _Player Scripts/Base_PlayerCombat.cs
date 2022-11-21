@@ -255,11 +255,12 @@ public class Base_PlayerCombat : MonoBehaviour
 
         //if (damageMultiplier > 1) knockbackStrength = 6; //TODO: set variable defintion in Inspector
 
-        foreach (Collider2D player in hitEnemies)
+        foreach (Collider2D enemy in hitEnemies)
         {
-            if (player.GetComponent<Base_EnemyCombat>() != null)
+            IDamageable damageable = enemy.GetComponent<IDamageable>();
+            if(damageable != null)
             {
-                player.GetComponent<Base_EnemyCombat>().TakeDamage(damageDealt, true, knockbackStrength);
+                damageable.TakeDamage(damageDealt, true, knockbackStrength);
                 HitStopAnim(attackAnimFull, groundAttack);
 
                 if (isAirAttacking) movement.Float(.3f);
@@ -271,6 +272,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     void HitStopAnim(float attackAnimFull, bool ground)
     {
+        //Interrupt current attack animation with alternate hitstop animation
         if (ground) animator.PlayAttackAnim(currentAttack, attackAnimFull, true);
         else animator.PlayAirAttackAnim(currentAirAttack, attackAnimFull, true);
     }
@@ -287,9 +289,8 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
-    public void GetKnockback(bool enemyToRight, float strength = 8, float delay = .5f)
+    public void GetKnockback(bool enemyToRight, float strength = 4, float delay = .05f, float recoveryDelay = .1f)
     {
-        return; //TODO: TEMP, function needs testing
         if (!isAlive) return;
         KnockbackNullCheckCO();
 
@@ -297,16 +298,12 @@ public class Base_PlayerCombat : MonoBehaviour
         if (strength <= 0) return;
 
         isKnockedback = true;
-        Debug.Log("Knockback on player");
-        //movement.ToggleFlip(false); //TODO; can just stun player
-        //TODO: player canMove is toggled to false in attackCO, need to allow rb.velocity to change for knockback
-        //GetStunned(.1f); 
 
         float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
-        KnockbackCO = StartCoroutine(KnockbackReset(delay));
+        KnockbackCO = StartCoroutine(KnockbackReset(delay, recoveryDelay));
     }
 
     IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
