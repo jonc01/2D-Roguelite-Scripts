@@ -12,6 +12,7 @@ public class AsyncLevelLoader : MonoBehaviour
     [SerializeField] private Animator LoadScreenAnim;
 
     [SerializeField] private GameObject playerObject;
+    //TODO: needs testing with new transforms
     [SerializeField] private Vector3 spawnPosition = new Vector3(0f, -3.35f, 0f ); //default: 
 
     private void Awake()
@@ -127,14 +128,14 @@ public class AsyncLevelLoader : MonoBehaviour
         for (int i=0; i<SceneManager.sceneCount; i++)
         {
             var scene = SceneManager.GetSceneAt(i);
-            if (scene.name == "_NeverUnload")
+            if (scene.name == "_PlayerScene")
             {
-                UnloadScene("_NeverUnload");
+                UnloadScene("_PlayerScene");
             }
         }
 
         yield return null;
-        var playerScene = SceneManager.LoadSceneAsync("_NeverUnload", LoadSceneMode.Additive);
+        var playerScene = SceneManager.LoadSceneAsync("_PlayerScene", LoadSceneMode.Additive);
 
         while (!playerScene.isDone)
         {
@@ -143,18 +144,18 @@ public class AsyncLevelLoader : MonoBehaviour
         }
         LoadScreenAnim.SetTrigger("StartLoop");
 
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName("_NeverUnload"));
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName("_PlayerScene"));
 
         playerLoaded = true;
     }
 
     public void StartGame(string startStage, string unloadStage)
     {
-        //1) Load Player scene (_NeverUnload)
+        //1) Load Player scene (_PlayerScene)
         //2) When loaded, set Player scene as active scene (allows us to unload MainMenu scene)
         //3) Unload MainMenu
         //4) Load TutorialStage
-        
+
         StartCoroutine(StartGameCO(startStage, unloadStage));
     }
 

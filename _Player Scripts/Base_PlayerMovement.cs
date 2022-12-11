@@ -8,6 +8,8 @@ public class Base_PlayerMovement : MonoBehaviour
     public Base_Character character;
     public AnimatorManager animator;
     public Base_PlayerCombat combat;
+    [SerializeField] VFXManager vfxManager;
+    [SerializeField] Transform vfxOffset;
     [SerializeField] public Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
@@ -28,9 +30,10 @@ public class Base_PlayerMovement : MonoBehaviour
     private GameObject currentOneWayPlatform;
     [SerializeField] public bool canDropThrough;
     //[SerializeField] private CapsuleCollider2D playerCollider;
-    [SerializeField] private BoxCollider2D playerCollider;
+    private BoxCollider2D playerCollider;
 
     //Stats
+    [Header("Movement Stats and Variables")]
     public float moveSpeed = 3f; //default, set by Base_Character
     public float jumpHeight = 8f; //default, set by Base_Character
     public float coyoteTimeThreshold = .1f;
@@ -50,14 +53,27 @@ public class Base_PlayerMovement : MonoBehaviour
     public bool isFalling;
     public bool isLanding;
     private float timeSpentFalling;
-    [SerializeField] private float landingAnimThreshold = 0.1f; //How long player needs to fall to play landing animation
+    [SerializeField] private float landingAnimThreshold = 0.25f; //How long player needs to fall to play landing animation
     public bool canPlayLanding;
+
+    //Jump Buffer
+    float jumpBufferCounter = .2f;
+    float jumpBufferTime;
+
+    //Double Jump
+    [SerializeField] private bool canDoubleJump;
+    [SerializeField] private bool doubleJumped;
+
+    //VFX
+    private bool playingLandFX;
+    private float runTimer; //How long the player has been running, resets on FX play
+    private float runFXCD = .3f; //How often the FX can be played //.3f
 
     //Dodge
     public bool canDash = true;
     public bool isDashing;
-    private float dashingPower = 20f;
-    private float dashingTime = .08f;//0.12f;
+    [SerializeField] private float dashingPower = 12f;
+    [SerializeField] private float dashingTime = .08f;//0.12f;
     private float dashingCD = 1f;
     private float originalGravity;
     //Coroutine DashCO;
@@ -65,6 +81,7 @@ public class Base_PlayerMovement : MonoBehaviour
     //Float
     [SerializeField] bool isFloating;
     Coroutine FloatCO;
+    Coroutine LandingCO;
 
     void Start()
     {
@@ -75,6 +92,8 @@ public class Base_PlayerMovement : MonoBehaviour
             jumpHeight = character.Base_JumpHeight;
         }
 
+        canDoubleJump = false;
+        doubleJumped = false;
         allowInput = true;
         isCrouching = false;
         canMove = true;
@@ -82,6 +101,7 @@ public class Base_PlayerMovement : MonoBehaviour
         jumped = false;
         canDash = true;
         isFloating = false;
+        playingLandFX = false;
         originalGravity = rb.gravityScale; //For Dash and Float
         timeSinceLeftGround = 0;
         updatePlatform = true;
@@ -99,27 +119,54 @@ public class Base_PlayerMovement : MonoBehaviour
         if (combat.isKnockedback) return;
         if (isDashing || isFloating) return;
 
+        //if (combat.isAttacking) return; //Can use this instead of calling canMove toggles in combat script
+
         if (!canMove || !canAirMove) return; //priority less than isDashing, allow immunity while dashing
         
         if(canMove) horizontal = Input.GetAxisRaw("Horizontal");
 
         Flip();
-
+        
         //Variable jump heights
         if(Input.GetButtonDown("Jump") && !jumped)
+        //if(jumpBufferCounter > 0f)//
         {
             if(IsGrounded() || coyoteAllowed)
             {
+                if (vfxManager != null) vfxManager.JumpFX(vfxOffset);
                 jumped = true;
                 rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
+                canDoubleJump = true;
+                //jumpBufferCounter = 0;
             }
         }
-        if(Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+
+        //Double Jump
+        if (canDoubleJump && !doubleJumped)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpHeight);// *.9f); //reduced height on second jump
+                doubleJumped = true;
+                if (vfxManager != null) vfxManager.JumpFX(vfxOffset);
+            }
+        }
+
+        //Variable Jump
+        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
 
-        //Crouch - to fall through platforms, just a trigger, not a toggle
+        //Jump Buffer
+        /*if (Input.GetButtonDown("Jump"))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+        else jumpBufferCounter -= Time.deltaTime;*/
+
+
+        //Crouch - to fall through platforms, a short toggle to allow player to fall through completely
         if (IsGrounded())
         {
             if (Input.GetButtonDown("Crouch"))
@@ -129,12 +176,16 @@ public class Base_PlayerMovement : MonoBehaviour
                 if(currentOneWayPlatform != null)
                     StartCoroutine(DisableCollision());
             }
+            doubleJumped = false;
             CheckPlatform();
+            CheckRunVFX();
         }
         else
         {
             //Not grounded, allow CheckPlatform() to get platform ID once
+            runTimer = 0;
             updatePlatform = true;
+            if (jumped) canDoubleJump = true;
         }
     }
 
@@ -156,7 +207,6 @@ public class Base_PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(0, rb.velocity.y);
             return;
         }
-
 
         rb.velocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
         //VelocityCheck();
@@ -215,7 +265,7 @@ public class Base_PlayerMovement : MonoBehaviour
     {
         timeSpentFalling += Time.deltaTime;
 
-        if (timeSpentFalling > .1f) isFalling = true;
+        if (timeSpentFalling > .2f) isFalling = true;
 
         if (timeSpentFalling >= landingAnimThreshold) canPlayLanding = true;
         else canPlayLanding = false;
@@ -234,13 +284,14 @@ public class Base_PlayerMovement : MonoBehaviour
         {
             isGrounded = true;
             isJumping = false;
-            timeSpentFalling = 0;
+            timeSpentFalling = 0; //Landing animation only plays if the player falls long enough
 
             if (isFalling)
             {
-                //Only play animation if falling longer than .1s
-                if (canPlayLanding)
-                    StartCoroutine(FalltoLandAnim());
+                //Only play animation if falling longer than .2s
+                if (!playingLandFX && canPlayLanding) StartCoroutine(LandingFX());
+
+                if (canPlayLanding) LandingCO = StartCoroutine(FalltoLandAnim());
                 else isFalling = false;
             }
         }
@@ -254,6 +305,31 @@ public class Base_PlayerMovement : MonoBehaviour
             CheckFallAnim();
         }
     }
+
+    #region Movement FX
+    IEnumerator LandingFX()
+    {
+        //This needs a cooldown, or it instantiates multiple times
+        playingLandFX = true;
+        yield return new WaitForSeconds(.05f); //short delay to prevent offset being pushed through ground on land
+        if (vfxManager != null) vfxManager.JumpFX(vfxOffset); //Reusing Land/Jump
+        yield return new WaitForSeconds(.3f);
+        playingLandFX = false;
+    }
+
+    void CheckRunVFX()
+    {
+        if (horizontal != 0) runTimer += Time.deltaTime;
+        else runTimer = .25f; //resetting to allow FX
+
+        if (vfxManager == null) return;
+        if (IsGrounded() && runTimer > runFXCD)
+        {
+            vfxManager.RunFX(vfxOffset, isFacingRight);
+            runTimer = 0;
+        }
+    }
+    #endregion
 
     IEnumerator FalltoLandAnim()
     {
@@ -310,6 +386,7 @@ public class Base_PlayerMovement : MonoBehaviour
     {
         if (!combat.isAlive) return;
         if(canDash) if(canMove || combat.isAttacking || combat.isAirAttacking) StartCoroutine(Dash());
+        if (vfxManager != null && isDashing) vfxManager.DashFX(vfxOffset, isFacingRight);
     }
     
     private IEnumerator Dash()

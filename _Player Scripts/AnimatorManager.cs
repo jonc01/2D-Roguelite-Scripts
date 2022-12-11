@@ -16,7 +16,7 @@ public class AnimatorManager : MonoBehaviour
     [SerializeField] private bool attacking;
     private bool playingDeath;
     Coroutine AttackCO;
-    
+    float landingTimer;
 
     #region Cached
     private int currentState;
@@ -77,6 +77,7 @@ public class AnimatorManager : MonoBehaviour
             return;
         }*/
         if (movement.isDashing) StopAttackCO();
+        if (movement.isJumping) StopLandingAnim();
 
         if (combat.isStunned)
         {
@@ -177,6 +178,11 @@ public class AnimatorManager : MonoBehaviour
         if (movement.horizontal == 0) anim.CrossFade(Idle, 0, 0);
         else anim.CrossFade(Move, 0, 0);
         //Makes no sense, but otherwise GetState GetsStuck
+    }
+
+    void StopLandingAnim()
+    {
+        lockedTill = Time.time; //overrides LockState
     }
 
     private int GetState()

@@ -18,10 +18,8 @@ public class Base_PlayerCombat : MonoBehaviour
     [SerializeField] HealthBar healthBar;
     [SerializeField] private bool showGizmos = false;
 
-    //public Slider healthSlider; //TODO: replace
     public HitStop hitStop; //Stops time, hitStop animations are separate
     
-
     [SerializeField] private SpriteRenderer sr;
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
@@ -45,7 +43,6 @@ public class Base_PlayerCombat : MonoBehaviour
     public float[] airAttackDelayAnimTimes;
     public float[] airAttackFullAnimTimes;
     public float[] airAttackDamageMultipliers;
-
 
     [Space(10)]
 

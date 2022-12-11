@@ -18,7 +18,7 @@ public class DoorController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         collider = GetComponent<Collider2D>();
-        if (doorLight != null) doorLight.SetActive(false);
+        ToggleDoorLight(false);
     }
     
     void Update()
@@ -32,14 +32,20 @@ public class DoorController : MonoBehaviour
         PlayAnim(0);
         collider.enabled = true;
         collider.isTrigger = false;
+        ToggleDoorLight(false);
     }
 
     void OpenDoor()
     {
         PlayAnim(1);
         collider.isTrigger = true;
+        ToggleDoorLight(true);
+    }
+
+    void ToggleDoorLight(bool toggle)
+    {
         if (doorLight != null)
-            doorLight.SetActive(true);
+            doorLight.SetActive(toggle);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

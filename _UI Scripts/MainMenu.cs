@@ -17,7 +17,7 @@ public class MainMenu : MonoBehaviour
     public void PlayDemo()
     {
         mainMenuUI.SetActive(false);
-        AsyncLevelLoader.asyncLevelLoader.StartGame("TutorialStage", "MainMenu");
+        AsyncLevelLoader.asyncLevelLoader.StartGame("_Demo_Stage", "MainMenu");
     }
 
     /*public void Play()

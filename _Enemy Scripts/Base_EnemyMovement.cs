@@ -17,6 +17,11 @@ public class Base_EnemyMovement : MonoBehaviour
     [SerializeField] bool canFlip;
     public bool isFacingRight = true;
 
+    [Header("Lunge")]
+    [SerializeField] bool canLunge;
+    [SerializeField] bool isLunging;
+    Coroutine LungeCO;
+
     private void Awake()
     {
         if(character != null)
@@ -27,6 +32,8 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         canFlip = true;
+        canLunge = true;
+        isLunging = false;
     }
 
     void Update()
@@ -47,6 +54,63 @@ public class Base_EnemyMovement : MonoBehaviour
         }
     }
 
+
+    public void MoveRight(bool moveRight)
+    {
+        if (!canMove) return;
+
+        if (moveRight)
+        {
+            rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
+            //Flip();
+        }
+        else
+        {
+            rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
+            //Flip();
+        }
+        Flip();
+    }
+
+    public void Lunge(bool facingRight, float strength = 8, float delay = .5f)
+    {
+        //TODO: repurposing Knockback for Lunge
+        KnockbackNullCheckCO();
+
+        canLunge = false;
+        isLunging = true;
+        ToggleFlip(false);
+        float temp = facingRight != true ? -1 : 1; //should lunge in direction facing
+        Vector2 direction = new Vector2(temp, rb.velocity.y);
+        rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        LungeCO = StartCoroutine(KnockbackReset(delay));
+    }
+
+    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
+    {
+        yield return new WaitForSeconds(delay);
+        rb.velocity = Vector3.zero;
+        canMove = false;
+        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
+        canMove = true;
+        ToggleFlip(true);
+        isLunging = false;
+        canLunge = true;
+    }
+
+    void KnockbackNullCheckCO()
+    {
+        //End Coroutine early, reset variables
+        if (LungeCO == null) return;
+        StopCoroutine(LungeCO);
+        canMove = true;
+        ToggleFlip(true);
+        isLunging = false;
+        canLunge = true;
+    }
+
+    #region Flip
     void Flip()
     {
         if (!canFlip) return;
@@ -67,24 +131,9 @@ public class Base_EnemyMovement : MonoBehaviour
         if (isFacingRight) combat.healthbarTransform.localRotation = Quaternion.Euler(0, 0, 0);
         else combat.healthbarTransform.localRotation = Quaternion.Euler(0, 180, 0);
     }
+    #endregion
 
-    public void MoveRight(bool moveRight)
-    {
-        if (!canMove) return;
-
-        if (moveRight)
-        {
-            rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
-            //Flip();
-        }
-        else
-        {
-            rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
-            //Flip();
-        }
-        Flip();
-    }
-
+    #region Toggles
     public void DisableMove()
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
@@ -94,4 +143,5 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         canFlip = toggle;
     }
+    #endregion
 }
