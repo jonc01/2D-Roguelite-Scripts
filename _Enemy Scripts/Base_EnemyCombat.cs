@@ -4,21 +4,19 @@ using UnityEngine;
 
 public class Base_EnemyCombat : MonoBehaviour, IDamageable
 {
+    [Header("Attack Behavior Setup")]
+    [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
+    [SerializeField] public Base_CombatBehavior AttackFarBehavior;
+
     [Header("References/Setup")]
-    public Base_EnemyMovement movement;
-    public Base_EnemyAnimator animator;
-    [SerializeField] protected EnemyStageManager enemyStageManager;
-    public OrbHolder orbHolder;
-    [SerializeField] protected Transform attackPoint;
     public LayerMask playerLayer;
+    [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] private Transform hitEffectsOffset;
-    [SerializeField] protected HealthBar healthBar;
-    public Transform healthbarTransform;
-    [SerializeField] protected BoxCollider2D collider;
-    [SerializeField] private SpriteRenderer sr;
+    //public Collider collider;
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
+    private Base_EnemyController enemyController;
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
@@ -34,31 +32,41 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Space(10)]
 
     [Header("Start() Reference Initialization")]
+    public Base_EnemyMovement movement;
+    public Base_EnemyAnimator animator;
+    [SerializeField] private SpriteRenderer sr;
     [SerializeField] protected TextPopupsHandler textPopups;
-    [SerializeField] protected HitEffectsHandler hitEffects;
+    [SerializeField] protected HealthBar healthBar;
+    public Transform healthbarTransform;
+    public OrbHolder orbHolder;
+    [SerializeField] protected EnemyStageManager enemyStageManager;
 
     [Space(10)]
 
     //HealthBar
 
     //Stats
-    [Header("=== Stats (char optional) ===")]
+    [Header("=== STATS (char optional) ===")]
+    [Header("--- Health ---")]
     public Base_Character character;
     [SerializeField] float maxHP;
     [SerializeField] float currentHP;
     [SerializeField] float defense = 0;
-
-    [SerializeField] float attackDamage;
+    
+    [Header("--- Attack ---")]
+    [SerializeField] public float attackDamage;
     [SerializeField] float attackSpeed;
     [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
     public float attackRange;
-    [SerializeField] float knockbackStrength = 0; //4 is moderate
+    [SerializeField] public float knockbackStrength = 0; //4 is moderate
     [Space(10)]
     float timeSinceAttack;
     //float critChance;
     //float critMultiplier;
+    bool facePlayerOverride;
 
+    [Header("--- Status ---")]
     //Bools
     [SerializeField] public bool isAlive;
     public bool isStunned;
@@ -75,9 +83,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
-        collider = GetComponent<BoxCollider2D>();
+        animator = GetComponentInChildren<Base_EnemyAnimator>();
+        //collider = GetComponent<BoxCollider2D>();
         //playerLayer = GameObject.FindGameObjectWithTag("Player").GetComponent<LayerMask>();
-
+        if (movement == null) movement = GetComponent<Base_EnemyMovement>();
+        if (enemyController == null) enemyController = GetComponent<Base_EnemyController>();
         //Initiating base stats before modifiers
 
         if (character != null)
@@ -93,6 +103,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isAlive = true;
         isStunned = false;
         isKnockedback = false;
+        facePlayerOverride = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
@@ -116,7 +127,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Must be in Start(), because of player scene loading. 
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         textPopups = GameObject.FindGameObjectWithTag("TextPopupsHandler").GetComponent<TextPopupsHandler>();
-        hitEffects = GameObject.FindGameObjectWithTag("HitEffectsHandler").GetComponent<HitEffectsHandler>();
         if (orbHolder == null) orbHolder = GetComponentInChildren<OrbHolder>();
         enemyStageManager = GetComponentInParent<EnemyStageManager>();
     }
@@ -129,6 +139,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (isStunned) return;
 
         AttackMoveCheck();
+        if (facePlayerOverride) FacePlayer();
     }
 
     protected virtual void AttackMoveCheck()
@@ -144,27 +155,72 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public virtual void Attack()
     {
         if (!isAlive || isAttacking) return;
-        if (timeSinceAttack > attackSpeed)
+        if (timeSinceAttack > attackSpeed) //TODO: repeat for AttackClose/Far
         {
             timeSinceAttack = 0;
+            StopAttack();
             AttackingCO = StartCoroutine(Attacking());
         }
     }
 
+    #region Attack Behavior Overrides
+
+    public virtual void AttackClose()
+    {
+        if (!isAlive || isAttacking) return;
+        //If no alternate behavior added, use default Attack()
+        if (AttackCloseBehavior == null) Attack();
+
+        if (timeSinceAttack > attackSpeed)
+        {
+            timeSinceAttack = 0;
+            AttackCloseBehavior.Attack();
+        }
+    }
+
+    public virtual void AttackFar()
+    {
+        if (!isAlive || isAttacking) return;
+        if (AttackFarBehavior == null) return;
+
+        if (timeSinceAttack > attackSpeed)
+        {
+            timeSinceAttack = 0;
+            AttackFarBehavior.Attack();
+        }
+    }
+
+    #endregion
+
     protected virtual IEnumerator Attacking()
     {
-        yield return new WaitForSeconds(startAttackDelay);
+        //Allow flip for a little longer
         isAttacking = true;
         movement.canMove = false;
-        animator.PlayAttackAnim(fullAttackAnimTime);
+        //facePlayerOverride = true;
         movement.ToggleFlip(false);
-        yield return new WaitForSeconds(attackDelayTime);
+        
+        animator.PlayAttackAnim(fullAttackAnimTime);
+
+        //yield return new WaitForSeconds(startAttackDelay);
+        //facePlayerOverride = false;
+        
+        yield return new WaitForSeconds(attackDelayTime);// - startAttackDelay);
         CheckHit();
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
         isAttacking = false;
         yield return new WaitForSeconds(attackEndDelay);
         movement.canMove = true;
         movement.ToggleFlip(true);
+    }
+
+    void FacePlayer()
+    {
+        //Player behind enemy
+        if (!enemyController.raycast.playerDetectFront)
+        {
+            movement.ManualFlip(!movement.isFacingRight);
+        }
     }
 
     public virtual void CheckHit()
@@ -177,6 +233,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
                 player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage);
                 player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
                 //knockback
+                //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
         }
     }
@@ -205,7 +262,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .5f)
+    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .1f)
     {
         KnockbackNullCheckCO();
 
@@ -247,6 +304,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;
         movement.canMove = true;
+        facePlayerOverride = false;
         movement.ToggleFlip(toggleFlip);
         //Cancels Attack animation
         animator.StopAttackAnimCO();
@@ -264,7 +322,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             totalDamage = 1; //Damage can never be lower than 1
         }
 
-        hitEffects.ShowHitEffect(hitEffectsOffset.position);
+        HitEffectsHandler.Instance.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
 
@@ -298,7 +356,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         ScreenShakeListener.Instance.Shake(2);
         movement.rb.simulated = false;
-        collider.enabled = false;
+        GetComponent<CircleCollider2D>().enabled = false;
 
         if (orbHolder != null) orbHolder.Launch(playerToRight);
 

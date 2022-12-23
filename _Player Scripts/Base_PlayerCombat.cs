@@ -355,6 +355,7 @@ public class Base_PlayerCombat : MonoBehaviour
         }
 
         textPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        HitEffectsHandler.Instance.ShowHitEffect(textPopupOffset.position);
 
         //Shake screen based on how much damage is taken (% of max HP)
         float damageToHealth = damageTaken/maxHP;

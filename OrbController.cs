@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class OrbController : MonoBehaviour
 {
+    private float startChaseDelay = .5f;
+
     [Header("Debugging")]
     [SerializeField] bool findPlayer;
     [SerializeField] float timeSpentFlying;
@@ -67,7 +69,7 @@ public class OrbController : MonoBehaviour
     IEnumerator MoveToPlayer()
     {
         if (player != null) yield return null;
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(startChaseDelay);
         timeSpentFlying = .1f;
         DisableColliderGrav();
     }
@@ -87,7 +89,7 @@ public class OrbController : MonoBehaviour
         hitDone = true;
         inventory.GiveGold(1);
         animator.Play("PuffOfSmoke");
-        Invoke("DestroyObject", 0.67f);
+        Invoke("DestroyObject", 0.67f); //Delay to play animation
     }
 
     void DestroyObject()

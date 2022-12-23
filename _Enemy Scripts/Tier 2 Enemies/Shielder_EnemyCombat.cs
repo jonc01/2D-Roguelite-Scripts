@@ -37,11 +37,13 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
 
     void OnDrawGizmos()
     {
-        if (attackPoint2 == null) return;
+        if (attackPoint == null && attackPoint2 == null) return;
 
         Gizmos.DrawWireCube(attackPoint2.position,
             new Vector3((hitBoxLength),
             hitBoxHeight, 0));
+
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
     public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
@@ -59,8 +61,10 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         healthBar.gameObject.SetActive(false);
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         movement.rb.simulated = false;
-        collider.enabled = false;
+        GetComponent<CircleCollider2D>().enabled = false;
+
         isAlive = false;
+        ScreenShakeListener.Instance.Shake(2);
 
         StartCoroutine(DelayDeath());
     }

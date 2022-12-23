@@ -52,6 +52,8 @@ public class ObjectPoolerList : MonoBehaviour
     // Instantiating GameObject
     private void GenerateNewObject()
     {
+        if (prefab == null) return;
+
         GameObject g = Instantiate(prefab);
         //g.transform.parent = transform;
         g.transform.SetParent(transform);

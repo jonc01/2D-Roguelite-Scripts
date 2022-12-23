@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class HitEffectsHandler : MonoBehaviour
 {
+    public static HitEffectsHandler Instance;
+
     [SerializeField]
     private ObjectPoolerList HitEffectsPool;
+
+    void Awake() {  Instance = this; }
 
     public void ShowHitEffect(Vector3 position)
     {
