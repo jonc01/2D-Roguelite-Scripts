@@ -13,7 +13,6 @@ public class Base_PlayerCombat : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     //[SerializeField] private Transform attackPoint;
     //[SerializeField] private float attackRange;
-    [SerializeField] TextPopupsHandler textPopups;
     [SerializeField] private Transform textPopupOffset;
     [SerializeField] HealthBar healthBar;
     [SerializeField] private bool showGizmos = false;
@@ -288,7 +287,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     public void GetKnockback(bool enemyToRight, float strength = 4, float delay = .05f, float recoveryDelay = .1f)
     {
-        if (!isAlive) return;
+        if (!isAlive || dashImmune) return;
         KnockbackNullCheckCO();
 
         if (kbResist > 0) strength -= kbResist;
@@ -297,7 +296,8 @@ public class Base_PlayerCombat : MonoBehaviour
         isKnockedback = true;
 
         float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        //Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
         KnockbackCO = StartCoroutine(KnockbackReset(delay, recoveryDelay));
@@ -343,8 +343,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     public void TakeDamage(float damageTaken)
     {
-        if (!isAlive) return;
-        if (dashImmune) return; //TODO: needs testing
+        if (!isAlive || dashImmune) return;
 
         HitFlash();
 
@@ -354,8 +353,8 @@ public class Base_PlayerCombat : MonoBehaviour
             totalDamage = 1; //Damage can never be lower than 1
         }
 
-        textPopups.ShowDamage(totalDamage, textPopupOffset.position);
-        HitEffectsHandler.Instance.ShowHitEffect(textPopupOffset.position);
+        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        InstantiateManager.Instance.HitEffects.ShowHitEffect(textPopupOffset.position);
 
         //Shake screen based on how much damage is taken (% of max HP)
         float damageToHealth = damageTaken/maxHP;
@@ -377,7 +376,7 @@ public class Base_PlayerCombat : MonoBehaviour
     {
         if (!isAlive) return;
 
-        textPopups.ShowHeal(healAmount, textPopupOffset.position);
+        InstantiateManager.Instance.TextPopups.ShowHeal(healAmount, textPopupOffset.position);
 
         if (currentHP < maxHP) currentHP += healAmount;
         if (currentHP > maxHP) currentHP = maxHP;

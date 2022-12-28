@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         Player = GameObject.FindGameObjectWithTag("Player").transform;
         PlayerMovement = Player.GetComponent<Base_PlayerMovement>();
         PlayerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
-        Inventory = GetComponent<Inventory>();
+        if (Inventory == null) Inventory = GetComponent<Inventory>();
     }
 
     private void Update()

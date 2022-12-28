@@ -8,7 +8,6 @@ public class Base_PlayerMovement : MonoBehaviour
     public Base_Character character;
     public AnimatorManager animator;
     public Base_PlayerCombat combat;
-    [SerializeField] VFXManager vfxManager;
     [SerializeField] Transform vfxOffset;
     [SerializeField] public Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
@@ -133,7 +132,7 @@ public class Base_PlayerMovement : MonoBehaviour
         {
             if(IsGrounded() || coyoteAllowed)
             {
-                if (vfxManager != null) vfxManager.JumpFX(vfxOffset);
+                InstantiateManager.Instance.VFX.JumpFX(vfxOffset);
                 jumped = true;
                 rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
                 canDoubleJump = true;
@@ -148,7 +147,7 @@ public class Base_PlayerMovement : MonoBehaviour
             {
                 rb.velocity = new Vector2(rb.velocity.x, jumpHeight);// *.9f); //reduced height on second jump
                 doubleJumped = true;
-                if (vfxManager != null) vfxManager.JumpFX(vfxOffset);
+                InstantiateManager.Instance.VFX.JumpFX(vfxOffset);
             }
         }
 
@@ -312,7 +311,7 @@ public class Base_PlayerMovement : MonoBehaviour
         //This needs a cooldown, or it instantiates multiple times
         playingLandFX = true;
         yield return new WaitForSeconds(.05f); //short delay to prevent offset being pushed through ground on land
-        if (vfxManager != null) vfxManager.JumpFX(vfxOffset); //Reusing Land/Jump
+        InstantiateManager.Instance.VFX.JumpFX(vfxOffset); //Reusing Land/Jump
         yield return new WaitForSeconds(.3f);
         playingLandFX = false;
     }
@@ -322,10 +321,9 @@ public class Base_PlayerMovement : MonoBehaviour
         if (horizontal != 0) runTimer += Time.deltaTime;
         else runTimer = .25f; //resetting to allow FX
 
-        if (vfxManager == null) return;
         if (IsGrounded() && runTimer > runFXCD)
         {
-            vfxManager.RunFX(vfxOffset, isFacingRight);
+            InstantiateManager.Instance.VFX.RunFX(vfxOffset, isFacingRight);
             runTimer = 0;
         }
     }
@@ -386,7 +384,7 @@ public class Base_PlayerMovement : MonoBehaviour
     {
         if (!combat.isAlive) return;
         if(canDash) if(canMove || combat.isAttacking || combat.isAirAttacking) StartCoroutine(Dash());
-        if (vfxManager != null && isDashing) vfxManager.DashFX(vfxOffset, isFacingRight);
+        if (isDashing) InstantiateManager.Instance.VFX.DashFX(vfxOffset, isFacingRight);
     }
     
     private IEnumerator Dash()

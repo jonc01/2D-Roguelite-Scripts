@@ -7,12 +7,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("Attack Behavior Setup")]
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
     [SerializeField] public Base_CombatBehavior AttackFarBehavior;
+    public bool canAttackFar;
 
     [Header("References/Setup")]
     public LayerMask playerLayer;
     [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
-    [SerializeField] private Transform hitEffectsOffset;
+    [SerializeField] public Transform hitEffectsOffset;
     //public Collider collider;
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
@@ -25,7 +26,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public float attackAnimDelayFrames = .1f;
     public float attackAnimTotalFrames = 1f;
     public float sampleRate = 12f;
-    [Header("*Don't Edit* Animation Results")]
+    [Header("*Calculated at Start()* Animation Results")]
     [SerializeField] float fullAttackAnimTime;
     [SerializeField] float attackDelayTime;
 
@@ -34,11 +35,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("Start() Reference Initialization")]
     public Base_EnemyMovement movement;
     public Base_EnemyAnimator animator;
-    [SerializeField] private SpriteRenderer sr;
-    [SerializeField] protected TextPopupsHandler textPopups;
+    [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
     public Transform healthbarTransform;
-    public OrbHolder orbHolder;
     [SerializeField] protected EnemyStageManager enemyStageManager;
 
     [Space(10)]
@@ -52,6 +51,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] float maxHP;
     [SerializeField] float currentHP;
     [SerializeField] float defense = 0;
+    [SerializeField] protected int totalXPOrbs = 3;
     
     [Header("--- Attack ---")]
     [SerializeField] public float attackDamage;
@@ -64,7 +64,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     float timeSinceAttack;
     //float critChance;
     //float critMultiplier;
-    bool facePlayerOverride;
 
     [Header("--- Status ---")]
     //Bools
@@ -103,7 +102,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isAlive = true;
         isStunned = false;
         isKnockedback = false;
-        facePlayerOverride = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
@@ -124,10 +122,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
 
         isAttacking = false;
-        //Must be in Start(), because of player scene loading. 
+        //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        textPopups = GameObject.FindGameObjectWithTag("TextPopupsHandler").GetComponent<TextPopupsHandler>();
-        if (orbHolder == null) orbHolder = GetComponentInChildren<OrbHolder>();
         enemyStageManager = GetComponentInParent<EnemyStageManager>();
     }
 
@@ -139,7 +135,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (isStunned) return;
 
         AttackMoveCheck();
-        if (facePlayerOverride) FacePlayer();
+        //if (facePlayerOverride) FacePlayer(); //TODO: delete
     }
 
     protected virtual void AttackMoveCheck()
@@ -197,15 +193,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Allow flip for a little longer
         isAttacking = true;
         movement.canMove = false;
-        //facePlayerOverride = true;
         movement.ToggleFlip(false);
         
         animator.PlayAttackAnim(fullAttackAnimTime);
 
-        //yield return new WaitForSeconds(startAttackDelay);
-        //facePlayerOverride = false;
+        yield return new WaitForSeconds(startAttackDelay);
+        FacePlayer(); //Flip to faceplayer before attacking
         
-        yield return new WaitForSeconds(attackDelayTime);// - startAttackDelay);
+        yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
         CheckHit();
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
         isAttacking = false;
@@ -304,7 +299,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;
         movement.canMove = true;
-        facePlayerOverride = false;
         movement.ToggleFlip(toggleFlip);
         //Cancels Attack animation
         animator.StopAttackAnimCO();
@@ -317,19 +311,18 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         HitFlash(); //Set material to white, short delay before resetting
 
         float totalDamage = damageTaken - defense;
-        if (totalDamage <= 0)
-        {
-            totalDamage = 1; //Damage can never be lower than 1
-        }
 
-        HitEffectsHandler.Instance.ShowHitEffect(hitEffectsOffset.position);
+        //Damage can never be lower than 1
+        if (totalDamage <= 0) totalDamage = 1;
+
+        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
 
         if (knockback) GetKnockback(playerToRight, strength);
 
         //Display Damage number
-        if (textPopups != null) textPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
 
         if (currentHP <= 0)
         {
@@ -358,10 +351,20 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         movement.rb.simulated = false;
         GetComponent<CircleCollider2D>().enabled = false;
 
-        if (orbHolder != null) orbHolder.Launch(playerToRight);
+        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
         enemyStageManager.UpdateEnemyCount();
+
+        //Disable sprite renderer before deleting gameobject
+        sr.enabled = false;
+        Invoke("DeleteObj", .5f); //Wait for fade out to finish
+    }
+
+    private void DeleteObj()
+    {
+        Destroy(gameObject);
     }
 }

@@ -11,7 +11,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
     [SerializeField] Transform attackPoint;
     [SerializeField] public float damage = 4;
     [SerializeField] public float speed = 3; //default 3
-    [SerializeField] bool canFire;
+    [SerializeField] public bool canFire;
 
 
     protected override void Start()
@@ -20,7 +20,6 @@ public class Ranged_Horizontal : Base_CombatBehavior
         canFire = true;
         //damage = combat.attackDamage; //! Manually setting damage
     }
-
 
     public override void Attack()
     {
@@ -31,6 +30,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
     IEnumerator ShootCO()
     {
         canFire = false;
+        canAttack = false;
         movement.ToggleFlip(false);
         movement.canMove = false;
         combat.isAttacking = true;
@@ -46,11 +46,12 @@ public class Ranged_Horizontal : Base_CombatBehavior
         script.playerToRight = combat.playerToRight; //Knockback direction
 
         yield return new WaitForSeconds(animEndingTime);
+        combat.isAttacking = false;
+        movement.canMove = true;
+        movement.ToggleFlip(true);
 
         yield return new WaitForSeconds(attackSpeed);
         canFire = true;
-        movement.ToggleFlip(true);
-        movement.canMove = false;
-        combat.isAttacking = false;
+        canAttack = true;
     }
 }

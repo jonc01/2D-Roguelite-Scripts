@@ -9,12 +9,13 @@ public class Base_EnemyController : MonoBehaviour
     public Base_EnemyCombat combat;
     public bool isRangedAttack = false;
     [SerializeField] private float CODurationLower = .2f, CODurationUpper = .8f;
+    
 
     [Header("=== Raycasts Reference ===")]
     [SerializeField] public Base_EnemyRaycast raycast;
     [SerializeField] int currPlayerPlatform;
 
-    [Header("=== Variables ===")]
+    [Header("=== Debug Variables ===")]
     [SerializeField] bool isIdling;
     [SerializeField] bool isPatrolling;
     [SerializeField] bool playerDetected;

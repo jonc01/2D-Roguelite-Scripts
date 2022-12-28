@@ -15,17 +15,6 @@ public class VFXManager : MonoBehaviour
     float dashVFXDuration = .5f;
     float stopVFXDuration = .417f;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void RunFX(Transform spawnPos, bool facingRight = true)
     {

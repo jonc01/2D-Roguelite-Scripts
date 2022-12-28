@@ -50,7 +50,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     {
         if (movement.isFacingRight == playerToRight)
         {
-            if (textPopups != null) textPopups.ShowBlocked(textPopupOffset.position);
+            InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
+            InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
             CheckCounterHit();
         }
         else base.TakeDamage(damageTaken, knockback, strength);
@@ -65,6 +66,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
 
         isAlive = false;
         ScreenShakeListener.Instance.Shake(2);
+        //InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+
 
         StartCoroutine(DelayDeath());
     }
@@ -74,10 +77,19 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         //Delay screenshake and XP orb spawns to line up with death animation
         yield return new WaitForSeconds(deathDelayTime);
 
+        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+
         ScreenShakeListener.Instance.Shake(2);
-        if (orbHolder != null) orbHolder.Launch(playerToRight);
+        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         enemyStageManager.UpdateEnemyCount();
+        //sr.enabled = false;
+        Invoke("DeleteObj", 1f); //Wait for fade out to finish
+    }
+
+    private void DeleteObj()
+    {
+        Destroy(gameObject);
     }
 }

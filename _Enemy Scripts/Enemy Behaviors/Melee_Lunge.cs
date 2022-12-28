@@ -44,7 +44,8 @@ public class Melee_Lunge : Base_CombatBehavior
 
         //Start Lunge animation
         combat.animator.PlayManualAnim(0, fullAnimTime);
-
+        InstantiateManager.Instance.Indicator.ChargeUp(combat.hitEffectsOffset.position, combat.transform);
+        
         yield return new WaitForSeconds(animDelay); //Charge up portion of animation
         allowCollision = true;
         combat.GetKnockback(!movement.isFacingRight, 8f, .2f); //Re-using GetKnockback
