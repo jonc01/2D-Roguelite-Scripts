@@ -8,6 +8,7 @@ public class BlockDropThrough : MonoBehaviour
     [SerializeField] string README = "! - Set tag to 'SolidPlatform'" +
      "Set Layer to 'Ignore Raycast'";
 
+    //THIS SCRIPT IS NOT BEING USED //can delete
 
     // private void OnTriggerEnter2D(Collider2D collision)
     // {

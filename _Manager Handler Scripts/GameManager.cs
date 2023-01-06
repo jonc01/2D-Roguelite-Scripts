@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 
     public Transform Player;
 
-    private Base_PlayerMovement PlayerMovement;
+    public Base_PlayerMovement PlayerMovement;
     public Transform PlayerTargetOffset;
     public Inventory Inventory;
     public int PlayerCurrPlatform;

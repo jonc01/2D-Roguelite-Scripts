@@ -63,18 +63,20 @@ public class Base_EnemyRaycast : MonoBehaviour
 
         isGrounded = IsGrounded();
         
+        //Not grounded, allow CheckPlatform() to get platform ID once
+        if (isGrounded) if(updatePlatform) CheckPlatform();
+        else updatePlatform = true;
+
         AttackCheck();
         LedgeWallCheck();
         PlayerDetectCheck();
         UpdatePlayerToRight();
     }
 
-    void FixedUpdate()
-    {
-        if (isGrounded) CheckPlatform();
-        else updatePlatform = true; 
-        //Not grounded, allow CheckPlatform() to get platform ID once
-    }
+    // void FixedUpdate()
+    // {
+    //     
+    // }
 
     bool IsGrounded()
     {
@@ -84,11 +86,11 @@ public class Base_EnemyRaycast : MonoBehaviour
     void CheckPlatform()
     {
         //Only updating platform after IsGrounded() returns false, then update once
-        if (!updatePlatform) return;
+        // if (!updatePlatform) return;
 
-        updatePlatform = false;
         int i = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).GetInstanceID();
         if (i != currPlatform) currPlatform = i;
+        updatePlatform = false;
     }
 
     void DebugDrawRaycast()

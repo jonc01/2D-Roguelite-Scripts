@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    [Header("References")]
+    [Header("References & Setup")]
+    [SerializeField] bool horizontal;
     [SerializeField] Collider2D doorCollider;
+    [SerializeField] BoxCollider2D groundCollider;
     [SerializeField] Collider2D blockDropThroughCollider;
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
@@ -19,6 +21,7 @@ public class DoorController : MonoBehaviour
     {
         if (animator == null) animator = GetComponent<Animator>();
         if (doorCollider == null) doorCollider = GetComponent<Collider2D>();
+        if (horizontal && groundCollider == null) groundCollider = gameObject.transform.Find("Ground Platform").GetComponent<BoxCollider2D>();
         //blockDropThroughCollider
         ToggleOpenIndicator(false);
     }
@@ -37,17 +40,21 @@ public class DoorController : MonoBehaviour
         if(toggle) Invoke("OpenDoorCollider", .5f);
         else Invoke("CloseDoorCollider", .1f);
         // doorCollider.isTrigger = toggle;
-        // if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = !toggle;
     }
 
     void OpenDoorCollider() //Change collider to trigger, allow dropThrough
     {
+        // if(groundCollider != null) groundCollider.tag = "OneWayPlatform";
         doorCollider.isTrigger = true;
+        //GameManager.Instance.PlayerMovement.currentOneWayPlatform = gameObject;
         if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = false;
+        //Override canDropThrough in case player is on the platform when it changes
+        //if(horizontal) GameManager.Instance.PlayerMovement.canDropThrough = true;
     }
 
     void CloseDoorCollider() //Disable trigger, block dropThrough
     {
+        // if(groundCollider != null) groundCollider.tag = "SolidPlatform";
         doorCollider.isTrigger = false;
         if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = true;
     }
