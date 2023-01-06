@@ -30,4 +30,9 @@ public class GameManager : MonoBehaviour
             PlayerCurrPlatform = PlayerMovement.currPlatform;
         }
     }
+
+    public void MovePlayer(Vector3 newPos)
+    {
+        Player.position = newPos;
+    }
 }

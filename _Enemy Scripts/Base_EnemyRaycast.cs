@@ -62,14 +62,18 @@ public class Base_EnemyRaycast : MonoBehaviour
         if (debugging) DebugDrawRaycast();
 
         isGrounded = IsGrounded();
-
-        if (isGrounded) CheckPlatform();
-        else updatePlatform = true; //Not grounded, allow CheckPlatform() to get platform ID once
         
         AttackCheck();
         LedgeWallCheck();
         PlayerDetectCheck();
         UpdatePlayerToRight();
+    }
+
+    void FixedUpdate()
+    {
+        if (isGrounded) CheckPlatform();
+        else updatePlatform = true; 
+        //Not grounded, allow CheckPlatform() to get platform ID once
     }
 
     bool IsGrounded()

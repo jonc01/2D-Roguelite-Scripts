@@ -8,12 +8,14 @@ public class LevelBuilder : MonoBehaviour
     //Step 1) LevelBuilder.cs
     //  a) This script instantiates and creates an array of Colliders
     //      b) Room origins (Colliders/Transform)
+    // *Need a Builder Layermask
 
     //Step 2) WallGenerator.cs
     //  a) Loop through RoomOrigins[]
     //    a.1) For each room, Check each direction for an existing object 
     //    a.2) Generate a Door if there is a bordering room
     //    a.3) else generate a Wall 
+    // *Attach any Layermask, for Walls, using Ground
 
     //Step 3) RoomGenerator.cs
     //  a) Loop through RoomOrigins[], place rooms at random
@@ -21,18 +23,23 @@ public class LevelBuilder : MonoBehaviour
     //    a.2) Make sure certain rooms are spawned as required (Start, Boss, Shops, Trials, etc)
 
     [Header("Builder Setup")]
+    //Distances to move to place new room origin
+    //Walls are placed at half of this distance
+    [SerializeField] float xDistance = 11f;
+    [SerializeField] float yDistance = 6f;
     [SerializeField] bool DEBUGGING = true;
     [SerializeField] WallGenerator WallGen;
     [SerializeField] RoomGenerator RoomGen;
-    [SerializeField] public LayerMask buildLayer;
+    [SerializeField] public LayerMask buildLayer; //"Builder" layer
     [SerializeField] private Transform Level; //Must be separate object
 
     [Space(10)]
     [Header("Generator Components")]
     public int totalRooms;
-    [SerializeField] GameObject originObj;
+    [SerializeField] GameObject originObj; //This object builds rooms at its location
 
-    [Header("--- Populated at Generation ---")]
+    [Space(10)]
+    [Header("--- Generation Results ---")]
     public GameObject[] GeneratedOrigins; //Starting room at [0]
     [SerializeField] public Vector3 startingRoom; //First room transform added, Start room
     [SerializeField] public Vector3 endRoom; //Last room transform added, should be Boss room
@@ -47,11 +54,19 @@ public class LevelBuilder : MonoBehaviour
     private int currOrigin;
     private bool openDirFound;
 
+    //Player and Camera transforms
+    private Transform player;
+    private Vector3 playerStartingPos;
+    private CameraRoomManager cameraManager;
+
     private void Start()
     {
         WallGen = GetComponent<WallGenerator>();
         RoomGen = GetComponent<RoomGenerator>();
         GeneratedOrigins = new GameObject[totalRooms];
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        playerStartingPos = player.position;
+        cameraManager = GameObject.FindGameObjectWithTag("GameManager").GetComponentInChildren<CameraRoomManager>();
     }
 
     void Update()
@@ -61,6 +76,7 @@ public class LevelBuilder : MonoBehaviour
             if (!builderRunning)
                 if (Input.GetKeyDown(KeyCode.U)) DeleteOrigins();
         }
+
         if (WallGen.wallGenDone && !builderRunning) return; //Stop updating raycasts if not needed
         OriginConnectCheck(); //Raycasts
         DebugRaycast();
@@ -69,21 +85,25 @@ public class LevelBuilder : MonoBehaviour
     private void DeleteOrigins() //DEBUGGING
     {
         transform.position = new Vector3(0, 0, 0);
+        player.GetComponent<Base_PlayerMovement>().rb.velocity = new Vector2(0, 0);
+        player.position = playerStartingPos;
+        cameraManager.RelocateCamera(transform.position);
 
         for (int i = 0; i < GeneratedOrigins.Length; i++)
         {
             Destroy(GeneratedOrigins[i]);
         }
-        Invoke("StartLevelGen", .1f);
+        Invoke("StartLevelGen", .02f);
     }
 
-    void StartLevelGen()
+    public void StartLevelGen()
     {
         StartCoroutine(LevelGenCO());
     }
 
     IEnumerator LevelGenCO()
     {
+        transform.position = new Vector3(0, 0, 0);
         Time.timeScale = 0; //Pause all game function
         //*All coroutines related to level generation need to use WaitForSecondsRealtime if timeScale is 0
 
@@ -169,16 +189,16 @@ public class LevelBuilder : MonoBehaviour
         switch (direction)
         {
             case 0: //Up
-                transform.position = new Vector3(x, y += 3, 0);
+                transform.position = new Vector3(x, y += yDistance, 0);
                 break;
             case 1: //Left
-                transform.position = new Vector3(x -= 5, y, 0);
+                transform.position = new Vector3(x -= xDistance, y, 0);
                 break;
             case 2: //Down
-                transform.position = new Vector3(x, y -= 3, 0);
+                transform.position = new Vector3(x, y -= yDistance, 0);
                 break;
             case 3: //Right
-                transform.position = new Vector3(x += 5, y, 0);
+                transform.position = new Vector3(x += xDistance, y, 0);
                 break;
             default:
                 Debug.Log("Error in Move() Random.Range");
@@ -213,18 +233,18 @@ public class LevelBuilder : MonoBehaviour
     private void OriginConnectCheck()
     {
         //Bools to check if origins exist in each direction of current position
-        originFoundUp = Physics2D.Raycast(transform.position, Vector3.up, 3f, buildLayer);
-        originFoundLeft = Physics2D.Raycast(transform.position, Vector3.left, 5f, buildLayer);
-        originFoundDown = Physics2D.Raycast(transform.position, Vector3.down, 3f, buildLayer);
-        originFoundRight = Physics2D.Raycast(transform.position, Vector3.right, 5f, buildLayer);
+        originFoundUp = Physics2D.Raycast(transform.position, Vector3.up, yDistance, buildLayer);
+        originFoundLeft = Physics2D.Raycast(transform.position, Vector3.left, xDistance, buildLayer);
+        originFoundDown = Physics2D.Raycast(transform.position, Vector3.down, yDistance, buildLayer);
+        originFoundRight = Physics2D.Raycast(transform.position, Vector3.right, xDistance, buildLayer);
     }
 
     private void DebugRaycast()
     {
-        Vector3 up = transform.TransformDirection(Vector3.up) * 3f;
-        Vector3 left = transform.TransformDirection(Vector3.left) * 5f;
-        Vector3 down = transform.TransformDirection(Vector3.down) * 3f;
-        Vector3 right = transform.TransformDirection(Vector3.right) * 5f;
+        Vector3 up = transform.TransformDirection(Vector3.up) * yDistance;
+        Vector3 left = transform.TransformDirection(Vector3.left) * xDistance;
+        Vector3 down = transform.TransformDirection(Vector3.down) * yDistance;
+        Vector3 right = transform.TransformDirection(Vector3.right) * xDistance;
 
         Debug.DrawRay(transform.position, up, Color.green);
         Debug.DrawRay(transform.position, left, Color.green);

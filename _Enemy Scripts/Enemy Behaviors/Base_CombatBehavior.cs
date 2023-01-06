@@ -32,6 +32,6 @@ public class Base_CombatBehavior : MonoBehaviour
 
     public virtual void Attack()
     {
-
+        //This is just here to get overridden
     }
 }

@@ -17,7 +17,7 @@ public class RoomGenerator : MonoBehaviour
     [SerializeField] int totalTrialsDeviation = 0;
 
     [Space(10)]
-    [Header("Generator Components")]
+    [Header("--- Generator Components (*Setup) ---")]
     [SerializeField] GameObject BossRoom;
     [Header("Generator Component Arrays")]
     [SerializeField] GameObject[] StartRooms;
@@ -25,7 +25,7 @@ public class RoomGenerator : MonoBehaviour
     [SerializeField] GameObject[] Shops;
     [SerializeField] GameObject[] Trials;
 
-    [Header("--- Populated at Generation ---")]
+    [Header("--- Generation Results ---")]
     [SerializeField] List<int> availableIndexes;
 
     [Header("Variables")]
@@ -113,6 +113,7 @@ public class RoomGenerator : MonoBehaviour
         }
         roomGenRunning = false;
         roomGenDone = true;
+
         Debug.Log("Rooms Generated");
     }
 

@@ -28,6 +28,7 @@ public class Base_PlayerMovement : MonoBehaviour
     //Drop-through platforms
     private GameObject currentOneWayPlatform;
     [SerializeField] public bool canDropThrough;
+    [SerializeField] public bool dropThroughBlocked;
     //[SerializeField] private CapsuleCollider2D playerCollider;
     private BoxCollider2D playerCollider;
 
@@ -171,12 +172,12 @@ public class Base_PlayerMovement : MonoBehaviour
             if (Input.GetButtonDown("Crouch"))
             {
                 //Allow dropping through platforms
-                if(!canDropThrough) return;
+                if(!canDropThrough || dropThroughBlocked) return;
                 if(currentOneWayPlatform != null)
                     StartCoroutine(DisableCollision());
             }
             doubleJumped = false;
-            CheckPlatform();
+            if (updatePlatform) CheckPlatform();
             CheckRunVFX();
         }
         else
@@ -195,6 +196,10 @@ public class Base_PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(0, rb.velocity.y); //The other options didn't work
             return;
         }
+
+        // //Only update platform while grounded
+        // if (IsGrounded()) CheckPlatform();
+        // else updatePlatform = true;
 
         if (combat.isKnockedback) return; //prevent movement inputs when knockedback
         
@@ -238,6 +243,7 @@ public class Base_PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("OneWayPlatform"))
         {
             currentOneWayPlatform = collision.gameObject;
+            canDropThrough = true;
         }
     }
 
@@ -246,7 +252,7 @@ public class Base_PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("OneWayPlatform"))
         {
             currentOneWayPlatform = null;
-            canDropThrough = true;
+            canDropThrough = false;
         }
     }
 
@@ -257,6 +263,18 @@ public class Base_PlayerMovement : MonoBehaviour
         Physics2D.IgnoreCollision(playerCollider, platformCollider);
         yield return new WaitForSeconds(.25f);
         Physics2D.IgnoreCollision(playerCollider, platformCollider, false);
+    }
+
+    private void OnTriggerEnter2D(Collider2D trigger)
+    {
+        // if (trigger.GetComponent<BlockDropThrough>()) dropThroughBlocked = true;
+        if (trigger.CompareTag("SolidPlatform")) dropThroughBlocked = true;
+    }
+
+    private void OnTriggerExit2D(Collider2D trigger)
+    {
+        // if (trigger.GetComponent<BlockDropThrough>()) dropThroughBlocked = false;
+        if (trigger.CompareTag("SolidPlatform")) dropThroughBlocked = false;
     }
     #endregion
 
@@ -345,14 +363,13 @@ public class Base_PlayerMovement : MonoBehaviour
     void CheckPlatform()
     {
         //Only updating platform after IsGrounded() returns false, then update once
-        if (!updatePlatform) return;
+        //if (!updatePlatform) return;
 
-        updatePlatform = false;
         int i = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).GetInstanceID();
-        if(i != currPlatform)
-        {
-            if (i > 0) currPlatform = i;
-        }
+        if (i != currPlatform) currPlatform = i;
+        updatePlatform = false;
+        // string j = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).name;
+        // Debug.Log("Current Platform: " + j);
     }
 
     private void OnDrawGizmos()
@@ -430,6 +447,17 @@ public class Base_PlayerMovement : MonoBehaviour
     public void StopCO()
     {
         StopAllCoroutines();
+    }
+
+    public void TimedDisableMove(float duration)
+    {
+        ToggleCanMove(false);
+        Invoke("EnableMove", duration);
+    }
+
+    void EnableMove()
+    {
+        ToggleCanMove(true);
     }
 
     public void ToggleCanMove(bool canMoveToggle)

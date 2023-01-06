@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class WallGenerator : MonoBehaviour
 {
+    [Header("Generator Setup")]
+    [SerializeField] float xDistance = 5.5f;
+    [SerializeField] float yDistance = 3f;
+
     [Header("Variables")]
     [SerializeField] private bool DEBUGGING;
     [SerializeField] public bool wallGenRunning;
@@ -15,7 +19,8 @@ public class WallGenerator : MonoBehaviour
     [SerializeField] LayerMask wallLayer;
     [SerializeField] LevelBuilder Builder;
 
-    [Header("Components")]
+    [Header("--- Components (*Setup) ---")]
+    [Header("0 - Horizontal, 1 - Vertical")]
     [SerializeField] GameObject[] Walls; //0: Top/Bot, 1: Left/Right
     [SerializeField] GameObject[] Doors; //0: Top/Bot, 1: Left/Right
 
@@ -111,7 +116,6 @@ public class WallGenerator : MonoBehaviour
         while (!upChecked && !leftChecked && !downChecked && !rightChecked) yield return null;
 
         //yield return new WaitForSecondsRealtime(.01f);
-
         buildingWallsDoors = false;
     }
 
@@ -125,22 +129,22 @@ public class WallGenerator : MonoBehaviour
         switch (direction)
         {
             case 0: //Up
-                y += 1.5f;
+                y += yDistance;
                 index = 0;
                 upChecked = true;
                 break;
             case 1: //Left
-                x -= 2.5f;
+                x -= xDistance;
                 index = 1;
                 leftChecked = true;
                 break;
             case 2: //Down
-                y -= 1.5f;
+                y -= yDistance;
                 index = 0;
                 downChecked = true;
                 break;
             case 3: //Right
-                x += 2.5f;
+                x += xDistance;
                 index = 1;
                 rightChecked = true;
                 break;
@@ -156,18 +160,18 @@ public class WallGenerator : MonoBehaviour
     #region Raycasts
     private void RoomConnectRaycastCheck()
     {
-        wallFoundUp = Physics2D.Raycast(transform.position, Vector3.up, 3f, wallLayer);
-        wallFoundLeft = Physics2D.Raycast(transform.position, Vector3.left, 5f, wallLayer);
-        wallFoundDown = Physics2D.Raycast(transform.position, Vector3.down, 3f, wallLayer);
-        wallFoundRight = Physics2D.Raycast(transform.position, Vector3.right, 5f, wallLayer);
+        wallFoundUp = Physics2D.Raycast(transform.position, Vector3.up, yDistance, wallLayer);
+        wallFoundLeft = Physics2D.Raycast(transform.position, Vector3.left, xDistance, wallLayer);
+        wallFoundDown = Physics2D.Raycast(transform.position, Vector3.down, yDistance, wallLayer);
+        wallFoundRight = Physics2D.Raycast(transform.position, Vector3.right, xDistance, wallLayer);
     }
 
     private void DebugRaycast()
     {
-        Vector3 up = transform.TransformDirection(Vector3.up) * 3f;
-        Vector3 left = transform.TransformDirection(Vector3.left) * 5f;
-        Vector3 down = transform.TransformDirection(Vector3.down) * 3f;
-        Vector3 right = transform.TransformDirection(Vector3.right) * 5f;
+        Vector3 up = transform.TransformDirection(Vector3.up) * yDistance;
+        Vector3 left = transform.TransformDirection(Vector3.left) * xDistance;
+        Vector3 down = transform.TransformDirection(Vector3.down) * yDistance;
+        Vector3 right = transform.TransformDirection(Vector3.right) * xDistance;
 
         Debug.DrawRay(transform.position, up, Color.green);
         Debug.DrawRay(transform.position, left, Color.green);

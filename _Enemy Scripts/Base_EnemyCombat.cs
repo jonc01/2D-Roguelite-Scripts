@@ -124,7 +124,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        enemyStageManager = GetComponentInParent<EnemyStageManager>();
+        enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
     }
 
     // Update is called once per frame

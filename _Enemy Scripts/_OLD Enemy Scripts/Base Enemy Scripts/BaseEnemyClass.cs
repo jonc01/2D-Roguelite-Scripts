@@ -17,7 +17,7 @@ public class BaseEnemyClass : MonoBehaviour
     public Rigidbody2D rb;
     private Material mDefault;
     protected Transform healthBarTransform;
-    [SerializeField] protected StageClear stageClear;
+    //[SerializeField] protected StageClear stageClear;
 
     // PREFAB HANDLERS (Start())
     [SerializeField] protected TextPopupsHandler TextPopupsHandler;
@@ -100,8 +100,8 @@ public class BaseEnemyClass : MonoBehaviour
         HitEffectsHandler = GameObject.Find("ObjectPool(HitEffects)").GetComponent<HitEffectsHandler>();
         DeathParticlesHandler = GameObject.Find("ObjectPool(DeathParticles)").GetComponent<DeathParticlesHandler>();
 
-        if (stageClear == null)
-            stageClear = GetComponentInParent<StageClear>();
+        // if (stageClear == null)
+        //     stageClear = GetComponentInParent<StageClear>();
             //stageClear = GameObject.Find("StageClearCheck").GetComponent<StageClear>();
 
 

@@ -5,10 +5,11 @@ using UnityEngine;
 public class DoorController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] Collider2D collider;
+    [SerializeField] Collider2D doorCollider;
+    [SerializeField] Collider2D blockDropThroughCollider;
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
-    [SerializeField] GameObject doorLight;
+    [SerializeField] GameObject doorArrow; //TODO: replace with arrow
 
     [Header("Variables")]
     public bool isOpen;
@@ -16,42 +17,45 @@ public class DoorController : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
-        collider = GetComponent<Collider2D>();
-        ToggleDoorLight(false);
+        if (animator == null) animator = GetComponent<Animator>();
+        if (doorCollider == null) doorCollider = GetComponent<Collider2D>();
+        //blockDropThroughCollider
+        ToggleOpenIndicator(false);
     }
     
     void Update()
     {
-        if (!isOpen) CloseDoor();
-        if (isOpen) OpenDoor();
+        //ToggleDoor(isOpen);
     }
 
-    void CloseDoor()
+    public void ToggleDoor(bool toggle)
     {
-        PlayAnim(0);
-        collider.enabled = true;
-        collider.isTrigger = false;
-        ToggleDoorLight(false);
+        isOpen = toggle;
+        if(isOpen) PlayAnim(1); //Open anim
+        else PlayAnim(0); //Close anim
+
+        if(toggle) Invoke("OpenDoorCollider", .5f);
+        else Invoke("CloseDoorCollider", .1f);
+        // doorCollider.isTrigger = toggle;
+        // if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = !toggle;
     }
 
-    void OpenDoor()
+    void OpenDoorCollider() //Change collider to trigger, allow dropThrough
     {
-        PlayAnim(1);
-        collider.isTrigger = true;
-        ToggleDoorLight(true);
+        doorCollider.isTrigger = true;
+        if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = false;
     }
 
-    void ToggleDoorLight(bool toggle)
+    void CloseDoorCollider() //Disable trigger, block dropThrough
     {
-        if (doorLight != null)
-            doorLight.SetActive(toggle);
+        doorCollider.isTrigger = false;
+        if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void ToggleOpenIndicator(bool toggle)
     {
-        Debug.Log("Player entered door");
-        //TODO: Move player to new connected scene
+        if (doorArrow != null)
+            doorArrow.SetActive(toggle);
     }
 
     private void PlayAnim(int index)
