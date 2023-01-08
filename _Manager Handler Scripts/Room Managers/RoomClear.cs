@@ -5,6 +5,7 @@ using UnityEngine;
 public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
+    public bool neutralRoom = false;
 
     [Header("References")]
     public DoorManager DoorManager;

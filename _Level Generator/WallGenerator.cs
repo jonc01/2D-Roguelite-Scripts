@@ -22,7 +22,8 @@ public class WallGenerator : MonoBehaviour
     [Header("--- Components (*Setup) ---")]
     [Header("0 - Horizontal, 1 - Vertical")]
     [SerializeField] GameObject[] Walls; //0: Top/Bot, 1: Left/Right
-    [SerializeField] GameObject[] Doors; //0: Top/Bot, 1: Left/Right
+    [SerializeField] GameObject[] VerticalDoors; //0: Top/Bot, 1: Left/Right
+    [SerializeField] GameObject[] HorizontalDoors; //0: Top/Bot, 1: Left/Right
 
     [Header("Raycasts")]
     [SerializeField] bool wallFoundUp;
@@ -104,13 +105,13 @@ public class WallGenerator : MonoBehaviour
         //If the raycast hits an Origin, build a Door
         //Else build a Wall
 
-        if (!wallFoundUp) GenerateWallDoor(0, !Builder.originFoundUp);
+        if (!wallFoundUp) ChooseWallDoor(0, !Builder.originFoundUp);
         else upChecked = true;
-        if (!wallFoundLeft) GenerateWallDoor(1, !Builder.originFoundLeft);
+        if (!wallFoundLeft) ChooseWallDoor(1, !Builder.originFoundLeft);
         else leftChecked = true;
-        if (!wallFoundDown) GenerateWallDoor(2, !Builder.originFoundDown);
+        if (!wallFoundDown) ChooseWallDoor(2, !Builder.originFoundDown);
         else downChecked = true;
-        if (!wallFoundRight) GenerateWallDoor(3, !Builder.originFoundRight);
+        if (!wallFoundRight) ChooseWallDoor(3, !Builder.originFoundRight);
         else rightChecked = true;
 
         while (!upChecked && !leftChecked && !downChecked && !rightChecked) yield return null;
@@ -119,7 +120,7 @@ public class WallGenerator : MonoBehaviour
         buildingWallsDoors = false;
     }
 
-    void GenerateWallDoor(int direction, bool isWall = true)
+    void ChooseWallDoor(int direction, bool isWall = true)
     {
         //Get current position, adjust offset and Instantiate Wall
         float x = transform.position.x;
@@ -154,7 +155,21 @@ public class WallGenerator : MonoBehaviour
         Vector3 newPos = new Vector3(x, y, 0);
 
         if (isWall) Instantiate(Walls[index], newPos, Quaternion.identity, currOrigin); //0: Top/Bot, 1: Left/Right
-        else Instantiate(Doors[index], newPos, Quaternion.identity, currOrigin);
+        else 
+        {
+            //Generate vertical or horizontal doors based on the direction being built
+            if(direction == 0 || direction == 2) GenerateDoor(newPos, false);
+            else GenerateDoor(newPos, true);
+        }
+        
+    }
+
+    void GenerateDoor(Vector3 newPos, bool isVertical)
+    {
+        int index = Random.Range(0, 3); //Change 3 to size var if making more variations
+
+        if(isVertical) Instantiate(VerticalDoors[index], newPos, Quaternion.identity, currOrigin);
+        else Instantiate(HorizontalDoors[index], newPos, Quaternion.identity, currOrigin);
     }
 
     #region Raycasts

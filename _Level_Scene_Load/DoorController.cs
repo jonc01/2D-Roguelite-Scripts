@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    [Header("References & Setup")]
-    [SerializeField] bool horizontal;
-    [SerializeField] Collider2D doorCollider;
-    [SerializeField] BoxCollider2D groundCollider;
+    [Header("Setup Horizontal ONLY")]
+    [SerializeField] bool horizontal; //Only horizontal needs a blockDropThrough
     [SerializeField] Collider2D blockDropThroughCollider;
+    [SerializeField] BoxCollider2D groundCollider;
+
+    [Header("References & Setup")]
+    [SerializeField] Collider2D doorCollider;
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
     [SerializeField] GameObject doorArrow; //TODO: replace with arrow
@@ -46,7 +48,6 @@ public class DoorController : MonoBehaviour
     {
         // if(groundCollider != null) groundCollider.tag = "OneWayPlatform";
         doorCollider.isTrigger = true;
-        //GameManager.Instance.PlayerMovement.currentOneWayPlatform = gameObject;
         if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = false;
         //Override canDropThrough in case player is on the platform when it changes
         //if(horizontal) GameManager.Instance.PlayerMovement.canDropThrough = true;
