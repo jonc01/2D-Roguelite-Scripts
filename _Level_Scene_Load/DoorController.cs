@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] Collider2D collider;
+    [Header("Setup Horizontal ONLY")]
+    [SerializeField] bool horizontal; //Only horizontal needs a blockDropThrough
+    [SerializeField] Collider2D blockDropThroughCollider;
+    [SerializeField] BoxCollider2D groundCollider;
+
+    [Header("References & Setup")]
+    [SerializeField] Collider2D doorCollider;
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
+    [SerializeField] GameObject doorArrow; //TODO: replace with arrow
 
     [Header("Variables")]
     public bool isOpen;
@@ -15,33 +21,49 @@ public class DoorController : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
-        collider = GetComponent<Collider2D>();
+        if (animator == null) animator = GetComponent<Animator>();
+        if (doorCollider == null) doorCollider = GetComponent<Collider2D>();
+        if (horizontal && groundCollider == null) groundCollider = gameObject.transform.Find("Ground Platform").GetComponent<BoxCollider2D>();
+        //blockDropThroughCollider
+        ToggleOpenIndicator(false);
     }
     
     void Update()
     {
-        if (!isOpen) CloseDoor();
-        if (isOpen) OpenDoor();
+        //ToggleDoor(isOpen);
     }
 
-    void CloseDoor()
+    public void ToggleDoor(bool toggle)
     {
-        PlayAnim(0);
-        collider.enabled = true;
-        collider.isTrigger = false;
+        isOpen = toggle;
+        if(isOpen) PlayAnim(1); //Open anim
+        else PlayAnim(0); //Close anim
+
+        if(toggle) Invoke("OpenDoorCollider", .5f);
+        else Invoke("CloseDoorCollider", .1f);
+        // doorCollider.isTrigger = toggle;
     }
 
-    void OpenDoor()
+    void OpenDoorCollider() //Change collider to trigger, allow dropThrough
     {
-        PlayAnim(1);
-        collider.isTrigger = true;
+        // if(groundCollider != null) groundCollider.tag = "OneWayPlatform";
+        doorCollider.isTrigger = true;
+        if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = false;
+        //Override canDropThrough in case player is on the platform when it changes
+        //if(horizontal) GameManager.Instance.PlayerMovement.canDropThrough = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    void CloseDoorCollider() //Disable trigger, block dropThrough
     {
-        Debug.Log("Player entered door");
-        //TODO: Move player to new connected scene
+        // if(groundCollider != null) groundCollider.tag = "SolidPlatform";
+        doorCollider.isTrigger = false;
+        if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = true;
+    }
+
+    void ToggleOpenIndicator(bool toggle)
+    {
+        if (doorArrow != null)
+            doorArrow.SetActive(toggle);
     }
 
     private void PlayAnim(int index)

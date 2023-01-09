@@ -7,13 +7,15 @@ public class Base_EnemyController : MonoBehaviour
     [Header("=== References/Setup ===")]
     public Base_EnemyMovement movement;
     public Base_EnemyCombat combat;
+    public bool isRangedAttack = false;
     [SerializeField] private float CODurationLower = .2f, CODurationUpper = .8f;
+    
 
     [Header("=== Raycasts Reference ===")]
-    [SerializeField] Base_EnemyRaycast raycast;
+    [SerializeField] public Base_EnemyRaycast raycast;
     [SerializeField] int currPlayerPlatform;
 
-    [Header("=== Variables ===")]
+    [Header("=== Debug Variables ===")]
     [SerializeField] bool isIdling;
     [SerializeField] bool isPatrolling;
     [SerializeField] bool playerDetected;
@@ -53,13 +55,14 @@ public class Base_EnemyController : MonoBehaviour
         MoveCheck();
         LedgeWallCheck();
         ChasePlayer();
-        AttackCheck();
+        AttackCheckClose();
+        AttackCheckFar();
         PlayerToRightCheck();
     }
 
     private void FixedUpdate()
     {
-        currPlayerPlatform = GameManager.Instance.PlayerCurrPlatform;
+        PlatformCheck();
     }
 
     void PlayerToRightCheck()
@@ -67,15 +70,30 @@ public class Base_EnemyController : MonoBehaviour
         combat.playerToRight = raycast.playerToRight;
     }
 
-    void AttackCheck()
+    void AttackCheckClose()
     {
-        if (raycast.playerInRange) combat.Attack();
+        if (!PlatformCheck()) return;
+        if (raycast.playerInRangeClose) combat.AttackClose();
+    }
+
+    void AttackCheckFar()
+    {
+        if (!PlatformCheck() && !isRangedAttack) return;
+        if (raycast.playerInRangeFar) combat.AttackFar();
+    }
+
+    bool PlatformCheck()
+    {
+        //Updates current player platform, compares to enemy's platform
+        currPlayerPlatform = GameManager.Instance.PlayerCurrPlatform;
+        if (currPlayerPlatform == raycast.currPlatform) return true;
+        else return false;
     }
 
     void ChasePlayer()
     {
         if (raycast.currPlatform != currPlayerPlatform) return;
-        if (raycast.wallDetect || !raycast.ledgeDetect) return;
+        if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
 
         if (raycast.playerDetectFront || raycast.playerDetectBack)
         {

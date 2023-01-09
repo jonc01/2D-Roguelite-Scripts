@@ -5,29 +5,41 @@ using UnityEngine;
 public class DoorManager : MonoBehaviour
 {
     //Controls doors in Stages
-    [Header("References")]
-    [SerializeField] DoorController[] doors;
-    [SerializeField] int totalDoors;
+    [SerializeField] List<DoorController> connectedDoors;
+    private bool checkForDoors;
+    public RoomClear roomClear;
 
     void Start()
     {
-        totalDoors = transform.childCount;
-        doors = new DoorController[totalDoors];
-        for(int i = 0; i < totalDoors; i++)
+        connectedDoors = new List<DoorController>();
+        roomClear = GetComponent<RoomClear>();
+    }
+
+    public void AddToList(DoorController door)
+    {
+        connectedDoors.Add(door);
+    }
+
+    //Called from RoomManager
+    public void ToggleAllDoors(bool toggle = true)
+    {
+        //StageClear calls this when all enemies are dead
+        //Opens all door child objects
+        if(connectedDoors.Count == 0) return;
+        for (int i = 0; i < connectedDoors.Count; i++)
         {
-            doors[i] = transform.GetChild(i).GetComponent<DoorController>();
+            if(connectedDoors[i] != null) connectedDoors[i].ToggleDoor(toggle);
         }
     }
 
-    public void OpenDoors()
+    public void UpdateDoorState(float delay = 0)
     {
-        //StageClear call this when all enemies are dead
-        //Opens all door child objects
-        if (totalDoors <= 0) return;
-        Debug.Log("Open doors");
-        for (int i = 0; i < totalDoors; i++)
-        {
-            doors[i].isOpen = true;
-        }
+        if(delay > 0) Invoke("DelayUpdateDoorState", delay);
+        else ToggleAllDoors(roomClear.roomCleared);
+    }
+
+    private void DelayUpdateDoorState()
+    {
+        ToggleAllDoors(roomClear.roomCleared);
     }
 }

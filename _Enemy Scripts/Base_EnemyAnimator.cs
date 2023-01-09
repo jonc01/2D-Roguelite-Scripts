@@ -8,7 +8,6 @@ public class Base_EnemyAnimator : MonoBehaviour
     public Animator anim;
     public Base_EnemyMovement movement;
     public Base_EnemyCombat combat;
-    //[SerializeField] float sampleRate = 12;
 
     //State Checks
 
@@ -17,7 +16,10 @@ public class Base_EnemyAnimator : MonoBehaviour
     Coroutine AttackCO;
 
     //Animation Names
-    [SerializeField] string[] AnimationNames = {"Idle", "Move", "Attack", "Death"};
+    [Header("Additional Animations")]
+    [SerializeField] string[] AdditionalAnims;
+    [SerializeField] int[] AdditionalAnimHashes;
+    //[SerializeField] float sampleRate = 12;
     //TODO: custom variables, or use this naming scheme
 
     #region Cached
@@ -50,6 +52,9 @@ public class Base_EnemyAnimator : MonoBehaviour
         if (combat == null) combat = GetComponentInParent<Base_EnemyCombat>();
 
         attacking = false;
+
+        //Generate hashes if not already setup
+        if (AdditionalAnimHashes.Length == 0) HashAdditionalAnims();
     }
 
     private void Update()
@@ -79,7 +84,7 @@ public class Base_EnemyAnimator : MonoBehaviour
         currentState = state;
     }
 
-    int LockState(int s, float t)
+    public int LockState(int s, float t)
     {
         lockedTill = Time.time + t;
         return s;
@@ -96,6 +101,16 @@ public class Base_EnemyAnimator : MonoBehaviour
         float animSpeed = anim.GetCurrentAnimatorStateInfo(0).speed;
         Debug.Log("Anim length:" + animLength);
         Debug.Log("Anim speed:" + animSpeed);*/
+        AttackCO = StartCoroutine(AttackState(animTime));
+    }
+
+    public void PlayManualAnim(int index, float animTime)
+    {
+        StopAttackAnimCO();
+        attacking = true;
+    
+        anim.CrossFade(AdditionalAnimHashes[index], 0, 0);
+
         AttackCO = StartCoroutine(AttackState(animTime));
     }
 
@@ -130,4 +145,20 @@ public class Base_EnemyAnimator : MonoBehaviour
         return movement.rb.velocity.x != 0 ? Move : Idle;
         //return movement.rb.velocity.y > 0 ? Jump : Fall;
     }
+
+
+    //
+    private void HashAdditionalAnims()
+    {
+        int total = AdditionalAnims.Length;
+        if (total <= 0) return;
+
+        AdditionalAnimHashes = new int[total];
+        
+        for(int i = 0; i < total; i++)
+        {
+            AdditionalAnimHashes[i] = Animator.StringToHash(AdditionalAnims[i]);
+        }
+    }
+    
 }

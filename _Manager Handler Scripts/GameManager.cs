@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 
     public Transform Player;
 
-    private Base_PlayerMovement PlayerMovement;
+    public Base_PlayerMovement PlayerMovement;
     public Transform PlayerTargetOffset;
     public Inventory Inventory;
     public int PlayerCurrPlatform;
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
         Player = GameObject.FindGameObjectWithTag("Player").transform;
         PlayerMovement = Player.GetComponent<Base_PlayerMovement>();
         PlayerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
-        Inventory = GetComponent<Inventory>();
+        if (Inventory == null) Inventory = GetComponent<Inventory>();
     }
 
     private void Update()
@@ -29,5 +29,10 @@ public class GameManager : MonoBehaviour
         {
             PlayerCurrPlatform = PlayerMovement.currPlatform;
         }
+    }
+
+    public void MovePlayer(Vector3 newPos)
+    {
+        Player.position = newPos;
     }
 }

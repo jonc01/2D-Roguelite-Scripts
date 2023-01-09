@@ -16,23 +16,34 @@ public class Base_EnemyMovement : MonoBehaviour
     public bool canMove = true;
     [SerializeField] bool canFlip;
     public bool isFacingRight = true;
+    bool isLunging;
+
+    //TESTING //TODO: 
+    bool _isKnockedback = false;
+    //
+
+    Coroutine LungingCO;
+
 
     private void Awake()
     {
         if(character != null)
             moveSpeed = character.Base_MoveSpeed;
+
+        isLunging = false;
     }
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        if(combat == null) combat = GetComponent<Base_EnemyCombat>();
         canFlip = true;
     }
 
     void Update()
     {
         if (!combat.isAlive) return;
-        if (combat.isKnockedback) return;
+        if (combat.isKnockedback || isLunging || _isKnockedback) return;
         Flip();
     }
 
@@ -40,16 +51,64 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         if (!combat.isAlive || combat.isStunned || !canMove)
         {
-            if(!combat.isKnockedback)
+            if(!combat.isKnockedback || isLunging || _isKnockedback)
                 DisableMove();
 
             return;
         }
     }
 
-    void Flip()
+
+    public void MoveRight(bool moveRight)
     {
-        if (!canFlip) return;
+        if (!canMove) return;
+
+        if (moveRight) rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
+        else rb.velocity = new Vector2(-moveSpeed, rb.velocity.y); 
+        
+        Flip();
+    }
+
+    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .5f)
+    {
+        KnockbackNullCheckCO();
+
+        if (strength <= 0) return;
+
+        _isKnockedback = true;
+        ToggleFlip(false);
+
+        float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        Vector2 direction = new Vector2(temp, rb.velocity.y);
+        rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        LungingCO = StartCoroutine(KnockbackReset(delay));
+    }
+
+    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
+    {
+        yield return new WaitForSeconds(delay);
+        rb.velocity = Vector3.zero;
+        canMove = false;
+        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
+        canMove = true;
+        ToggleFlip(true);
+        _isKnockedback = false;
+    }
+
+    void KnockbackNullCheckCO()
+    {
+        if (LungingCO == null) return;
+        StopCoroutine(LungingCO);
+        canMove = true;
+        ToggleFlip(true);
+        _isKnockedback = false;
+    }
+
+    #region Flip
+    void Flip(bool overrideFlip = false)
+    {
+        if (!canFlip && !overrideFlip) return;
         if(isFacingRight && rb.velocity.x < 0 || !isFacingRight && rb.velocity.x > 0)
         {
             isFacingRight = !isFacingRight;
@@ -57,34 +116,27 @@ public class Base_EnemyMovement : MonoBehaviour
             if(isFacingRight) transform.localRotation = Quaternion.Euler(0, 0, 0);
             else transform.localRotation = Quaternion.Euler(0, 180, 0);
 
-            ManualFlip();
+            HealthBarFlip();
         }
     }
 
-    void ManualFlip()
+    void HealthBarFlip()
     {
         //Flipping healthbar so it remains in correct orientation as character sprite flips
         if (isFacingRight) combat.healthbarTransform.localRotation = Quaternion.Euler(0, 0, 0);
         else combat.healthbarTransform.localRotation = Quaternion.Euler(0, 180, 0);
     }
 
-    public void MoveRight(bool moveRight)
+    public void ManualFlip(bool faceRight)
     {
-        if (!canMove) return;
-
-        if (moveRight)
-        {
-            rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
-            //Flip();
-        }
-        else
-        {
-            rb.velocity = new Vector2(-moveSpeed, rb.velocity.y);
-            //Flip();
-        }
-        Flip();
+        isFacingRight = faceRight;
+        if(isFacingRight) transform.localRotation = Quaternion.Euler(0, 0, 0);
+        else transform.localRotation = Quaternion.Euler(0, 180, 0);
+        HealthBarFlip();
     }
+    #endregion
 
+    #region Toggles
     public void DisableMove()
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
@@ -94,4 +146,5 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         canFlip = toggle;
     }
+    #endregion
 }

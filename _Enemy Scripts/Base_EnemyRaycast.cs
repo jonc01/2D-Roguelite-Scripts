@@ -17,13 +17,14 @@ public class Base_EnemyRaycast : MonoBehaviour
 
     [Space]
     [Header("=== Adjustable Variables ===")] //Raycast variables
-    [SerializeField] private float ledgeCheckDistance = 0.2f;
+    [SerializeField] private float ledgeCheckDistance = 0.05f;
     [SerializeField]
     private float
         wallCheckDistance = 0.5f, //negative values - enemies are initialized facing left
         playerCheckDistanceFront = 3f, //Aggro range
         playerCheckDistanceBack = 1.5f;
-    public float attackRange = 0.67f; //when to start attacking player, uses a raycast to detect if player is within range
+    public float attackRangeClose = 0.67f; //when to start attacking player, uses a raycast to detect if player is within range
+    public float attackRangeFar = 1f;
 
     [Space]
     [Header("Current Platform")]
@@ -37,7 +38,8 @@ public class Base_EnemyRaycast : MonoBehaviour
     public bool
         playerDetectFront,
         playerDetectBack,
-        playerInRange,
+        playerInRangeClose,
+        playerInRangeFar,
         ledgeDetect,
         wallDetect,
         isGrounded;
@@ -60,15 +62,21 @@ public class Base_EnemyRaycast : MonoBehaviour
         if (debugging) DebugDrawRaycast();
 
         isGrounded = IsGrounded();
-
-        if (isGrounded) CheckPlatform();
-        else updatePlatform = true; //Not grounded, allow CheckPlatform() to get platform ID once
         
+        //Not grounded, allow CheckPlatform() to get platform ID once
+        if (isGrounded) if(updatePlatform) CheckPlatform();
+        else updatePlatform = true;
+
         AttackCheck();
         LedgeWallCheck();
         PlayerDetectCheck();
         UpdatePlayerToRight();
     }
+
+    // void FixedUpdate()
+    // {
+    //     
+    // }
 
     bool IsGrounded()
     {
@@ -78,11 +86,11 @@ public class Base_EnemyRaycast : MonoBehaviour
     void CheckPlatform()
     {
         //Only updating platform after IsGrounded() returns false, then update once
-        if (!updatePlatform) return;
+        // if (!updatePlatform) return;
 
-        updatePlatform = false;
         int i = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).GetInstanceID();
         if (i != currPlatform) currPlatform = i;
+        updatePlatform = false;
     }
 
     void DebugDrawRaycast()
@@ -99,13 +107,18 @@ public class Base_EnemyRaycast : MonoBehaviour
         Vector3 attackLeft = transform.TransformDirection(Vector3.left) * playerCheckDistanceBack;
         Debug.DrawRay(wallPlayerCheck.position, attackLeft, Color.red);
 
-        Vector3 playerInAttackRange = transform.TransformDirection(Vector3.right) * attackRange;
-        Debug.DrawRay(attackCheck.position, playerInAttackRange, Color.magenta);
+        Vector3 playerInAttackRangeFar = transform.TransformDirection(Vector3.right) * attackRangeFar;
+        Debug.DrawRay(attackCheck.position, playerInAttackRangeFar, Color.yellow);
+
+        Vector3 playerInAttackRangeClose = transform.TransformDirection(Vector3.right) * attackRangeClose;
+        Debug.DrawRay(attackCheck.position, playerInAttackRangeClose, Color.magenta);
+
     }
 
     void AttackCheck()
     {
-        playerInRange = Physics2D.Raycast(attackCheck.position, transform.right, attackRange, playerLayer);
+        playerInRangeClose = Physics2D.Raycast(attackCheck.position, transform.right, attackRangeClose, playerLayer);
+        playerInRangeFar = Physics2D.Raycast(attackCheck.position, transform.right, attackRangeFar, playerLayer);
     }
 
     void LedgeWallCheck()
