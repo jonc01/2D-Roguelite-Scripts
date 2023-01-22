@@ -5,7 +5,8 @@ using UnityEngine;
 public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
-    public bool neutralRoom = false;
+    public bool neutralRoom = false; //If true, room stays cleared
+    //^ Use for Start room, Shops, etc
 
     [Header("References")]
     public DoorManager DoorManager;
@@ -13,6 +14,7 @@ public class RoomClear : MonoBehaviour
     void Start()
     {
         roomCleared = false;
+
         if (DoorManager == null) DoorManager = GetComponent<DoorManager>();
         //if (DoorManager == null) DoorManager = GameObject.FindGameObjectWithTag("DoorManager").GetComponent<DoorManager>();
             //This only gets the number of children under "Enemies", doesn't count children's children

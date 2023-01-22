@@ -5,7 +5,7 @@ using UnityEngine;
 public class DoorManager : MonoBehaviour
 {
     //Controls doors in Stages
-    [SerializeField] List<DoorController> connectedDoors;
+    [SerializeField] public List<DoorController> connectedDoors;
     private bool checkForDoors;
     public RoomClear roomClear;
 

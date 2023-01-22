@@ -33,8 +33,8 @@ public class OrbController : MonoBehaviour
 
     private void Awake()
     {
-        rb = gameObject.GetComponent<Rigidbody2D>();
-        collider = gameObject.GetComponent<CircleCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
+        collider = GetComponent<CircleCollider2D>();
         findPlayer = false;
         timeSpentFlying = 0;
 
