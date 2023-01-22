@@ -11,6 +11,7 @@ public class DoorController : MonoBehaviour
 
     [Header("References & Setup")]
     [SerializeField] Collider2D doorCollider;
+    public Transform doorOffset; //For use with door props
     [SerializeField] Animator animator;
     [SerializeField] string[] animNames = { "Door_Closed", "Door_Opening", "Door_Opened" };
     [SerializeField] GameObject doorArrow; //TODO: replace with arrow
@@ -25,6 +26,7 @@ public class DoorController : MonoBehaviour
         if (doorCollider == null) doorCollider = GetComponent<Collider2D>();
         if (horizontal && groundCollider == null) groundCollider = gameObject.transform.Find("Ground Platform").GetComponent<BoxCollider2D>();
         //blockDropThroughCollider
+        if(doorCollider != null) doorOffset = doorCollider.transform;
         ToggleOpenIndicator(false);
     }
     
@@ -49,6 +51,8 @@ public class DoorController : MonoBehaviour
         // if(groundCollider != null) groundCollider.tag = "OneWayPlatform";
         doorCollider.isTrigger = true;
         if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = false;
+
+        ToggleOpenIndicator(true);
         //Override canDropThrough in case player is on the platform when it changes
         //if(horizontal) GameManager.Instance.PlayerMovement.canDropThrough = true;
     }
@@ -58,12 +62,12 @@ public class DoorController : MonoBehaviour
         // if(groundCollider != null) groundCollider.tag = "SolidPlatform";
         doorCollider.isTrigger = false;
         if(blockDropThroughCollider != null) blockDropThroughCollider.enabled = true;
+        ToggleOpenIndicator(false);
     }
 
     void ToggleOpenIndicator(bool toggle)
     {
-        if (doorArrow != null)
-            doorArrow.SetActive(toggle);
+        if (doorArrow != null) doorArrow.SetActive(toggle);
     }
 
     private void PlayAnim(int index)

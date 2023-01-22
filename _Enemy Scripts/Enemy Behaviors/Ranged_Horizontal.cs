@@ -9,6 +9,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
     [Header("Ranged Projectile")]
     [SerializeField] GameObject projectile;
     [SerializeField] Transform attackPoint;
+    //Set Projectile Damage and Speed from here, projectile prefab is set at instantiation
     [SerializeField] public float damage = 4;
     [SerializeField] public float speed = 3; //default 3
     [SerializeField] public bool canFire;
@@ -39,6 +40,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
 
         yield return new WaitForSeconds(animDelay); //Charge up anim
 
+        //Instantiate projectile, set variables from this script
         GameObject projectileObj = Instantiate(projectile, attackPoint.position, transform.rotation);
         ProjectileController script = projectileObj.GetComponent<ProjectileController>();
         script.damage = damage;

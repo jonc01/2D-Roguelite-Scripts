@@ -161,7 +161,6 @@ public class WallGenerator : MonoBehaviour
             if(direction == 0 || direction == 2) GenerateDoor(newPos, false);
             else GenerateDoor(newPos, true);
         }
-        
     }
 
     void GenerateDoor(Vector3 newPos, bool isVertical)

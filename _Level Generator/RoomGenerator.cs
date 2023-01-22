@@ -9,12 +9,12 @@ public class RoomGenerator : MonoBehaviour
     public LevelBuilder Builder;
 
     [Header("Shops")]
-    public int numShops = 2;
-    [SerializeField] int totalShopDeviation = 1;
+    public int numShopsLower = 2;
+    [SerializeField] int numShopsUpper = 3;
 
     [Header("Trials")]
-    public int numTrials = 1;
-    [SerializeField] int totalTrialsDeviation = 0;
+    public int numTrialsLower = 1;
+    [SerializeField] int numTrialsUpper = 1;
 
     [Space(10)]
     [Header("--- Generator Components (*Setup) ---")]
@@ -33,6 +33,7 @@ public class RoomGenerator : MonoBehaviour
 
     public bool roomGenRunning;
     public bool roomGenDone;
+    private RoomDoorGenerator roomDoorGen;
 
     private void Start()
     {
@@ -41,6 +42,7 @@ public class RoomGenerator : MonoBehaviour
 
         availableIndexes = new List<int>();
         //shopAdded = false; //Example
+        roomDoorGen = GetComponentInChildren<RoomDoorGenerator>();
     }
 
     void Update()
@@ -77,25 +79,26 @@ public class RoomGenerator : MonoBehaviour
         CreateRoom(StartRooms[0], 0); //TODO: randomize StartRooms if multiple
         CreateRoom(BossRoom, bossRoomIndex);
 
+        
 
         //Create Shops
-        int totalShops = Random.Range(numShops, numShops + totalShopDeviation);
+        int totalShops = Random.Range(numShopsLower, numShopsUpper + 1);
         for (int i = 0; i < totalShops; i++)
         {
             int randShop = Random.Range(0, totalShops); //Pick random shop from array of variations
-            int randIndex = Random.Range(0, availableIndexes.Count);
-            CreateRoom(Shops[randShop], availableIndexes[randIndex]);
+            int randRoomIndex = Random.Range(0, availableIndexes.Count);
+            CreateRoom(Shops[randShop], availableIndexes[randRoomIndex]);
         }
 
         yield return new WaitForSecondsRealtime(.01f);
 
         //Create Trial(s)
-        int totalTrials = Random.Range(numTrials - totalTrialsDeviation, numTrials + totalTrialsDeviation);
+        int totalTrials = Random.Range(numTrialsLower, numTrialsUpper + 1);
         for (int i = 0; i < totalTrials; i++) //Reserve indexes for Trials
         {
             int randTrial = Random.Range(0, totalTrials);
-            int randIndex = Random.Range(0, availableIndexes.Count);
-            CreateRoom(Trials[randTrial], availableIndexes[randIndex]);
+            int randRoomIndex = Random.Range(0, availableIndexes.Count);
+            CreateRoom(Trials[randTrial], availableIndexes[randRoomIndex]);
         }
 
         yield return new WaitForSecondsRealtime(.01f);
@@ -104,15 +107,17 @@ public class RoomGenerator : MonoBehaviour
         //Clear out list as we go
         while (availableIndexes.Count > 0)
         {
-            int i = availableIndexes[0];
+            //int i = availableIndexes[0];
             //yield return new WaitForSecondsRealtime(.01f); //0.001
 
             int rand = Random.Range(0, Rooms.Length);
 
-            CreateRoom(Rooms[rand], i);
+            CreateRoom(Rooms[rand], availableIndexes[0]);
         }
         roomGenRunning = false;
         roomGenDone = true;
+
+        roomDoorGen.AddBorderingDoors();
 
         Debug.Log("Rooms Generated");
     }

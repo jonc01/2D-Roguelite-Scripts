@@ -28,6 +28,7 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField] float xDistance = 11f;
     [SerializeField] float yDistance = 6f;
     [SerializeField] bool DEBUGGING = true;
+    [SerializeField] GameObject LevelGenBoundaries;
     [SerializeField] WallGenerator WallGen;
     [SerializeField] RoomGenerator RoomGen;
     [SerializeField] public LayerMask buildLayer; //"Builder" layer
@@ -124,6 +125,7 @@ public class LevelBuilder : MonoBehaviour
     IEnumerator GenerateOriginsCO()
     {
         Debug.Log("Generating Origins...");
+        if(LevelGenBoundaries != null) LevelGenBoundaries.SetActive(true);
         builderRunning = true;
         for (int i = 0; i < totalRooms; i++)
         {
@@ -147,6 +149,9 @@ public class LevelBuilder : MonoBehaviour
         endRoom = transform.position;
 
         builderRunning = false;
+        
+        //Disable Boundaries after Origins are built
+        if(LevelGenBoundaries != null) LevelGenBoundaries.SetActive(false);
 
         yield return new WaitForSecondsRealtime(.1f);
         Debug.Log("Origins Generated");

@@ -1,62 +1,52 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class VFXManager : MonoBehaviour
 {
-    [SerializeField] private GameObject RunVFX;
-    [SerializeField] private GameObject LandingVFX; //reusing for Jump
-    [SerializeField] private GameObject JumpVFX; //^
-    [SerializeField] private GameObject DashVFX;
-    [SerializeField] private GameObject StopVFX;
+    [SerializeField] private VFXHandler RunVFX;
+    [SerializeField] private VFXHandler JumpVFX;
+    [SerializeField] private VFXHandler DashVFX;
+    [SerializeField] private VFXHandler StopVFX;
 
-    float jumpVFXDuration = .417f;
-    float runVFXDuration = .417f;
-    float dashVFXDuration = .5f;
-    float stopVFXDuration = .417f;
+    // float jumpVFXDuration = .417f;
+    // float runVFXDuration = .417f;
+    // float dashVFXDuration = .5f;
+    // float stopVFXDuration = .417f;
 
-
-    public void RunFX(Transform spawnPos, bool facingRight = true)
+    public void RunFX(Transform spawnTransform, bool facingRight = true)
     {
         //Needs to spawn in the direction the player is facing.
         //P -> Spawn normal, <- P Spawn Flipped
         if (RunVFX == null) return;
-        GameObject g;
-        if(facingRight) g = Instantiate(RunVFX, spawnPos.position, Quaternion.identity, transform);
-        else g = Instantiate(RunVFX, spawnPos.position, spawnPos.rotation * Quaternion.Euler(0, 180f, 0), transform);
 
-        StartCoroutine(DeleteObject(g, runVFXDuration));
+        if (facingRight) RunVFX.ShowEffect(spawnTransform.position, 0);
+        else RunVFX.ShowEffect(spawnTransform.position, 180);
     }
 
-    public void JumpFX(Transform spawnPos)
+    public void JumpFX(Transform spawnTransform)
     {
         if (JumpVFX == null) return;
-        GameObject g = Instantiate(JumpVFX, spawnPos.position, Quaternion.identity, transform);
-        StartCoroutine(DeleteObject(g, jumpVFXDuration));
+        JumpVFX.ShowEffect(spawnTransform.position);
     }
 
-    public void StopFX(Transform spawnPos, bool facingRight = true)
+    public void StopFX(Transform spawnTransform, bool facingRight = true)
     {
         //Needs to spawn in the direction the player is facing.
         //P -> Spawn normal, <- P Spawn Flipped
         if(StopVFX == null) return;
-        GameObject g;
-        if(facingRight) g = Instantiate(StopVFX, spawnPos.position, Quaternion.identity, transform);
-        else g = Instantiate(StopVFX, spawnPos.position, spawnPos.rotation * Quaternion.Euler(0, 180f, 0), transform);
 
-        StartCoroutine(DeleteObject(g, stopVFXDuration));
+        if (facingRight) StopVFX.ShowEffect(spawnTransform.position, 0);
+        else StopVFX.ShowEffect(spawnTransform.position, 180);
     }
 
-    public void DashFX(Transform spawnPos, bool facingRight = true)
+    public void DashFX(Transform spawnTransform, bool facingRight = true)
     {
         //Needs to spawn in the direction the player is facing.
         //P -> Spawn normal, <- P Spawn Flipped
         if (DashVFX == null) return;
-        GameObject g;
-        if (facingRight) g = Instantiate(DashVFX, spawnPos.position, Quaternion.identity, transform);
-        else g = Instantiate(DashVFX, spawnPos.position, spawnPos.rotation * Quaternion.Euler(0, 180f, 0), transform);
 
-        StartCoroutine(DeleteObject(g, dashVFXDuration));
+        if (facingRight) DashVFX.ShowEffect(spawnTransform.position, 0);
+        else DashVFX.ShowEffect(spawnTransform.position, 180);
     }
 
     IEnumerator DeleteObject(GameObject g, float duration)

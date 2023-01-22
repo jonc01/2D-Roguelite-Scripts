@@ -83,7 +83,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
-        enemyStageManager.UpdateEnemyCount();
+        if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
         //sr.enabled = false;
         Invoke("DeleteObj", 1f); //Wait for fade out to finish
     }

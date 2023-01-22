@@ -186,6 +186,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
     }
 
+    public virtual bool CanAttackFar()
+    {
+        return AttackFarBehavior.canAttack;
+    }
+
     #endregion
 
     protected virtual IEnumerator Attacking()
@@ -212,7 +217,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     void FacePlayer()
     {
         //Player behind enemy
-        if (!enemyController.raycast.playerDetectFront)
+        if (enemyController.raycast.playerDetectBack)
         {
             movement.ManualFlip(!movement.isFacingRight);
         }
@@ -356,7 +361,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
-        enemyStageManager.UpdateEnemyCount();
+        if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject
         sr.enabled = false;

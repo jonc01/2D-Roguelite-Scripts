@@ -6,16 +6,40 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    [SerializeField] int enemyCount; //number of enemies in level
+    //public bool neutralRoom = false;
     [SerializeField] Transform enemyParentObj;
+    [SerializeField] int enemyCount; //number of enemies in level
+    [SerializeField] private int totalEnemyCount; //used to store the original number
+    private int nextWaveCount;
+    [Header("Multiple Waves Setup")]
+    [SerializeField] bool multipleWaves = false;
+    [SerializeField] int[] waveThreshold;
+    [SerializeField] private int currentWave;
+    
     RoomClear roomManager;
 
     void Start()
     {
+        roomManager = GetComponentInParent<RoomClear>();
         if (enemyParentObj == null) EnemySetup();
         else enemyCount = enemyParentObj.childCount;
+        totalEnemyCount = enemyCount;
 
-        roomManager = GetComponentInParent<RoomClear>();
+        if(enemyCount == 0)
+        {
+            RoomClear temp = GetComponentInParent<RoomClear>();
+            temp.roomCleared = true;
+            roomManager.Cleared();
+        }
+
+        currentWave = 0;
+
+        if(!multipleWaves)
+        {
+            waveThreshold = new int[1];
+            waveThreshold[0] = enemyCount;
+        } 
+        SpawnEnemies();
     }
 
     public void EnemySetup()
@@ -24,16 +48,64 @@ public class EnemyStageManager : MonoBehaviour
         {
             if(transform.GetChild(i).CompareTag("Enemy"))
             {
+                //Only need the one Enemy parent object, break when found
                 enemyParentObj = transform.GetChild(i).transform;
                 break;
             }
         }
         if (enemyParentObj != null) enemyCount = enemyParentObj.childCount;
+
+        //Toggle all enemies
+        if(enemyCount > 0)
+        {
+            for(int i = 0; i < enemyCount; i++)
+                enemyParentObj.GetChild(i).gameObject.SetActive(false);
+        }
+    }
+
+    public void SpawnEnemies()
+    {
+        SpawnWave(currentWave);
+    }
+
+    private void SpawnWave(int wave)
+    {
+        //Spawn next # of enemies
+        //TODO: this doesn't properly spawn all enemies in the second wave
+        //needs fixing if using more than 2 waves (waveThreshold[1] not 0)
+        for(int i = 0; i < waveThreshold[currentWave]; i++)
+            enemyParentObj.GetChild(i).gameObject.SetActive(true);
+    }
+
+    private void SpawnWave()
+    {
+        //Spawn all remaining enemies
+        for(int i = 0; i < enemyCount + 1; i++)
+            enemyParentObj.GetChild(i).gameObject.SetActive(true);
+    }
+
+    void UpdateWaveCount()
+    {
+        //Check if all of the currently toggled enemies are dead
+        if(!multipleWaves || (currentWave + 1 > waveThreshold.Length)) return;
+
+        if(enemyCount <= (totalEnemyCount - waveThreshold[currentWave]))
+        {
+            //Spawn next wave based on number, spawn next number of enemies
+            totalEnemyCount -= waveThreshold[currentWave];
+            currentWave++;
+            //nextWaveCount = enemyCount - waveThreshold[currentWave];
+            if(currentWave + 1 <= waveThreshold.Length) //Check that this isn't the last wave
+                SpawnWave(currentWave);
+            else
+                SpawnWave();
+        }
     }
 
     public void UpdateEnemyCount()
     {
         if (enemyCount > 0) enemyCount--;
+        UpdateWaveCount();
         if (enemyCount <= 0) roomManager.Cleared();
     }
 }

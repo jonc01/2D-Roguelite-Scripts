@@ -67,7 +67,9 @@ public class Base_EnemyController : MonoBehaviour
 
     void PlayerToRightCheck()
     {
-        combat.playerToRight = raycast.playerToRight;
+        //Only update if the player is actively being detected
+        if(raycast.playerDetectFront || raycast.playerDetectBack)
+            combat.playerToRight = raycast.playerToRight;
     }
 
     void AttackCheckClose()
@@ -79,7 +81,7 @@ public class Base_EnemyController : MonoBehaviour
     void AttackCheckFar()
     {
         if (!PlatformCheck() && !isRangedAttack) return;
-        if (raycast.playerInRangeFar) combat.AttackFar();
+        if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
     }
 
     bool PlatformCheck()

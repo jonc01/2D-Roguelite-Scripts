@@ -35,7 +35,7 @@ public class Base_PlayerMovement : MonoBehaviour
     //Stats
     [Header("Movement Stats and Variables")]
     public float moveSpeed = 3f; //default, set by Base_Character
-    public float jumpHeight = 8f; //default, set by Base_Character
+    public float jumpHeight = 7f; //default, set by Base_Character
     public float coyoteTimeThreshold = .1f;
     private float timeSinceLeftGround;
     private bool coyoteAllowed;
@@ -57,8 +57,10 @@ public class Base_PlayerMovement : MonoBehaviour
     public bool canPlayLanding;
 
     //Jump Buffer
-    float jumpBufferCounter = .2f;
-    float jumpBufferTime;
+    private float jumpBuffer = .15f;
+    private float jumpBufferTimer = 0;
+    private float jumpVFXCD = .1f;
+    private float jumpVFXCDTimer;
 
     //Double Jump
     [SerializeField] private bool canDoubleJump;
@@ -104,6 +106,7 @@ public class Base_PlayerMovement : MonoBehaviour
         playingLandFX = false;
         originalGravity = rb.gravityScale; //For Dash and Float
         timeSinceLeftGround = 0;
+        jumpVFXCDTimer = 0;
         updatePlatform = true;
     }
 
@@ -112,6 +115,8 @@ public class Base_PlayerMovement : MonoBehaviour
         if (!combat.isAlive) return;
 
         CheckCoyoteTime();
+        jumpBufferTimer -= Time.deltaTime;
+        jumpVFXCDTimer -= Time.deltaTime;
 
         VelocityCheck(); //Checks for grounded, falling, jumping, landing
 
@@ -128,43 +133,45 @@ public class Base_PlayerMovement : MonoBehaviour
         Flip();
         
         //Variable jump heights
-        if(Input.GetButtonDown("Jump") && !jumped)
-        //if(jumpBufferCounter > 0f)//
+        if(Input.GetButtonDown("Jump"))// && !jumped)
         {
+            jumpBufferTimer = jumpBuffer;
+        }
+
+        //if(Input.GetButtonDown("Jump"))
+        if(jumpBufferTimer > 0 && !jumped)
+        {
+            if(isJumping) return; //Velocity check
             if(IsGrounded() || coyoteAllowed)
             {
-                InstantiateManager.Instance.VFX.JumpFX(vfxOffset);
                 jumped = true;
+                //coyoteAllowed = false;
+                PlayJumpVFX();
                 rb.velocity = new Vector2(rb.velocity.x, jumpHeight);
                 canDoubleJump = true;
-                //jumpBufferCounter = 0;
+                //coyoteAllowed = false;
             }
         }
 
         //Double Jump
-        if (canDoubleJump && !doubleJumped)
+        if (canDoubleJump && !doubleJumped && !coyoteAllowed)
         {
             if (Input.GetButtonDown("Jump"))
             {
+                jumpBufferTimer = 0;
                 rb.velocity = new Vector2(rb.velocity.x, jumpHeight);// *.9f); //reduced height on second jump
                 doubleJumped = true;
-                InstantiateManager.Instance.VFX.JumpFX(vfxOffset);
+                canDoubleJump = false;
+                PlayJumpVFX();
             }
         }
 
         //Variable Jump
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
         {
+            jumpBufferTimer = 0;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
-
-        //Jump Buffer
-        /*if (Input.GetButtonDown("Jump"))
-        {
-            jumpBufferCounter = jumpBufferTime;
-        }
-        else jumpBufferCounter -= Time.deltaTime;*/
-
 
         //Crouch - to fall through platforms, a short toggle to allow player to fall through completely
         if (IsGrounded())
@@ -176,6 +183,7 @@ public class Base_PlayerMovement : MonoBehaviour
                 if(currentOneWayPlatform != null)
                     StartCoroutine(DisableCollision());
             }
+            canDoubleJump = false;
             doubleJumped = false;
             if (updatePlatform) CheckPlatform();
             CheckRunVFX();
@@ -185,7 +193,7 @@ public class Base_PlayerMovement : MonoBehaviour
             //Not grounded, allow CheckPlatform() to get platform ID once
             runTimer = 0;
             updatePlatform = true;
-            if (jumped) canDoubleJump = true;
+            canDoubleJump = true;
         }
     }
 
@@ -216,6 +224,12 @@ public class Base_PlayerMovement : MonoBehaviour
         //VelocityCheck();
     }
 
+    void PlayJumpVFX()
+    {
+        if (jumpVFXCDTimer <= 0) InstantiateManager.Instance.VFX.JumpFX(vfxOffset);
+        jumpVFXCDTimer = jumpVFXCD;
+    }
+
     void CheckCoyoteTime()
     {
         if (IsGrounded())
@@ -229,7 +243,12 @@ public class Base_PlayerMovement : MonoBehaviour
         {
             coyoteAllowed = true;
         }
-        else coyoteAllowed = false;
+        else
+        {
+            coyoteAllowed = false;
+            jumped = true;
+        } 
+ 
     }
 
     #region Drop-through Platform
@@ -329,7 +348,7 @@ public class Base_PlayerMovement : MonoBehaviour
         //This needs a cooldown, or it instantiates multiple times
         playingLandFX = true;
         yield return new WaitForSeconds(.05f); //short delay to prevent offset being pushed through ground on land
-        InstantiateManager.Instance.VFX.JumpFX(vfxOffset); //Reusing Land/Jump
+        PlayJumpVFX(); //Reusing Land/Jump
         yield return new WaitForSeconds(.3f);
         playingLandFX = false;
     }
