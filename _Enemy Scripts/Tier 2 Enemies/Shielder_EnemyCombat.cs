@@ -48,6 +48,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
 
     public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
+        if (!isAlive || isSpawning) return;
         if (movement.isFacingRight == playerToRight)
         {
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);

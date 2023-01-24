@@ -50,7 +50,7 @@ public class Base_EnemyController : MonoBehaviour
             return;
         }
 
-        if (!raycast.isGrounded) return;
+        if (!raycast.isGrounded || combat.isSpawning) return;
 
         MoveCheck();
         LedgeWallCheck();

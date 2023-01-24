@@ -14,6 +14,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] public Transform hitEffectsOffset;
+    [SerializeField] protected Transform bottomOffset;
     //public Collider collider;
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
@@ -68,6 +69,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("--- Status ---")]
     //Bools
     [SerializeField] public bool isAlive;
+    [SerializeField] public bool isSpawning;
     public bool isStunned;
     public bool isKnockedback;
     public bool isAttacking;
@@ -111,6 +113,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         fullAttackAnimTime = attackAnimTotalFrames / sampleRate;
         attackDelayTime = attackAnimDelayFrames / sampleRate;
+
     }
 
     protected virtual void Start()
@@ -120,6 +123,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             maxHP *= 100;
             currentHP = maxHP;
         }
+        
 
         isAttacking = false;
         //Must be in Start(), because of player scene loading.
@@ -127,15 +131,38 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
     }
 
+    protected virtual void OnEnable()
+    {
+        //Manual set, duration of SpawnIndicator SpawnIn
+        //Toggle enemy before spawning in
+        StartCoroutine(SpawnCO(.75f));
+    }
+
     // Update is called once per frame
     protected virtual void Update()
     {
-        if (!isAlive) return; //Stops all updates if dead
+        if (!isAlive || isSpawning) return; //Stops all updates if dead
         timeSinceAttack += Time.deltaTime;
         if (isStunned) return;
 
         AttackMoveCheck();
-        //if (facePlayerOverride) FacePlayer(); //TODO: delete
+    }
+
+    protected virtual IEnumerator SpawnCO(float delay)
+    {
+        isSpawning = true; //This prevents the enemy from attacking and taking damage
+        healthBar.gameObject.SetActive(false);
+        if(bottomOffset != null)
+            InstantiateManager.Instance.Indicator.ChargeUp(bottomOffset.position, transform, 1);
+        //Toggle SR off
+        sr.enabled = false;
+        yield return new WaitForSeconds(0.1667f); //TODO: appear delay
+        sr.enabled = true;
+        HitFlash(delay);
+        healthBar.gameObject.SetActive(true);
+        //Toggle SR on
+        yield return new WaitForSeconds(0.583f);
+        isSpawning = false;
     }
 
     protected virtual void AttackMoveCheck()
@@ -150,7 +177,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void Attack()
     {
-        if (!isAlive || isAttacking) return;
+        if (!isAlive || isAttacking || isSpawning) return;
         if (timeSinceAttack > attackSpeed) //TODO: repeat for AttackClose/Far
         {
             timeSinceAttack = 0;
@@ -163,7 +190,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void AttackClose()
     {
-        if (!isAlive || isAttacking) return;
+        if (!isAlive || isAttacking || isSpawning) return;
         //If no alternate behavior added, use default Attack()
         if (AttackCloseBehavior == null) Attack();
 
@@ -176,7 +203,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void AttackFar()
     {
-        if (!isAlive || isAttacking) return;
+        if (!isAlive || isAttacking || isSpawning) return;
         if (AttackFarBehavior == null) return;
 
         if (timeSinceAttack > attackSpeed)
@@ -247,7 +274,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void GetStunned(float stunDuration = .5f)
     {
-        if (!isAlive) return;
+        if (!isAlive || isSpawning) return;
 
         //TODO: 
         //StopAllCoroutines(); //This could allow stun locks, depending on how often player can apply stun
@@ -311,7 +338,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
-        if (!isAlive) return;
+        if (!isAlive || isSpawning) return;
 
         HitFlash(); //Set material to white, short delay before resetting
 
@@ -336,10 +363,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
     }
 
-    void HitFlash()
+    void HitFlash(float resetDelay = .1f)
     {
         sr.material = mWhiteFlash;
-        Invoke("ResetMaterial", .1f);
+        Invoke("ResetMaterial", resetDelay);
     }
 
     void ResetMaterial()
