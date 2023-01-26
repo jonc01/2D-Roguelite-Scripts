@@ -38,8 +38,7 @@ public class EnemyStageManager : MonoBehaviour
         {
             waveThreshold = new int[1];
             waveThreshold[0] = enemyCount;
-        } 
-        SpawnEnemies();
+        }
     }
 
     public void EnemySetup()
@@ -63,6 +62,7 @@ public class EnemyStageManager : MonoBehaviour
         }
     }
 
+#region Spawning
     public void SpawnEnemies()
     {
         SpawnWave(currentWave);
@@ -101,6 +101,7 @@ public class EnemyStageManager : MonoBehaviour
                 SpawnWave();
         }
     }
+#endregion
 
     public void UpdateEnemyCount()
     {

@@ -27,6 +27,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public float attackAnimDelayFrames = .1f;
     public float attackAnimTotalFrames = 1f;
     public float sampleRate = 12f;
+    [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
     [Header("*Calculated at Start()* Animation Results")]
     [SerializeField] float fullAttackAnimTime;
     [SerializeField] float attackDelayTime;
@@ -153,7 +154,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isSpawning = true; //This prevents the enemy from attacking and taking damage
         healthBar.gameObject.SetActive(false);
         if(bottomOffset != null)
-            InstantiateManager.Instance.Indicator.ChargeUp(bottomOffset.position, transform, 1);
+            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 1, spawnFXScale);
         //Toggle SR off
         sr.enabled = false;
         yield return new WaitForSeconds(0.1667f); //TODO: appear delay

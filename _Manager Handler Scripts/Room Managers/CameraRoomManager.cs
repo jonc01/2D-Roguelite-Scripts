@@ -34,7 +34,7 @@ public class CameraRoomManager : MonoBehaviour
         {
             RelocateCamera();
             playerIsHere = true; //TODO: may have a use, currently debugging
-            doorManager.UpdateDoorState(.05f);
+            doorManager.UpdateDoorState(.05f); //Open/Close doors if room has been cleared
         }
     }
 

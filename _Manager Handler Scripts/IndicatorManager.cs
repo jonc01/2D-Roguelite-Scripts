@@ -1,24 +1,22 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class IndicatorManager : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] GameObject[] IndicatorPrefab;
-    [SerializeField] private float[] indicatorAnimTime;
+    [SerializeField] PooledObjHandler[] Prefabs;
+    //[SerializeField] private float[] indicatorAnimTime;
     //defaults: .5167f, .5f
 
-    public void ChargeUp(Vector3 position, Transform parent, int index = 0)
+    public void PlayIndicator(Vector3 position, int index = 0, float scale = 2.5f)
     {
-        if (IndicatorPrefab == null) return;
-        GameObject prefab = Instantiate(IndicatorPrefab[index], position, Quaternion.identity, parent);
-        StartCoroutine(DeleteObject(prefab, index));
+        if (Prefabs.Length == 0) return;
+        Prefabs[index].PlayAttachedAnim(position, scale);
     }
 
-    IEnumerator DeleteObject(GameObject prefab, int index = 0)
+    public void PlayIndicator(Vector3 position, int index = 0)
     {
-        yield return new WaitForSeconds(indicatorAnimTime[index]);
-        Destroy(prefab);
+        if (Prefabs.Length == 0) return;
+        Prefabs[index].PlayAttachedAnim(position, 1);
     }
 }

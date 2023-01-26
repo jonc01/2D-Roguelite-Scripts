@@ -10,6 +10,7 @@ public class RoomClear : MonoBehaviour
 
     [Header("References")]
     public DoorManager DoorManager;
+    [SerializeField] public EnemyStageManager stageManager;
 
     void Start()
     {
@@ -41,5 +42,17 @@ public class RoomClear : MonoBehaviour
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;
+    }
+
+    public void CheckSpawn()
+    {
+        //Delay added to stageManager reference get, Start() is called before Room instantiated
+        if (stageManager == null) stageManager = GetComponentInChildren<EnemyStageManager>();
+        if (!roomCleared) Invoke("CheckSpawnDelay", 1f);
+    }
+
+    private void CheckSpawnDelay()
+    {
+        stageManager.SpawnEnemies();
     }
 }

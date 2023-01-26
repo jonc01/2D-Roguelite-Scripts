@@ -36,6 +36,8 @@ public class DoorManager : MonoBehaviour
     {
         if(delay > 0) Invoke("DelayUpdateDoorState", delay);
         else ToggleAllDoors(roomClear.roomCleared);
+
+        roomClear.CheckSpawn();
     }
 
     private void DelayUpdateDoorState()
