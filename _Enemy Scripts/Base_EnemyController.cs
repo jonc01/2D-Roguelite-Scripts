@@ -32,7 +32,8 @@ public class Base_EnemyController : MonoBehaviour
     private void Start()
     {
         bool startDir = (Random.value > 0.5f);
-        movement.MoveRight(startDir);
+        // movement.MoveRight(startDir);
+        StartIdle(.3f, false);
     }
 
     private void Update()

@@ -79,10 +79,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
     protected Coroutine AttackingCO;
+    private bool initialEnable;
 
 
     protected virtual void Awake()
     {
+        initialEnable = true;
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
         animator = GetComponentInChildren<Base_EnemyAnimator>();
@@ -112,9 +114,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             healthbarTransform = healthBar.GetComponent<Transform>();
         }
 
+        //TODO: remove these, manual set
         fullAttackAnimTime = attackAnimTotalFrames / sampleRate;
         attackDelayTime = attackAnimDelayFrames / sampleRate;
-
     }
 
     protected virtual void Start()
@@ -136,8 +138,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
+        if(initialEnable) return;
         StartCoroutine(SpawnCO(.75f));
     }
+
+    protected virtual void OnDisable() { initialEnable = false; }
 
     // Update is called once per frame
     protected virtual void Update()
