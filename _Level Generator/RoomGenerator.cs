@@ -98,7 +98,10 @@ public class RoomGenerator : MonoBehaviour
         {
             int randTrial = Random.Range(0, totalTrials);
             int randRoomIndex = Random.Range(0, availableIndexes.Count);
-            CreateRoom(Trials[randTrial], availableIndexes[randRoomIndex]);
+            //Setting trialRoom variable in RoomClear
+            int roomIndex = availableIndexes[randRoomIndex];
+            Builder.GeneratedOrigins[roomIndex].GetComponent<RoomClear>().trialRoom = true;
+            CreateRoom(Trials[randTrial], roomIndex);
         }
 
         yield return new WaitForSecondsRealtime(.01f);
@@ -111,7 +114,6 @@ public class RoomGenerator : MonoBehaviour
             //yield return new WaitForSecondsRealtime(.01f); //0.001
 
             int rand = Random.Range(0, Rooms.Length);
-
             CreateRoom(Rooms[rand], availableIndexes[0]);
         }
         roomGenRunning = false;

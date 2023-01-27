@@ -22,15 +22,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
-
-    [Header("= Required Manual Animations Setup =")]
-    public float attackAnimDelayFrames = .1f;
-    public float attackAnimTotalFrames = 1f;
-    public float sampleRate = 12f;
     [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
-    [Header("*Calculated at Start()* Animation Results")]
-    [SerializeField] float fullAttackAnimTime;
-    [SerializeField] float attackDelayTime;
+    [Header("*Animation Times")]
+    [SerializeField] float fullAttackAnimTime; //1f, 1.416667f
+    [SerializeField] float attackDelayTime; //0.0834f, 0.834f
 
     [Space(10)]
 
@@ -114,20 +109,20 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             healthbarTransform = healthBar.GetComponent<Transform>();
         }
 
-        //TODO: remove these, manual set
-        fullAttackAnimTime = attackAnimTotalFrames / sampleRate;
-        attackDelayTime = attackAnimDelayFrames / sampleRate;
+        //Defaults
+        // fullAttackAnimTime = 1f;
+        // attackDelayTime = 0.0834f;
     }
 
     protected virtual void Start()
     {
+        //TEMP
         if (DEBUGMODE)
         {
             maxHP *= 100;
             currentHP = maxHP;
         }
         
-
         isAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.

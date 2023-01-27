@@ -5,8 +5,7 @@ using UnityEngine;
 public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
-    public bool neutralRoom = false; //If true, room stays cleared
-    //^ Use for Start room, Shops, etc
+    public bool trialRoom; //gets set at in RoomGenerator as Trial room is created
 
     [Header("References")]
     public DoorManager DoorManager;
@@ -38,7 +37,7 @@ public class RoomClear : MonoBehaviour
     IEnumerator DelayClear()
     {
         yield return new WaitForSeconds(1f);
-        DoorManager.ToggleAllDoors(true);
+        DoorManager.OpenAllDoors(true);
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;

@@ -12,11 +12,12 @@ public class EnemyStageManager : MonoBehaviour
     [SerializeField] private int totalEnemyCount; //used to store the original number
     private int nextWaveCount;
     [Header("Multiple Waves Setup")]
+    [SerializeField] public bool trialRoom = false;
     [SerializeField] bool multipleWaves = false;
     [SerializeField] int[] waveThreshold;
     [SerializeField] private int currentWave;
     
-    RoomClear roomManager;
+    public RoomClear roomManager;
 
     void Start()
     {
@@ -31,6 +32,8 @@ public class EnemyStageManager : MonoBehaviour
             temp.roomCleared = true;
             roomManager.Cleared();
         }
+
+        // if(trialRoom) roomManager.DoorManager.ToggleAllDoors(true);
 
         currentWave = 0;
 
@@ -65,6 +68,14 @@ public class EnemyStageManager : MonoBehaviour
 #region Spawning
     public void SpawnEnemies()
     {
+        if(trialRoom) return;
+        SpawnWave(currentWave);
+    }
+
+    public void StartTrial()
+    {
+        //Separate call for Trials
+        if(!trialRoom) return;
         SpawnWave(currentWave);
     }
 

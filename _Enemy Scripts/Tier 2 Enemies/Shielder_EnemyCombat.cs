@@ -11,13 +11,16 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     [SerializeField] float hitBoxHeight = .48f; //.48f
 
     [Header("= Die() Delay =")]
-    [SerializeField] float deathDelayFrames = 8;
-    float deathDelayTime;
+    [SerializeField] float deathDelayTime;
 
     protected override void Start()
     {
         base.Start();
-        deathDelayTime = deathDelayFrames / sampleRate;
+
+        //Defaults
+        // fullAttackAnimTime = 1.4167f;
+        // attackDelayTime = 0.834f;
+        //deathDelayTime = 0.667f;
     }
 
     public virtual void CheckCounterHit()
