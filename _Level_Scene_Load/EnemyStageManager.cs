@@ -6,10 +6,10 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    //public bool neutralRoom = false;
     [SerializeField] Transform enemyParentObj;
     [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] private int totalEnemyCount; //used to store the original number
+    public RoomClear roomManager;
     private int nextWaveCount;
     [Header("Multiple Waves Setup")]
     [SerializeField] public bool trialRoom = false;
@@ -17,7 +17,8 @@ public class EnemyStageManager : MonoBehaviour
     [SerializeField] int[] waveThreshold;
     [SerializeField] private int currentWave;
     
-    public RoomClear roomManager;
+    [Header("Wave Debugging")]
+    [SerializeField] private int currWaveEnemyCount;
 
     void Start()
     {
@@ -33,11 +34,13 @@ public class EnemyStageManager : MonoBehaviour
             roomManager.Cleared();
         }
 
-        // if(trialRoom) roomManager.DoorManager.ToggleAllDoors(true);
-
         currentWave = 0;
 
-        if(!multipleWaves)
+        if(multipleWaves)
+        {
+            if(!trialRoom) SpawnNextWave();
+        }
+        else
         {
             waveThreshold = new int[1];
             waveThreshold[0] = enemyCount;
@@ -68,56 +71,76 @@ public class EnemyStageManager : MonoBehaviour
 #region Spawning
     public void SpawnEnemies()
     {
+        //Called by default, when Player enters room
         if(trialRoom) return;
-        SpawnWave(currentWave);
+        SpawnCurrentWave();
     }
 
     public void StartTrial()
     {
-        //Separate call for Trials
+        //Separate call for Trials, manually called with interact
         if(!trialRoom) return;
-        SpawnWave(currentWave);
+        SpawnCurrentWave();
     }
 
-    private void SpawnWave(int wave)
+    private void SpawnCurrentWave()
     {
+        currWaveEnemyCount = waveThreshold[currentWave];
+        int numSpawns;
         //Spawn next # of enemies
-        //TODO: this doesn't properly spawn all enemies in the second wave
-        //needs fixing if using more than 2 waves (waveThreshold[1] not 0)
-        for(int i = 0; i < waveThreshold[currentWave]; i++)
-            enemyParentObj.GetChild(i).gameObject.SetActive(true);
+        //Compare wave index to total number of Waves
+        if((currentWave - 1) < waveThreshold.Length)
+        {
+            numSpawns = waveThreshold[currentWave];
+        }
+        else numSpawns = enemyCount + 1;
+
+        for(int i = 0; i < numSpawns; i++)
+                enemyParentObj.GetChild(i).gameObject.SetActive(true);
     }
 
     private void SpawnWave()
     {
-        //Spawn all remaining enemies
+        //Spawn all or remaining enemies
         for(int i = 0; i < enemyCount + 1; i++)
             enemyParentObj.GetChild(i).gameObject.SetActive(true);
     }
 
-    void UpdateWaveCount()
+    void CheckWaveCount()
     {
         //Check if all of the currently toggled enemies are dead
-        if(!multipleWaves || (currentWave + 1 > waveThreshold.Length)) return;
+        if(!multipleWaves || enemyCount <= 0) return;
 
-        if(enemyCount <= (totalEnemyCount - waveThreshold[currentWave]))
+        currWaveEnemyCount--;
+        if(currWaveEnemyCount <= 0)
         {
-            //Spawn next wave based on number, spawn next number of enemies
-            totalEnemyCount -= waveThreshold[currentWave];
-            currentWave++;
-            //nextWaveCount = enemyCount - waveThreshold[currentWave];
-            if(currentWave + 1 <= waveThreshold.Length) //Check that this isn't the last wave
-                SpawnWave(currentWave);
-            else
+            if((currentWave + 1) > waveThreshold.Length)
                 SpawnWave();
+            else
+            {
+                currentWave++;
+                SpawnNextWave();
+            }
         }
+    }
+
+    private void SpawnNextWave()
+    {
+        if(enemyCount <= 0) return;
+        //Check if index is in bounds, if not, spawn remaining enemies
+        if((currentWave + 1) > waveThreshold.Length)
+        {
+            //Make sure everything else is spawned here
+            SpawnWave();
+        }
+        else Invoke("SpawnCurrentWave", .5f);
     }
 #endregion
 
     public void UpdateEnemyCount()
     {
         if (enemyCount > 0) enemyCount--;
-        UpdateWaveCount();
+        CheckWaveCount();
         if (enemyCount <= 0) roomManager.Cleared();
     }
 }

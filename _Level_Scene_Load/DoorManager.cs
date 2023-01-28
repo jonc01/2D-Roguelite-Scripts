@@ -34,7 +34,7 @@ public class DoorManager : MonoBehaviour
 
     public void UpdateDoorState(float delay = 0)
     {
-        //GetComponent needed here as Start would sometimes be too slow
+        //GetComponent needed here as Start would sometimes miss the reference get
         if(roomClear == null) roomClear = GetComponent<RoomClear>();
         if(roomClear.trialRoom)
         {
