@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class RoomDoorGenerator : MonoBehaviour
 {
+    //! - Not in-use
+    //If using, call after Rooms are generated
+    //
+
     [Header("References")]
     private LevelBuilder Builder;
     [SerializeField] GameObject BossRoomOrigin;
@@ -16,14 +20,6 @@ public class RoomDoorGenerator : MonoBehaviour
         borderingDoors = new List<Transform>();
         if (Builder == null) Builder = GetComponentInParent<LevelBuilder>();
     }
-
-    // void Update()
-    // {
-    //     if(Input.GetKeyDown(KeyCode.O))
-    //     {
-    //         AddBorderingDoors();
-    //     }
-    // }
 
     public void AddBorderingDoors()
     {

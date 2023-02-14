@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,13 +10,16 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     [SerializeField] float hitBoxHeight = .48f; //.48f
 
     [Header("= Die() Delay =")]
-    [SerializeField] float deathDelayFrames = 8;
-    float deathDelayTime;
+    [SerializeField] float deathDelayTime;
 
     protected override void Start()
     {
         base.Start();
-        deathDelayTime = deathDelayFrames / sampleRate;
+
+        //Defaults
+        // fullAttackAnimTime = 1.4167f;
+        // attackDelayTime = 0.834f;
+        //deathDelayTime = 0.667f;
     }
 
     public virtual void CheckCounterHit()
@@ -48,6 +50,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
 
     public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
+        if (!isAlive || isSpawning) return;
         if (movement.isFacingRight == playerToRight)
         {
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
@@ -88,8 +91,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         Invoke("DeleteObj", 1f); //Wait for fade out to finish
     }
 
-    private void DeleteObj()
-    {
-        Destroy(gameObject);
-    }
+    // private void DeleteObj()
+    // {
+    //     Destroy(gameObject);
+    // }
 }

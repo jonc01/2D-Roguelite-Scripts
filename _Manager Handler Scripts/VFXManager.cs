@@ -49,9 +49,9 @@ public class VFXManager : MonoBehaviour
         else DashVFX.ShowEffect(spawnTransform.position, 180);
     }
 
-    IEnumerator DeleteObject(GameObject g, float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        Destroy(g);
-    }
+    // IEnumerator DeleteObject(GameObject g, float duration)
+    // {
+    //     yield return new WaitForSeconds(duration);
+    //     Destroy(g);
+    // }
 }

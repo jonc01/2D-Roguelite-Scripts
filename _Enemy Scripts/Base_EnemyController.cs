@@ -32,10 +32,11 @@ public class Base_EnemyController : MonoBehaviour
     private void Start()
     {
         bool startDir = (Random.value > 0.5f);
-        movement.MoveRight(startDir);
+        // movement.MoveRight(startDir);
+        StartIdle(.3f, false);
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (!combat.isAlive)
         {
@@ -50,7 +51,7 @@ public class Base_EnemyController : MonoBehaviour
             return;
         }
 
-        if (!raycast.isGrounded) return;
+        if (!raycast.isGrounded || combat.isSpawning) return;
 
         MoveCheck();
         LedgeWallCheck();
@@ -60,7 +61,7 @@ public class Base_EnemyController : MonoBehaviour
         PlayerToRightCheck();
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         PlatformCheck();
     }
@@ -84,7 +85,7 @@ public class Base_EnemyController : MonoBehaviour
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
     }
 
-    bool PlatformCheck()
+    protected virtual bool PlatformCheck()
     {
         //Updates current player platform, compares to enemy's platform
         currPlayerPlatform = GameManager.Instance.PlayerCurrPlatform;

@@ -33,7 +33,6 @@ public class RoomGenerator : MonoBehaviour
 
     public bool roomGenRunning;
     public bool roomGenDone;
-    private RoomDoorGenerator roomDoorGen;
 
     private void Start()
     {
@@ -42,7 +41,6 @@ public class RoomGenerator : MonoBehaviour
 
         availableIndexes = new List<int>();
         //shopAdded = false; //Example
-        roomDoorGen = GetComponentInChildren<RoomDoorGenerator>();
     }
 
     void Update()
@@ -82,11 +80,11 @@ public class RoomGenerator : MonoBehaviour
         
 
         //Create Shops
-        int totalShops = Random.Range(numShopsLower, numShopsUpper + 1);
+        int totalShops = Random.Range(numShopsLower, numShopsUpper + 1); //int Random.Range is not max inclusive
         for (int i = 0; i < totalShops; i++)
         {
             int randShop = Random.Range(0, totalShops); //Pick random shop from array of variations
-            int randRoomIndex = Random.Range(0, availableIndexes.Count);
+            int randRoomIndex = Random.Range(0, availableIndexes.Count); //int no max inclusive, so this works for index values
             CreateRoom(Shops[randShop], availableIndexes[randRoomIndex]);
         }
 
@@ -96,9 +94,12 @@ public class RoomGenerator : MonoBehaviour
         int totalTrials = Random.Range(numTrialsLower, numTrialsUpper + 1);
         for (int i = 0; i < totalTrials; i++) //Reserve indexes for Trials
         {
-            int randTrial = Random.Range(0, totalTrials);
+            int randTrial = Random.Range(0, Trials.Length);
             int randRoomIndex = Random.Range(0, availableIndexes.Count);
-            CreateRoom(Trials[randTrial], availableIndexes[randRoomIndex]);
+            //Setting trialRoom variable in RoomClear
+            int roomIndex = availableIndexes[randRoomIndex];
+            Builder.GeneratedOrigins[roomIndex].GetComponent<RoomClear>().trialRoom = true;
+            CreateRoom(Trials[randTrial], roomIndex);
         }
 
         yield return new WaitForSecondsRealtime(.01f);
@@ -111,13 +112,10 @@ public class RoomGenerator : MonoBehaviour
             //yield return new WaitForSecondsRealtime(.01f); //0.001
 
             int rand = Random.Range(0, Rooms.Length);
-
             CreateRoom(Rooms[rand], availableIndexes[0]);
         }
         roomGenRunning = false;
         roomGenDone = true;
-
-        roomDoorGen.AddBorderingDoors();
 
         Debug.Log("Rooms Generated");
     }

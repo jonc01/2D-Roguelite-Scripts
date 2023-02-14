@@ -12,7 +12,7 @@ public class DoorManager : MonoBehaviour
     void Start()
     {
         connectedDoors = new List<DoorController>();
-        roomClear = GetComponent<RoomClear>();
+        roomClear = GetComponent<RoomClear>(); //TODO: check if needed here
     }
 
     public void AddToList(DoorController door)
@@ -21,7 +21,7 @@ public class DoorManager : MonoBehaviour
     }
 
     //Called from RoomManager
-    public void ToggleAllDoors(bool toggle = true)
+    public void OpenAllDoors(bool toggle = true)
     {
         //StageClear calls this when all enemies are dead
         //Opens all door child objects
@@ -34,12 +34,22 @@ public class DoorManager : MonoBehaviour
 
     public void UpdateDoorState(float delay = 0)
     {
+        //GetComponent needed here as Start would sometimes miss the reference get
+        if(roomClear == null) roomClear = GetComponent<RoomClear>();
+        if(roomClear.trialRoom)
+        {
+            OpenAllDoors(true);
+            return;
+        }
+
         if(delay > 0) Invoke("DelayUpdateDoorState", delay);
-        else ToggleAllDoors(roomClear.roomCleared);
+        else OpenAllDoors(roomClear.roomCleared);
+
+        roomClear.CheckSpawn();
     }
 
     private void DelayUpdateDoorState()
     {
-        ToggleAllDoors(roomClear.roomCleared);
+        OpenAllDoors(roomClear.roomCleared);
     }
 }
