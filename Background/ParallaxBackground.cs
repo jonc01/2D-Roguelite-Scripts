@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ParallaxBackground : MonoBehaviour
 {
     [SerializeField] private float parallaxEffectMultiplier;
-    private Transform cameraTransform;
+    [SerializeField] private float parallaxEffectMultiplierY;
+    [SerializeField] private Transform cameraTransform;
     private Vector3 lastCameraPosition;
-    private float textureUnitSizeX;
+    [SerializeField] private float textureUnitSizeX;
+    [SerializeField] private float textureUnitSizeY;
 
     private void Start()
     {
@@ -17,19 +18,22 @@ public class ParallaxBackground : MonoBehaviour
         Sprite sprite = GetComponent<SpriteRenderer>().sprite;
         Texture2D texture = sprite.texture;
         textureUnitSizeX = texture.width / sprite.pixelsPerUnit;
+        textureUnitSizeY = .9f;
     }
 
     private void Update() //FixedUpdate prevents jittery effect in editor, but Update fixes in build
     {
         Vector3 deltaMovement = cameraTransform.position - lastCameraPosition;
-        transform.position += deltaMovement * parallaxEffectMultiplier;
+        // transform.position += deltaMovement * parallaxEffectMultiplier;
+        transform.position += new Vector3(deltaMovement.x * parallaxEffectMultiplier, deltaMovement.y *parallaxEffectMultiplierY, 0);
+        // transform.position.y += deltaMovement * parallaxEffectMultiplierY;
         lastCameraPosition = cameraTransform.position;
 
         if (Mathf.Abs(cameraTransform.position.x - transform.position.x) >= textureUnitSizeX)
         {
             float offsetPositionX = (cameraTransform.position.x - transform.position.x) % textureUnitSizeX;
             transform.position = new Vector3(cameraTransform.position.x + offsetPositionX, transform.position.y);
-            float offsetPositionY = (cameraTransform.position.y - transform.position.y) % textureUnitSizeX;
+            //float offsetPositionY = (cameraTransform.position.y - transform.position.y) % textureUnitSizeY;
         }
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -92,8 +91,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         Invoke("DeleteObj", 1f); //Wait for fade out to finish
     }
 
-    private void DeleteObj()
-    {
-        Destroy(gameObject);
-    }
+    // private void DeleteObj()
+    // {
+    //     Destroy(gameObject);
+    // }
 }

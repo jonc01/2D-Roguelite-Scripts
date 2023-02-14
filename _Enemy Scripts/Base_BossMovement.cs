@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Base_EnemyMovement : MonoBehaviour
+public class Base_BossMovement : MonoBehaviour
 {
     [Header("References/Setup")]
     public Base_Character character;
     [SerializeField] public Rigidbody2D rb;
-    public Base_EnemyCombat combat;
+    public Base_BossCombat combat;
 
     public float moveSpeed;
 
@@ -17,13 +17,7 @@ public class Base_EnemyMovement : MonoBehaviour
     [SerializeField] bool canFlip;
     public bool isFacingRight = true;
     bool isLunging;
-
-    //TESTING //TODO: 
-    bool _isKnockedback = false;
-    //
-
     Coroutine LungingCO;
-
 
     private void Awake()
     {
@@ -36,14 +30,14 @@ public class Base_EnemyMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        if(combat == null) combat = GetComponent<Base_EnemyCombat>();
+        if(combat == null) combat = GetComponent<Base_BossCombat>();
         canFlip = true;
     }
 
     void Update()
     {
         if (!combat.isAlive) return;
-        if (combat.isKnockedback || isLunging || _isKnockedback) return;
+        if (isLunging) return;
         Flip();
     }
 
@@ -51,9 +45,7 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         if (!combat.isAlive || combat.isStunned || !canMove)
         {
-            if(!combat.isKnockedback || isLunging || _isKnockedback)
-                DisableMove();
-
+            if(isLunging) DisableMove();
             return;
         }
     }
@@ -75,7 +67,6 @@ public class Base_EnemyMovement : MonoBehaviour
 
         if (strength <= 0) return;
 
-        _isKnockedback = true;
         ToggleFlip(false);
 
         float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
@@ -93,7 +84,6 @@ public class Base_EnemyMovement : MonoBehaviour
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         canMove = true;
         ToggleFlip(true);
-        _isKnockedback = false;
     }
 
     void KnockbackNullCheckCO()
@@ -102,7 +92,6 @@ public class Base_EnemyMovement : MonoBehaviour
         StopCoroutine(LungingCO);
         canMove = true;
         ToggleFlip(true);
-        _isKnockedback = false;
     }
 
     #region Flip
@@ -122,10 +111,7 @@ public class Base_EnemyMovement : MonoBehaviour
 
     void HealthBarFlip()
     {
-        if(combat.healthbarTransform == null) return;
-        //Flipping healthbar so it remains in correct orientation as character sprite flips
-        if (isFacingRight) combat.healthbarTransform.localRotation = Quaternion.Euler(0, 0, 0);
-        else combat.healthbarTransform.localRotation = Quaternion.Euler(0, 180, 0);
+        //Boss has static healthbar
     }
 
     public void ManualFlip(bool faceRight)

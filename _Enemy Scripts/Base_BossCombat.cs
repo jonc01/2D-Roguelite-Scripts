@@ -2,39 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Base_EnemyCombat : MonoBehaviour, IDamageable
+public class Base_BossCombat : MonoBehaviour, IDamageable
 {
+
     [Header("Attack Behavior Setup")]
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
     [SerializeField] public Base_CombatBehavior AttackFarBehavior;
     public bool canAttackFar;
+    public bool canAttack;
 
     [Header("References/Setup")]
     public LayerMask playerLayer;
-    [SerializeField] protected Transform attackPoint;
+    [SerializeField] protected Transform[] attackPoint;
+    public float[] attackRangeX;
+    public float[] attackRangeY;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] public Transform hitEffectsOffset;
     [SerializeField] protected Transform bottomOffset;
-    //public Collider collider;
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
-    protected Base_EnemyController enemyController;
+    protected Base_BossController bossController;
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
-    [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
+    [SerializeField] protected float spawnFXScale = 2.5f; //2.5f default 
     [Header("*Animation Times")]
-    [SerializeField] float fullAttackAnimTime; //1f, 1.416667f
-    [SerializeField] float attackDelayTime; //0.0834f, 0.834f
+    [SerializeField] protected float[] fullAttackAnimTime; //1f, 1.416667f
+    [SerializeField] protected float[] attackDelayTime; //0.0834f, 0.834f
 
     [Space(10)]
 
     [Header("Start() Reference Initialization")]
-    public Base_EnemyMovement movement;
-    public Base_EnemyAnimator animator;
+    public Base_BossMovement movement;
+    public Base_BossAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
-    public Transform healthbarTransform;
     [SerializeField] protected EnemyStageManager enemyStageManager;
 
     [Space(10)]
@@ -48,17 +50,18 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] float maxHP;
     [SerializeField] float currentHP;
     [SerializeField] float defense = 0;
-    [SerializeField] protected int totalXPOrbs = 3;
+    [SerializeField] protected int totalXPOrbs = 20;
     
     [Header("--- Attack ---")]
-    [SerializeField] public float attackDamage;
-    [SerializeField] float attackSpeed;
-    [SerializeField] float attackEndDelay = 0;
-    [SerializeField] float startAttackDelay = 0;
-    public float attackRange;
+    [SerializeField] public float[] attackDamage;
+    [SerializeField] protected float attackSpeed;
+    [SerializeField] protected float attackEndDelay = 0;
+    [SerializeField] protected float startAttackDelay = 0;
+
     [SerializeField] public float knockbackStrength = 0; //4 is moderate
     [Space(10)]
-    float timeSinceAttack;
+    protected float timeSinceAttack;
+    [SerializeField] public int currAttackIndex;
     //float critChance;
     //float critMultiplier;
 
@@ -67,12 +70,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] public bool isAlive;
     [SerializeField] public bool isSpawning;
     public bool isStunned;
-    public bool isKnockedback;
     public bool isAttacking;
     public bool playerToRight;
-    public float kbResist = 0;
     Coroutine StunnedCO;
-    Coroutine KnockbackCO;
     protected Coroutine AttackingCO;
     private bool initialEnable;
 
@@ -82,31 +82,29 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         initialEnable = true;
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
-        animator = GetComponentInChildren<Base_EnemyAnimator>();
+        animator = GetComponentInChildren<Base_BossAnimator>();
         //collider = GetComponent<BoxCollider2D>();
         //playerLayer = GameObject.FindGameObjectWithTag("Player").GetComponent<LayerMask>();
-        if (movement == null) movement = GetComponent<Base_EnemyMovement>();
-        if (enemyController == null) enemyController = GetComponent<Base_EnemyController>();
+        if (movement == null) movement = GetComponent<Base_BossMovement>();
+        if (bossController == null) bossController = GetComponent<Base_BossController>();
         //Initiating base stats before modifiers
 
         if (character != null)
         {
             defense = character.Base_Defense;
-            attackDamage = character.Base_AttackDamage;
+            attackDamage[0] = character.Base_AttackDamage;
             attackSpeed = character.Base_AttackSpeed;
-            attackRange = character.Base_AttackRange;
+            // attackRange = character.Base_AttackRange;
             maxHP = character.Base_MaxHP;
         }
 
         currentHP = maxHP;
         isAlive = true;
         isStunned = false;
-        isKnockedback = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
             healthBar.SetHealth(maxHP);
-            healthbarTransform = healthBar.GetComponent<Transform>();
         }
 
         //Defaults
@@ -126,6 +124,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         #endif
 
         isAttacking = false;
+        canAttack = true;
+        currAttackIndex = 0; //TODO: randomize?
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -136,10 +136,15 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
         if(initialEnable) return;
-        StartCoroutine(SpawnCO(.75f));
+        float spawnDelay = .5f;
+        animator.PlayManualAnim(5, spawnDelay);
+        StartCoroutine(SpawnCO(spawnDelay));
     }
 
-    protected virtual void OnDisable() { initialEnable = false; }
+    protected virtual void OnDisable()
+    { 
+        initialEnable = false; 
+    }
 
     // Update is called once per frame
     protected virtual void Update()
@@ -147,6 +152,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (!isAlive || isSpawning) return; //Stops all updates if dead
         timeSinceAttack += Time.deltaTime;
         if (isStunned) return;
+        if (isAttacking) return;
 
         AttackMoveCheck();
     }
@@ -154,23 +160,25 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     protected virtual IEnumerator SpawnCO(float delay)
     {
         isSpawning = true; //This prevents the enemy from attacking and taking damage
-        healthBar.gameObject.SetActive(false);
-        if(bottomOffset != null)
-            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 1, spawnFXScale);
+        // healthBar.gameObject.SetActive(false);
+        // if(bottomOffset != null) //!~ no indicator
+        //     InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 1, spawnFXScale);
         //Toggle SR off
-        sr.enabled = false;
-        yield return new WaitForSeconds(0.1667f); //TODO: appear delay
-        sr.enabled = true;
-        HitFlash(delay);
+        // sr.enabled = false;
+        yield return new WaitForSeconds(delay);
+        animator.PlayManualAnim(4, 1f);
+        yield return new WaitForSeconds(1f); //Wake animation
+        // sr.enabled = true;
+        // HitFlash(delay);
         healthBar.gameObject.SetActive(true);
         //Toggle SR on
-        yield return new WaitForSeconds(0.583f);
+        yield return new WaitForSeconds(0.5f);
         isSpawning = false;
     }
 
     protected virtual void AttackMoveCheck()
     {
-        float delay = attackSpeed + fullAttackAnimTime;
+        float delay = attackSpeed + fullAttackAnimTime[currAttackIndex];
         if (timeSinceAttack <= delay) //air attacks not affected
         {
             movement.canMove = false;
@@ -178,76 +186,88 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         else movement.canMove = true;
     }
 
-    public virtual void Attack()
-    {
-        if (!isAlive || isAttacking || isSpawning) return;
-        if (timeSinceAttack > attackSpeed) //TODO: repeat for AttackClose/Far
-        {
-            timeSinceAttack = 0;
-            StopAttack();
-            AttackingCO = StartCoroutine(Attacking());
-        }
-    }
-
     #region Attack Behavior Overrides
 
-    public virtual void AttackClose()
-    {
-        if (!isAlive || isAttacking || isSpawning) return;
-        //If no alternate behavior added, use default Attack()
-        if (AttackCloseBehavior == null) Attack();
+    // public virtual void AttackClose()
+    // {
+    //     if (!isAlive || isAttacking || isSpawning) return;
+    //     //If no alternate behavior added, use default Attack()
+    //     if (AttackCloseBehavior == null) Attack();
 
-        if (timeSinceAttack > attackSpeed)
-        {
-            timeSinceAttack = 0;
-            AttackCloseBehavior.Attack();
-        }
+    //     if (timeSinceAttack > attackSpeed)
+    //     {
+    //         timeSinceAttack = 0;
+    //         AttackCloseBehavior.Attack();
+    //     }
+    // }
+
+    // public virtual void AttackFar()
+    // {
+    //     if (!isAlive || isAttacking || isSpawning) return;
+    //     if (AttackFarBehavior == null) return;
+
+    //     if (timeSinceAttack > attackSpeed)
+    //     {
+    //         timeSinceAttack = 0;
+    //         AttackFarBehavior.Attack();
+    //     }
+    // }
+
+    //TODO: New functions vvvvvvvvvvv
+    public virtual bool CanAttack(int attackIndex)
+    {
+        //TODO: either have an array bool[] canAttack;
+        //TODO: or add attacks into attack phases
+            // Example: phase[0] = {  }
+
+        if(attackIndex < attackPoint.Length) return canAttack;
+        else return false;
+        // if(AttackFarBehavior == null) return false;
+        // else return AttackFarBehavior.canAttack;
     }
 
-    public virtual void AttackFar()
+    public virtual void Attack(int attackIndex)
     {
-        if (!isAlive || isAttacking || isSpawning) return;
-        if (AttackFarBehavior == null) return;
-
-        if (timeSinceAttack > attackSpeed)
-        {
-            timeSinceAttack = 0;
-            AttackFarBehavior.Attack();
-        }
+        if (!isAlive || isAttacking || isSpawning || !canAttack) return;
+        if (timeSinceAttack <= attackSpeed) return;
+    
+        timeSinceAttack = 0;
+        //Default behavior, use an override script for multiple custom attacks
+        StartCoroutine(Attacking());
     }
-
-    public virtual bool CanAttackFar()
-    {
-        return AttackFarBehavior.canAttack;
-    }
+    //TODO: new functions ^^^^^^^^^^^
 
     #endregion
 
     protected virtual IEnumerator Attacking()
     {
+        //TODO: replace with individual attack behaviors
         //Allow flip for a little longer
         isAttacking = true;
         movement.canMove = false;
         movement.ToggleFlip(false);
         
-        animator.PlayAttackAnim(fullAttackAnimTime);
+        animator.PlayAttackAnim(fullAttackAnimTime[currAttackIndex]);
 
         yield return new WaitForSeconds(startAttackDelay);
         FacePlayer(); //Flip to faceplayer before attacking
         
-        yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
+        yield return new WaitForSeconds(attackDelayTime[currAttackIndex] - startAttackDelay);
         CheckHit();
-        yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
+        yield return new WaitForSeconds(fullAttackAnimTime[currAttackIndex] - attackDelayTime[currAttackIndex]);
         isAttacking = false;
         yield return new WaitForSeconds(attackEndDelay);
         movement.canMove = true;
         movement.ToggleFlip(true);
+        
+        currAttackIndex++;
+        if(currAttackIndex >= attackPoint.Length) currAttackIndex = 0;
     }
 
     protected virtual void FacePlayer()
     {
         //Player behind enemy
-        if (enemyController.raycast.playerDetectBack)
+        if (!bossController.playerDetect.playerDetectFront)
         {
             movement.ManualFlip(!movement.isFacingRight);
         }
@@ -255,13 +275,15 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void CheckHit()
     {
-        Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, playerLayer);
+        Vector3 hitboxSize = new Vector3 (attackRangeX[currAttackIndex], attackRangeY[currAttackIndex], 0);
+        Collider2D[] hitPlayers = Physics2D.OverlapBoxAll(attackPoint[currAttackIndex].position, hitboxSize, 0f, playerLayer);
+        
         foreach (Collider2D player in hitPlayers)
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage);
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
+                player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage[currAttackIndex]);
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight);
                 //knockback
                 //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
@@ -271,8 +293,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     private void OnDrawGizmos()
     {
         if (attackPoint == null) return;
-
-        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        
+        Gizmos.color = Color.red;
+        for(int i=0; i<attackPoint.Length; i++)
+        {
+            Gizmos.DrawWireCube(attackPoint[i].position, new Vector3(attackRangeX[i], attackRangeY[i], 0));
+        }
     }
 
     public virtual void GetStunned(float stunDuration = .5f)
@@ -292,43 +318,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .1f)
-    {
-        KnockbackNullCheckCO();
-
-        if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
-
-        isKnockedback = true;
-        movement.ToggleFlip(false);
-
-        float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
-
-        KnockbackCO = StartCoroutine(KnockbackReset(delay));
-    }
-
-    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
-    {
-        yield return new WaitForSeconds(delay);
-        movement.rb.velocity = Vector3.zero;
-        movement.canMove = false;
-        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
-        movement.canMove = true;
-        movement.ToggleFlip(true);
-        isKnockedback = false;
-    }
-
-    void KnockbackNullCheckCO()
-    {
-        if (KnockbackCO == null) return;
-        StopCoroutine(KnockbackCO);
-        movement.canMove = true;
-        movement.ToggleFlip(true);
-        isKnockedback = false;
-    }
-
     void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
@@ -339,6 +328,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         animator.StopAttackAnimCO();
     }
 
+#region TakeDamage, HitFlash, Die
     public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
         if (!isAlive || isSpawning) return;
@@ -353,8 +343,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
-
-        if (knockback) GetKnockback(playerToRight, strength);
 
         //Display Damage number
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
@@ -384,7 +372,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         ScreenShakeListener.Instance.Shake(2);
         movement.rb.simulated = false;
-        GetComponent<CircleCollider2D>().enabled = false;
+        GetComponent<BoxCollider2D>().enabled = false;
 
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
@@ -394,12 +382,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject
-        sr.enabled = false;
-        Invoke("DeleteObj", .5f); //Wait for fade out to finish
+        //sr.enabled = false;
+        //Invoke("DeleteObj", .5f); //Wait for fade out to finish
     }
 
     protected virtual void DeleteObj()
     {
+        //TODO: bosses won't be deleted, just switch to static death anim
         Destroy(gameObject);
     }
+#endregion
 }

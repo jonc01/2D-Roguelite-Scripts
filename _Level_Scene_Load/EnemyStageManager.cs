@@ -38,6 +38,7 @@ public class EnemyStageManager : MonoBehaviour
 
         if(multipleWaves)
         {
+            //If not trial room, start first wave
             if(!trialRoom) SpawnNextWave();
         }
         else

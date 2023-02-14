@@ -36,7 +36,7 @@ public class Base_EnemyController : MonoBehaviour
         StartIdle(.3f, false);
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (!combat.isAlive)
         {
@@ -61,7 +61,7 @@ public class Base_EnemyController : MonoBehaviour
         PlayerToRightCheck();
     }
 
-    private void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         PlatformCheck();
     }
@@ -85,7 +85,7 @@ public class Base_EnemyController : MonoBehaviour
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
     }
 
-    bool PlatformCheck()
+    protected virtual bool PlatformCheck()
     {
         //Updates current player platform, compares to enemy's platform
         currPlayerPlatform = GameManager.Instance.PlayerCurrPlatform;
