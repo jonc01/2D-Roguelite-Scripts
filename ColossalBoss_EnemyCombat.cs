@@ -5,9 +5,15 @@ using UnityEngine;
 public class ColossalBoss_EnemyCombat : Base_BossCombat
 {
     //float attackEndDelay = .5f;
-    [Header("= Colossal Boss = : Melee/Explosion")]
-    [SerializeField] GameObject MeleeExplosionPrefab;
+    [Header("= Colossal Boss = : (1) RangeAttack")]
+    [SerializeField] GameObject RangeAttackExplosionPrefab;
     [SerializeField] Transform bossGroundOffset;
+
+    [Header("= Colossal Boss = : (2) Melee/Explosion")]
+    [SerializeField] GameObject MeleeExplosionPrefab;
+    [Header("= Colossal Boss = : (2) Melee/Explosion")]
+    [SerializeField] GameObject SuperAttackExplosionPrefab;
+
 
     protected override void Awake()
     {
@@ -39,7 +45,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         timeSinceAttack = 0;
         isAttacking = true;
         
-        attackIndex = 1; //TODO: TESTING, delete when done to cycle attacks
+        //TODO: TESTING, delete when done to cycle attacks
+        attackIndex = 1; 
+        currAttackIndex = 1;
+        //////////////////////////////////////////////////
 
         switch(attackIndex)
         {
@@ -63,9 +72,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
 #region Attack Coroutines
 
+    int InstantiateFlip()
+    {
+        if(movement.isFacingRight) return 1;
+        else return -1;
+    }
+
     IEnumerator RangeAttack() //0
     {
-        Debug.Log("Calling RangeAttack"); //TODO: TESTING
         movement.canMove = false;
         movement.DisableMove();
         movement.ToggleFlip(false);
@@ -75,27 +89,25 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         FacePlayer();
 
         yield return new WaitForSeconds(attackDelayTime[0] - startAttackDelay);
-        CheckHit();
+        Instantiate(RangeAttackExplosionPrefab, transform.position, transform.rotation);
+
         yield return new WaitForSeconds(fullAttackAnimTime[0] - attackDelayTime[0]);
-        
         yield return new WaitForSeconds(attackEndDelay);
         movement.ToggleFlip(true);
 
-        //TODO: move all this to another CO AttackEndCO
         StartCoroutine(AttackEnd());
     }
 
     IEnumerator MeleeExplosion() //1
     {
-        Debug.Log("Calling MeleeExplosion"); //TODO: TESTING
         movement.canMove = false;
         movement.DisableMove();
         movement.ToggleFlip(false);
         //Start melee animation
         // yield return new WaitForSeconds(startAttackDelay); //delay before starting attack 
         
-        animator.PlayManualAnim(currAttackIndex, fullAttackAnimTime[currAttackIndex]);
-        yield return new WaitForSeconds(attackDelayTime[currAttackIndex] - startAttackDelay);
+        animator.PlayManualAnim(currAttackIndex, fullAttackAnimTime[1]);
+        yield return new WaitForSeconds(attackDelayTime[1] - startAttackDelay);
 
         CheckHit(); //Check Melee hit
         //Get Player position and cast explosion
@@ -103,10 +115,9 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         Vector3 castPos = new Vector3(playerX, bossGroundOffset.position.y, 0);
         Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
 
-        yield return new WaitForSeconds(fullAttackAnimTime[currAttackIndex] - attackDelayTime[currAttackIndex]);
+        yield return new WaitForSeconds(fullAttackAnimTime[1] - attackDelayTime[1]);
         
         yield return new WaitForSeconds(attackEndDelay);
-        currAttackIndex = 0; //TODO: replace once setup
 
         StartCoroutine(AttackEnd());
     }
@@ -114,13 +125,12 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     IEnumerator SuperAttack() //2
     {
         yield return null;
-        currAttackIndex = 0; //TODO: replace once setup
+        // Instantiate(SuperAttackExplosionPrefab, transform.position, Quaternion.identity);
     }
 
     IEnumerator MeleeSpin() //3
     {
         yield return null;
-        currAttackIndex = 0; //TODO: replace once setup
     }
 
     //Ending Coroutine

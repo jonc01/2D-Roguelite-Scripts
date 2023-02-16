@@ -6,12 +6,29 @@ public class CastExplosion : MonoBehaviour
 {
     [Header("Animation Variables")]
     //Separate animators to play at different scales
-    [SerializeField] private Animator animExplosion;
     [SerializeField] private Animator animChargeUp;
     [SerializeField] float chargeDuration = 0.667f;
-    [SerializeField] float explosionDuration = 0.583f;
-
+    [SerializeField] int chargeUpHashedInt;
     [Space]
+    [SerializeField] private Animator animExplosion;
+    [SerializeField] float explosionDuration = 0.583f;
+    [SerializeField] int explosionHashedInt;
+
+    [Header("Adjustable Variables")]
+
+    [SerializeField] float startDelay = 0;
+    [Header("Knockback")]
+    public bool hasKnockBack = true;
+    [SerializeField] float knockbackStrength = 2f;
+    [SerializeField] float knockbackDuration = .5f;
+
+    [Header("KnockUp")]
+    public bool hasKnockUp = false;
+    [SerializeField] float knockupStrength = 4f;
+    [SerializeField] float knockupDuration = .5f;
+    [SerializeField] bool directionalKnockback = true;
+
+    [Space(10)]
     [Header("Damage Variables")]
     public LayerMask targetLayer;
     public float damage = 5f;
@@ -20,29 +37,31 @@ public class CastExplosion : MonoBehaviour
 
     void Awake()
     {
-        if (animExplosion == null) animExplosion = GetComponent<Animator>();
         if (animChargeUp == null) animChargeUp = GetComponentInChildren<Animator>();
+        if (animExplosion == null) animExplosion = GetComponent<Animator>();
     }
 
     void Start()
     {
-        animExplosion.Play(-49316988); //"DefaultBlank"
+        //! - Make sure animations are default set to a blank frame anim in animation controller
         StartCoroutine(PlayAnims());
     }
 
-    // void OnEnable()
-    // { 
-    //     StartCoroutine(PlayAnims());
-    // }
-
     IEnumerator PlayAnims()
     {
-        animChargeUp.Play(-1454319710);////ExplosionChargeUp");
-        yield return new WaitForSeconds(chargeDuration);
+        yield return new WaitForSeconds(startDelay);
+
+        if(animChargeUp != null) //Skip this delay if no ChargeUp
+        {
+            animChargeUp.Play(chargeUpHashedInt);//ExplosionChargeUp");
+            yield return new WaitForSeconds(chargeDuration);
+        }
+
         CheckHit();
-        animExplosion.Play(-211360833);//"Explosion");
+        animExplosion.Play(explosionHashedInt);//"Explosion");
         yield return new WaitForSeconds(explosionDuration);
-        gameObject.SetActive(false);
+        // gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     void CheckHit()
@@ -55,11 +74,24 @@ public class CastExplosion : MonoBehaviour
         {
             player.TakeDamage(damage);
 
-            bool playerToRight;
-            if(transform.position.x < player.transform.position.x) playerToRight = true;
-            else playerToRight = false;
+            if(hasKnockBack)
+            {
+                bool playerToRight;
 
-            player.GetKnockback(playerToRight);
+                if(directionalKnockback){
+                    if(transform.rotation.y == 0) playerToRight = false;
+                    else playerToRight = true;
+                }else{
+                    if(transform.position.x < player.transform.position.x) playerToRight = true;
+                    else playerToRight = false;
+                }
+                player.GetKnockback(playerToRight, knockbackStrength, knockbackDuration);
+            }
+
+            if(hasKnockUp) //TODO: set true for Melee Explosion
+            {
+                player.GetKnockup(knockupStrength, knockupDuration); //TODO: test delay/recovery
+            }
         }
     }
 

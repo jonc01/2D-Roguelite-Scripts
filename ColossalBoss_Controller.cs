@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class ColossalBoss_Controller : Base_BossController
 {
-
-
+    
 
     protected override void AttackCheck()
     {
@@ -18,7 +17,7 @@ public class ColossalBoss_Controller : Base_BossController
     protected override void ChasePlayer()
     {
         base.ChasePlayer();
-        
+
     }
 
     protected override void FlipDir()
