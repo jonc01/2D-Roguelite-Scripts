@@ -418,8 +418,8 @@ public class Base_PlayerMovement : MonoBehaviour
     
     public void StartDash()
     {
-        if (!combat.isAlive) return;
-        if(canDash) if(canMove || combat.isAttacking || combat.isAirAttacking) StartCoroutine(Dash());
+        if (!combat.isAlive || combat.isKnockedback) return;
+        if (canDash) if(canMove || combat.isAttacking || combat.isAirAttacking) StartCoroutine(Dash());
         if (isDashing) InstantiateManager.Instance.VFX.DashFX(vfxOffset, isFacingRight);
     }
     
@@ -484,6 +484,16 @@ public class Base_PlayerMovement : MonoBehaviour
         canMove = canMoveToggle;
         //canMove check in FixedUpdate()
         //while false, velocity is set to 0
+    }
+
+    public void StopVelocityX()
+    {
+        rb.velocity = new Vector2(0, rb.velocity.y);
+    }
+
+    public void StopVelocityY()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, 0);
     }
 
     public void ToggleAirMove(bool canMoveToggle)

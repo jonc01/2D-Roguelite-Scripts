@@ -47,9 +47,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Header("=== STATS (char optional) ===")]
     [Header("--- Health ---")]
     public Base_Character character;
-    [SerializeField] float maxHP;
-    [SerializeField] float currentHP;
-    [SerializeField] float defense = 0;
+    [SerializeField] protected float maxHP;
+    [SerializeField] protected float currentHP;
+    [SerializeField] protected float defense = 0;
     [SerializeField] protected int totalXPOrbs = 20;
     
     [Header("--- Attack ---")]
@@ -58,7 +58,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] protected float attackEndDelay = 0;
     [SerializeField] protected float startAttackDelay = 0;
 
-    [SerializeField] public float knockbackStrength = 0; //4 is moderate
+    [Header("--- Knock(back/up) ---")]
+    [SerializeField] public float knockbackStrength = 1; //2 low, 4 moderate
+    [SerializeField] public float knockupStrength = 2;
     [Space(10)]
     protected float timeSinceAttack;
     [SerializeField] public int currAttackIndex;
@@ -69,6 +71,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     //Bools
     [SerializeField] public bool isAlive;
     [SerializeField] public bool isSpawning;
+    [SerializeField] public int currentPhase;
+    protected int numAttacks;
     public bool isStunned;
     public bool isAttacking;
     public bool playerToRight;
@@ -126,6 +130,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isAttacking = false;
         canAttack = true;
         currAttackIndex = 0; //TODO: randomize?
+        currentPhase = 1;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -188,45 +193,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     #region Attack Behavior Overrides
 
-    // public virtual void AttackClose()
-    // {
-    //     if (!isAlive || isAttacking || isSpawning) return;
-    //     //If no alternate behavior added, use default Attack()
-    //     if (AttackCloseBehavior == null) Attack();
-
-    //     if (timeSinceAttack > attackSpeed)
-    //     {
-    //         timeSinceAttack = 0;
-    //         AttackCloseBehavior.Attack();
-    //     }
-    // }
-
-    // public virtual void AttackFar()
-    // {
-    //     if (!isAlive || isAttacking || isSpawning) return;
-    //     if (AttackFarBehavior == null) return;
-
-    //     if (timeSinceAttack > attackSpeed)
-    //     {
-    //         timeSinceAttack = 0;
-    //         AttackFarBehavior.Attack();
-    //     }
-    // }
-
-    //TODO: New functions vvvvvvvvvvv
-    public virtual bool CanAttack(int attackIndex)
-    {
-        //TODO: either have an array bool[] canAttack;
-        //TODO: or add attacks into attack phases
-            // Example: phase[0] = {  }
-
-        if(attackIndex < attackPoint.Length) return canAttack;
-        else return false;
-        // if(AttackFarBehavior == null) return false;
-        // else return AttackFarBehavior.canAttack;
-    }
-
-    public virtual void Attack(int attackIndex)
+    public virtual void Attack()
     {
         if (!isAlive || isAttacking || isSpawning || !canAttack) return;
         if (timeSinceAttack <= attackSpeed) return;
@@ -235,7 +202,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         //Default behavior, use an override script for multiple custom attacks
         StartCoroutine(Attacking());
     }
-    //TODO: new functions ^^^^^^^^^^^
 
     #endregion
 
@@ -273,7 +239,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         }
     }
 
-    public virtual void CheckHit()
+    public virtual void CheckHit(bool knockback = false, bool knockup = false)
     {
         Vector3 hitboxSize = new Vector3 (attackRangeX[currAttackIndex], attackRangeY[currAttackIndex], 0);
         Collider2D[] hitPlayers = Physics2D.OverlapBoxAll(attackPoint[currAttackIndex].position, hitboxSize, 0f, playerLayer);
@@ -282,9 +248,10 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage[currAttackIndex]);
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight);
-                //knockback
+                var p = player.GetComponent<Base_PlayerCombat>();
+                p.TakeDamage(attackDamage[currAttackIndex]);
+                if (knockback) p.GetKnockback(!playerToRight, knockbackStrength);
+                if (knockup) p.GetKnockup(knockupStrength);
                 //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
         }

@@ -59,7 +59,7 @@ public class Base_BossController : MonoBehaviour
     {
         // Check currentAttack to check if the Player is in the corresponding trigger before attacking
         if (playerDetect.CheckPlayerDetect(combat.currAttackIndex))
-            combat.Attack(combat.currAttackIndex);
+            combat.Attack();
     }
 
     protected virtual void ChasePlayer()

@@ -6,6 +6,7 @@ public class ProjectileController : MonoBehaviour
 {
     [Header("Variables")]
     public float damage = 5;
+    public float knockbackStrength = 1;
     public float speed = 3;
     [SerializeField] private bool projectileHit;
     [SerializeField] private float hitAnimTime;
@@ -36,7 +37,7 @@ public class ProjectileController : MonoBehaviour
 
         //Check for player collision
         var target = collision.GetComponent<Base_PlayerCombat>();
-        if(target != null){ target.TakeDamage(damage); target.GetKnockback(!playerToRight); }
+        if(target != null){ target.TakeDamage(damage); target.GetKnockback(!playerToRight, knockbackStrength); }
 
         //It projectile hits wall, still destroy
         DestroyProjectile();

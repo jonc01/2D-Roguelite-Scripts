@@ -81,6 +81,8 @@ public class Base_PlayerCombat : MonoBehaviour
     Coroutine AttackingCO;
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
+    Coroutine KnockupCO;
+    Coroutine KnockbackResetCO;
 
 
     void Start()
@@ -285,7 +287,7 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
-    public void GetKnockback(bool enemyToRight, float strength = 4, float delay = .05f, float recoveryDelay = .1f)
+    public void GetKnockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         KnockbackNullCheckCO();
@@ -294,21 +296,52 @@ public class Base_PlayerCombat : MonoBehaviour
         if (strength <= 0) return;
 
         isKnockedback = true;
+        KnockbackCO = StartCoroutine(Knockback(enemyToRight, strength, recoveryDelay));
+        // float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        // Vector2 direction = new Vector2(temp, .3f);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+    }
 
+    IEnumerator Knockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
+    {
+        movement.StopVelocityX();
+        yield return new WaitForSeconds(.02f); //need delay for physics to update
         float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        //Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
         Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
-        KnockbackCO = StartCoroutine(KnockbackReset(delay, recoveryDelay));
+        KnockbackResetCO = StartCoroutine(KnockbackReset(recoveryDelay));
     }
 
-    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
+    public void GetKnockup(float strength = 4, float recoveryDelay = .1f)
     {
-        yield return new WaitForSeconds(delay);
-        movement.rb.velocity = Vector3.zero;
+        if (!isAlive || dashImmune) return;
+        KnockbackNullCheckCO();
+
+        if (kbResist > 0) strength -= kbResist;
+        if (strength <= 0) return;
+
+        isKnockedback = true;
+        KnockbackCO = StartCoroutine(Knockup(strength, recoveryDelay));
+    }
+
+    IEnumerator Knockup(float strength, float recoveryDelay)
+    {
+        // movement.StopVelocityX();
+        movement.StopVelocityY();
+        yield return new WaitForSeconds(.02f); //Short delay to reset velocity
+        Vector2 knockUpDir = new Vector2(movement.rb.velocity.x, strength);
+        movement.rb.AddForce(knockUpDir, ForceMode2D.Impulse);
+        
+        KnockbackResetCO = StartCoroutine(KnockbackReset(recoveryDelay));
+    }
+
+    IEnumerator KnockbackReset(float recoveryDelay = .15f)
+    {
+        //Wait recoveryDelay, then set velocity to 0 and allow the player to move again
         movement.canMove = false;
-        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
+        yield return new WaitForSeconds(recoveryDelay);
+        movement.rb.velocity = Vector3.zero;
         movement.canMove = true;
         //movement.ToggleFlip(true); //TODO: can just stun player
         isKnockedback = false;
@@ -316,12 +349,13 @@ public class Base_PlayerCombat : MonoBehaviour
 
     void KnockbackNullCheckCO()
     {
-        if (KnockbackCO == null) return;
-        StopCoroutine(KnockbackCO);
+        if (KnockbackResetCO == null) return;
+        StopCoroutine(KnockbackResetCO);
         movement.canMove = true;
         //movement.ToggleFlip(true); //TODO: can just stun player
         isKnockedback = false;
     }
+
 
     public void GetStunned(float stunDuration)
     {

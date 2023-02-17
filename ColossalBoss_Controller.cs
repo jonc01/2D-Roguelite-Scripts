@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class ColossalBoss_Controller : Base_BossController
 {
-
-
+    
 
     protected override void AttackCheck()
     {
         // base.AttackCheck();
         //TODO: only keep CheckPlayerDetect if using trigger colliders to initiate attacks
         if (combat.currAttackIndex == 1 || playerDetect.CheckPlayerDetect(combat.currAttackIndex))
-            combat.Attack(combat.currAttackIndex);
+            combat.Attack();
     }
 
     protected override void ChasePlayer()
     {
         base.ChasePlayer();
-        
+
     }
 
     protected override void FlipDir()
