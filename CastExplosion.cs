@@ -28,6 +28,9 @@ public class CastExplosion : MonoBehaviour
     [SerializeField] float knockupDuration = .5f;
     [SerializeField] bool directionalKnockback = true;
 
+    [Header("=== TOGGLE Prefab ===")]
+    [SerializeField] bool TOGGLE = false;
+
     [Space(10)]
     [Header("Damage Variables")]
     public LayerMask targetLayer;
@@ -39,12 +42,18 @@ public class CastExplosion : MonoBehaviour
     {
         if (animChargeUp == null) animChargeUp = GetComponentInChildren<Animator>();
         if (animExplosion == null) animExplosion = GetComponent<Animator>();
+        if (TOGGLE) gameObject.SetActive(false);
     }
 
     void Start()
     {
         //! - Make sure animations are default set to a blank frame anim in animation controller
-        StartCoroutine(PlayAnims());
+        if (!TOGGLE) StartCoroutine(PlayAnims());
+    }
+
+    void OnEnable()
+    {
+        if (TOGGLE) StartCoroutine(PlayAnims());
     }
 
     IEnumerator PlayAnims()
@@ -60,8 +69,10 @@ public class CastExplosion : MonoBehaviour
         CheckHit();
         animExplosion.Play(explosionHashedInt);//"Explosion");
         yield return new WaitForSeconds(explosionDuration);
-        // gameObject.SetActive(false);
-        Destroy(gameObject);
+        
+        // Toggle objects are Disabled, otherwise Destroy
+        if (TOGGLE) gameObject.SetActive(false);
+        else Destroy(gameObject);
     }
 
     void CheckHit()

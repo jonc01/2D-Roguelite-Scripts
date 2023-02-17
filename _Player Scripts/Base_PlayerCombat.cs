@@ -305,7 +305,7 @@ public class Base_PlayerCombat : MonoBehaviour
     IEnumerator Knockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
     {
         movement.StopVelocityX();
-        yield return new WaitForSeconds(.02f);
+        yield return new WaitForSeconds(.02f); //need delay for physics to update
         float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
@@ -327,7 +327,8 @@ public class Base_PlayerCombat : MonoBehaviour
 
     IEnumerator Knockup(float strength, float recoveryDelay)
     {
-        movement.StopVelocityX();
+        // movement.StopVelocityX();
+        movement.StopVelocityY();
         yield return new WaitForSeconds(.02f); //Short delay to reset velocity
         Vector2 knockUpDir = new Vector2(movement.rb.velocity.x, strength);
         movement.rb.AddForce(knockUpDir, ForceMode2D.Impulse);

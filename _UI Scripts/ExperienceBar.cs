@@ -9,7 +9,7 @@ public class ExperienceBar : MonoBehaviour
     public Slider slider; //Experience Bar
     public TextMeshProUGUI displayPlayerLevel;
     public HealthBar healthBar;
-    public PlayerCombat playerCombat;
+    // public PlayerCombat playerCombat;
     public TextPopupsHandler textPopupsHandler;
     public TextPopupsHandler xpPopups;
     public Transform player;
@@ -60,7 +60,7 @@ public class ExperienceBar : MonoBehaviour
         if (displayPlayerLevel != null) //update level
             displayPlayerLevel.text = currentPlayerLevel.ToString();
 
-        playerCombat.maxHealth += ((currentPlayerLevel - 1) * 10f); //health +10/level
+        // playerCombat.maxHealth += ((currentPlayerLevel - 1) * 10f); //health +10/level
         //TODO: pick on of these, these scale correctly
         //playerCombat.maxHealth += 10f; //health +10/level
         //playerCombat.maxHealth = ((currentPlayerLevel - 1) * 10f); //health +10/level
@@ -69,7 +69,7 @@ public class ExperienceBar : MonoBehaviour
         //playerCombat.HealPlayer(healthBar.maxHealth);
 
 
-        playerCombat.wepDamage += ((currentPlayerLevel - 1) * 2); //damage +2/level
+        // playerCombat.wepDamage += ((currentPlayerLevel - 1) * 2); //damage +2/level
         //TODO: pick one of these, these scale correctly
         //playerCombat.wepDamage += 2; //damage +2/level
         //playerCombat.wepDamage = ((currentPlayerLevel - 1) * 2); //damage +2/level
