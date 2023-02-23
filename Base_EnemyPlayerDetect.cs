@@ -30,10 +30,10 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
     [SerializeField]
     private float
         wallCheckDistance = 0.5f, //negative values - enemies are initialized facing left
-        playerCheckDistanceFront = 3f, //Aggro range
-        playerCheckDistanceBack = 1.5f;
-    public float attackRangeClose = 0.67f; //when to start attacking player, uses a raycast to detect if player is within range
-    public float attackRangeFar = 1f;
+        playerCheckDistTooClose = 1f,
+        playerCheckDistMain = 1.5f;
+    // public float attackRangeClose = 0.67f; //when to start attacking player, uses a raycast to detect if player is within range
+    // public float attackRangeFar = 1f;
 
     [Space]
     [Header("Current Platform")]
@@ -44,16 +44,12 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
     [Space]
     [Header("=== Player Transform Checks ===")]
     public bool playerToRight;
-    public bool 
-        playerDetectFront;
+    public bool playerDetectFront;
 
     [Space]
     [Header("=== Raycast Checks ===")]
     [SerializeField]
-    public bool
-        ledgeDetect,
-        wallDetect,
-        isGrounded;
+    public bool ledgeDetect, wallDetect, isGrounded;
 
     private void Awake()
     {
@@ -67,10 +63,6 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
 
         updatePlatform = true;
         if(player == null) player = GameManager.Instance.Player;
-    }
-
-    void Start(){
-
     }
 
     void OnEnable()
@@ -121,21 +113,15 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
         Vector3 down = transform.TransformDirection(Vector3.down) * ledgeCheckDistance;
         Debug.DrawRay(ledgeCheck.position, down, Color.green);
 
-        Vector3 right = transform.TransformDirection(Vector3.right) * wallCheckDistance;
-        //Debug.DrawRay(wallPlayerCheck.position, right, Color.blue);
+        Vector3 wallCheck = transform.TransformDirection(Vector3.left) * wallCheckDistance;
+        Debug.DrawRay(wallPlayerCheck.position, wallCheck, Color.cyan);
+
+        Vector3 distCheckMain = transform.TransformDirection(Vector3.right) * playerCheckDistMain;
+        Debug.DrawRay(transform.parent.position, distCheckMain, Color.magenta);
 
         //This is just here for visual debugging, doesn't use a raycast
-        Vector3 attackRight = transform.TransformDirection(Vector3.right) * playerCheckDistanceFront;
-        Debug.DrawRay(wallPlayerCheck.position, attackRight, Color.cyan);
-
-        Vector3 attackLeft = transform.TransformDirection(Vector3.left) * playerCheckDistanceBack;
-        Debug.DrawRay(wallPlayerCheck.position, attackLeft, Color.red);
-
-        Vector3 playerInAttackRangeFar = transform.TransformDirection(Vector3.right) * attackRangeFar;
-        Debug.DrawRay(attackCheck.position, playerInAttackRangeFar, Color.yellow);
-
-        Vector3 playerInAttackRangeClose = transform.TransformDirection(Vector3.right) * attackRangeClose;
-        Debug.DrawRay(attackCheck.position, playerInAttackRangeClose, Color.magenta);
+        Vector3 distCheckTooClose = transform.TransformDirection(Vector3.right) * playerCheckDistTooClose;
+        Debug.DrawRay(transform.parent.position, distCheckTooClose, Color.blue);
     }
 
     void AttackCheck()
@@ -158,28 +144,35 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
     {
         //TODO: also might not be needed, not patrolling, just chasing player
         ledgeDetect = Physics2D.Raycast(ledgeCheck.position, Vector2.down, ledgeCheckDistance, groundLayer);
-        wallDetect = Physics2D.Raycast(wallPlayerCheck.position, transform.right, wallCheckDistance, groundLayer);
+        wallDetect = Physics2D.Raycast(wallPlayerCheck.position, -transform.right, wallCheckDistance, groundLayer);
     }
 
     void PlayerDetectCheck()
     {
-        //TODO: replace these with triggers
-        // playerDetectFront = Physics2D.Raycast(wallPlayerCheck.position, transform.right, playerCheckDistanceFront, playerLayer);
-        // playerDetectBack = Physics2D.Raycast(wallPlayerCheck.position, -transform.right, playerCheckDistanceBack, playerLayer);
-        // if(player.position.x < transform.position.x) playerDetectFront = true;
-        // else playerDetectFront = false;
         if(playerToRight == movement.isFacingRight) playerDetectFront = true;
+        else playerDetectFront = false;
     }
 
     void UpdatePlayerToRight()
     {
-        // Updates 'playerToRight' bool: where the player is in relation to enemy
-        // if (playerDetectFront) playerToRight = movement.isFacingRight;
-        // else playerToRight = !movement.isFacingRight;
-
+        //Compare player and enemy 
         if(player.position.x < transform.position.x) playerToRight = false;
         else playerToRight = true;
+    }
 
-        //no else; don't want to update playerToRight when player jumps above raycast
+    public bool PlayerDistTooClose()
+    {
+        //Only checks distances if Player is in front
+        float playerDistance = Mathf.Abs(player.position.x - transform.position.x);
+        if(playerDistance < playerCheckDistTooClose) return true;
+        else return false;
+    }
+
+    public bool PlayerDistMain()
+    {
+        //Only checks distances if Player is in front
+        float playerDistance = Mathf.Abs(player.position.x - transform.position.x);
+        if(playerDistance < playerCheckDistMain) return true;
+        else return false;
     }
 }

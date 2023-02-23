@@ -14,7 +14,7 @@ public class Base_BossMovement : MonoBehaviour
     [Header("State Variables")]
     //public bool isGrounded; //Use raycast.IsGrounded() instead
     public bool canMove = true;
-    [SerializeField] bool canFlip;
+    [SerializeField] public bool canFlip;
     public bool isFacingRight = true;
     bool isLunging;
     Coroutine LungingCO;
@@ -61,7 +61,21 @@ public class Base_BossMovement : MonoBehaviour
         Flip();
     }
 
-    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .5f)
+    public virtual void Lunge(bool lungeToRight, float strength = 4, float duration = .3f)
+    {
+        canMove = false;
+        //Reversed Knockback, moving towards player instead of backwards
+        GetKnockback(!lungeToRight, strength, duration);
+    }
+
+    // public void LungeAlt(bool lungeToRight, float strength = 8, float duration = .2f)
+    // {
+    //     canMove = false;
+    //     //Needs to use '!' to lunge towards player
+    //     GetKnockback(!lungeToRight, 8f, .2f); //Re-using GetKnockback
+    // }
+
+    public virtual void GetKnockback(bool playerToRight, float strength = 8, float duration = .5f, bool manualReset = true)
     {
         KnockbackNullCheckCO();
 
@@ -73,12 +87,12 @@ public class Base_BossMovement : MonoBehaviour
         Vector2 direction = new Vector2(temp, rb.velocity.y);
         rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
-        LungingCO = StartCoroutine(KnockbackReset(delay));
+        if(!manualReset) LungingCO = StartCoroutine(KnockbackReset(duration));
     }
 
-    IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
+    IEnumerator KnockbackReset(float duration, float recoveryDelay = .1f)
     {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSeconds(duration);
         rb.velocity = Vector3.zero;
         canMove = false;
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again

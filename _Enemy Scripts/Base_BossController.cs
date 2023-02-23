@@ -57,9 +57,22 @@ public class Base_BossController : MonoBehaviour
 
     protected virtual void AttackCheck()
     {
-        // Check currentAttack to check if the Player is in the corresponding trigger before attacking
-        if (playerDetect.CheckPlayerDetect(combat.currAttackIndex))
-            combat.Attack();
+        combat.playerInFront = playerDetect.playerDetectFront;
+        if(!playerDetect.playerDetectFront)
+        {
+            combat.backToWall = true;
+        }
+        else
+        {
+            combat.backToWall = playerDetect.wallDetect;
+            if(!playerDetect.wallDetect)
+            {
+                //Player too close, Use Melee or dash backwards before attacking
+                combat.attackClose = playerDetect.PlayerDistTooClose();
+                combat.attackMain = playerDetect.PlayerDistMain();
+            }
+        }
+        combat.Attack();
     }
 
     protected virtual void ChasePlayer()
