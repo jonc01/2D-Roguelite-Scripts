@@ -33,6 +33,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] Vector3 initialGroundOffset;
     [SerializeField] float flyingOffsetY = 1f;
     [SerializeField] Vector3 flyingOffsetPos;
+    private float parentObjX;
 
     protected override void Awake()
     {
@@ -51,6 +52,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     protected override void OnEnable()
     {
         base.OnEnable();
+        parentObjX = transform.parent.transform.position.x;
     }
 
     void FixedUpdate()
@@ -94,7 +96,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     {
         timeSinceAttack = 0;
         canAttack = false;
-        ThresholdCheck(); //TODO: bring back when done testing
+        ThresholdCheck(); 
         
         //TODO: TESTING, delete when done to cycle attacks
         // int randAttack = Random.Range(0, 5);
@@ -187,7 +189,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         if(hpThrehold <= .66f)
         {
             currentPhase = 2;
-            // numAttacks = 4; //TODO: 3?
+            // numAttacks = 4; 
             attackEndDelay = 0.1f; //No delay, attackSpeed delay still applies
         }
         if(hpThrehold <= .33f)
@@ -263,7 +265,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         movement.canMove = false;
         movement.DisableMove();
         isAttacking = true;
-        movement.ToggleFlip(true); //TODO: may not be needed, since ManualFlip overrides
+        movement.ToggleFlip(true);
         //Start melee animation
         animator.PlayManualAnim(1, fullAttackAnimTime[1]);
         yield return new WaitForSeconds(startAttackDelay); //delay before starting attack
@@ -353,7 +355,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         bool moveToRightWall; //= (Random.value > 0.5f); //randomize
 
         //Move to the furthest wall, checking x position
-        if(transform.position.x < 0) moveToRightWall = true; //TODO: this doesn't work :)
+        if(transform.position.x < parentObjX) moveToRightWall = true;
         else moveToRightWall = false;
 
         //-------------------------
