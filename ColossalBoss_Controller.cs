@@ -17,8 +17,8 @@ public class ColossalBoss_Controller : Base_BossController
 
     protected override void ChasePlayer()
     {
+        if (!combat.chasePlayer) return;
         base.ChasePlayer();
-
     }
 
     protected override void FlipDir()

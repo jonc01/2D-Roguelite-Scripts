@@ -123,6 +123,7 @@ public class Base_BossMovement : MonoBehaviour
         }
     }
 
+
     void HealthBarFlip()
     {
         //Boss has static healthbar
@@ -131,7 +132,7 @@ public class Base_BossMovement : MonoBehaviour
     public void ManualFlip(bool faceRight)
     {
         isFacingRight = faceRight;
-        if(isFacingRight) transform.localRotation = Quaternion.Euler(0, 0, 0);
+        if(faceRight) transform.localRotation = Quaternion.Euler(0, 0, 0);
         else transform.localRotation = Quaternion.Euler(0, 180, 0);
         HealthBarFlip();
     }

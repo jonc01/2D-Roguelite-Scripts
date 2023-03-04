@@ -11,6 +11,8 @@ public class Base_BossController : MonoBehaviour
 
     [Header("=== Player Transform and Raycast Reference ===")]
     [SerializeField] protected float playerDetectRange = .5f;
+    [SerializeField] protected float attackRange = 2f;
+    [SerializeField] protected float distToPlayer;
     [SerializeField] public Base_EnemyPlayerDetect playerDetect;
 
     protected virtual void Awake()
@@ -26,27 +28,20 @@ public class Base_BossController : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (!combat.isAlive) return;
+        if (!combat.isAlive || combat.isSpawning) return;
 
-        if (combat.isStunned)// || combat.isKnockedback)
-        {
-            // StopPatrolling();
-            return;
-        }
-
-        // if (!raycast.isGrounded || combat.isSpawning) return;
-        if (combat.isSpawning) return;
+        // if (combat.isStunned) return;
 
         #if UNITY_EDITOR
         if(DEBUGGING) DebugRaycast();
         #endif
 
         ChasePlayer();
-        if (combat.isAttacking) return;
+        PlayerToRightCheck();
 
+        // if (!combat.canAttack) return;
         // LedgeWallCheck();
         AttackCheck();
-        PlayerToRightCheck();
     }
 
     protected void PlayerToRightCheck()
@@ -55,24 +50,25 @@ public class Base_BossController : MonoBehaviour
         combat.playerToRight = playerDetect.playerToRight;
     }
 
+    protected float PlayerDistCheck()
+    {
+        distToPlayer = Mathf.Abs(playerDetect.player.position.x - transform.position.x);
+        return distToPlayer;
+    }
+
     protected virtual void AttackCheck()
     {
-        combat.playerInFront = playerDetect.playerDetectFront;
-        if(!playerDetect.playerDetectFront)
-        {
-            combat.backToWall = true;
-        }
-        else
-        {
-            combat.backToWall = playerDetect.wallDetect;
-            if(!playerDetect.wallDetect)
-            {
-                //Player too close, Use Melee or dash backwards before attacking
-                combat.attackClose = playerDetect.PlayerDistTooClose();
-                combat.attackMain = playerDetect.PlayerDistMain();
-            }
-        }
         combat.Attack();
+
+        //These variables determine lunge distance and direction during attacks
+        combat.playerInFront = playerDetect.playerDetectFront;
+        combat.attackClose = playerDetect.PlayerDistTooClose();
+        combat.attackMain = playerDetect.PlayerDistMain();
+        combat.backToWall = playerDetect.wallDetectBack; //Wall detect only checks behind boss
+        combat.faceToWall = playerDetect.wallDetectFront;
+
+        // if(!combat.isAttacking) return;
+        combat.distanceToPlayer = PlayerDistCheck();
     }
 
     protected virtual void ChasePlayer()
@@ -80,7 +76,7 @@ public class Base_BossController : MonoBehaviour
         if (!movement.canMove) return;
         // if (raycast.wallDetect || !raycast.ledgeDetect) return;
         //May not be needed with platform check
-        if(Mathf.Abs(playerDetect.player.position.x - transform.position.x) >= playerDetectRange)
+        if(PlayerDistCheck() >= playerDetectRange)
             movement.MoveRight(playerDetect.playerToRight);
     }
 

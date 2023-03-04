@@ -83,7 +83,10 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool attackClose;
     public bool attackMain;
     public bool playerInFront;
+    public bool faceToWall;
     public bool backToWall;
+    public float distanceToPlayer;
+    public bool chasePlayer; //override to prevent Boss from chasing Player
 
 
     protected virtual void Awake()
@@ -294,10 +297,10 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         // else attackMain, don't move
     }
 
-    void LungeStart(bool playerToRight, float duration = .3f)
+    void LungeStart(bool lungeToRight, float duration = .3f)
     {
         float strength = 4f;
-        movement.Lunge(playerToRight, strength, duration);
+        movement.Lunge(lungeToRight, strength, duration);
     }
 
     public virtual void GetStunned(float stunDuration = .5f)
