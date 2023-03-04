@@ -93,10 +93,6 @@ public class Base_BossAnimator : MonoBehaviour
 
         anim.CrossFade(Attack, 0, 0); //TODO: is crossfade needed?
 
-        /*float animLength = anim.GetCurrentAnimatorStateInfo(0).length;
-        float animSpeed = anim.GetCurrentAnimatorStateInfo(0).speed;
-        Debug.Log("Anim length:" + animLength);
-        Debug.Log("Anim speed:" + animSpeed);*/
         AttackCO = StartCoroutine(AttackState(animTime));
     }
 

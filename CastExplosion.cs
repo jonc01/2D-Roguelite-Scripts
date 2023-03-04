@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CastExplosion : MonoBehaviour
@@ -15,7 +14,7 @@ public class CastExplosion : MonoBehaviour
     [SerializeField] int explosionHashedInt;
 
     [Header("Adjustable Variables")]
-
+    [SerializeField] int screenshakeIntensity = 1;
     [SerializeField] float startDelay = 0;
     [Header("Knockback")]
     public bool hasKnockBack = true;
@@ -68,6 +67,7 @@ public class CastExplosion : MonoBehaviour
 
         CheckHit();
         animExplosion.Play(explosionHashedInt);//"Explosion");
+        ScreenShakeListener.Instance.Shake(screenshakeIntensity);
         yield return new WaitForSeconds(explosionDuration);
         
         // Toggle objects are Disabled, otherwise Destroy

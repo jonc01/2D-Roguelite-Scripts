@@ -79,6 +79,14 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     Coroutine StunnedCO;
     protected Coroutine AttackingCO;
     private bool initialEnable;
+    [Header("Attack Logic variables")]
+    public bool attackClose;
+    public bool attackMain;
+    public bool playerInFront;
+    public bool faceToWall;
+    public bool backToWall;
+    public float distanceToPlayer;
+    public bool chasePlayer; //override to prevent Boss from chasing Player
 
 
     protected virtual void Awake()
@@ -203,6 +211,16 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         StartCoroutine(Attacking());
     }
 
+    public virtual void Attack(int attackIndex)
+    {
+        if (!isAlive || isAttacking || isSpawning || !canAttack) return;
+        if (timeSinceAttack <= attackSpeed) return;
+    
+        timeSinceAttack = 0;
+        currAttackIndex = attackIndex;
+        StartCoroutine(Attacking());
+    }
+
     #endregion
 
     protected virtual IEnumerator Attacking()
@@ -248,10 +266,10 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                var p = player.GetComponent<Base_PlayerCombat>();
-                p.TakeDamage(attackDamage[currAttackIndex]);
-                if (knockback) p.GetKnockback(!playerToRight, knockbackStrength);
-                if (knockup) p.GetKnockup(knockupStrength);
+                var playerObj = player.GetComponent<Base_PlayerCombat>();
+                playerObj.TakeDamage(attackDamage[currAttackIndex]);
+                if (knockback) playerObj.GetKnockback(!playerToRight, knockbackStrength);
+                if (knockup) playerObj.GetKnockup(knockupStrength);
                 //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
         }
@@ -266,6 +284,23 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         {
             Gizmos.DrawWireCube(attackPoint[i].position, new Vector3(attackRangeX[i], attackRangeY[i], 0));
         }
+    }
+
+    public virtual void LungeCheck(float lungeStrength = .1f, float duration = .3f)
+    {
+        //Player is too close, lunge backwards
+        if(attackClose)
+            LungeStart(!playerToRight, lungeStrength);
+        //Player is out of normal attack range, lunge forward
+        else if(!attackMain && !attackClose)
+            LungeStart(playerToRight, lungeStrength);
+        // else attackMain, don't move
+    }
+
+    void LungeStart(bool lungeToRight, float duration = .3f)
+    {
+        float strength = 4f;
+        movement.Lunge(lungeToRight, strength, duration);
     }
 
     public virtual void GetStunned(float stunDuration = .5f)

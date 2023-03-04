@@ -8,16 +8,17 @@ public class ColossalBoss_Controller : Base_BossController
 
     protected override void AttackCheck()
     {
-        // base.AttackCheck();
+        // if(!combat.movement.canFlip) return;
+        base.AttackCheck();
         //TODO: only keep CheckPlayerDetect if using trigger colliders to initiate attacks
-        if (combat.currAttackIndex == 1 || playerDetect.CheckPlayerDetect(combat.currAttackIndex))
-            combat.Attack();
+        // if (combat.currAttackIndex == 1 || playerDetect.CheckPlayerDetect(combat.currAttackIndex))
+        //     combat.Attack();
     }
 
     protected override void ChasePlayer()
     {
+        if (!combat.chasePlayer) return;
         base.ChasePlayer();
-
     }
 
     protected override void FlipDir()
