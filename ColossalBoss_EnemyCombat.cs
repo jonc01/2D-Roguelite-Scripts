@@ -25,7 +25,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] GameObject SuperAttackExplosionPrefab;
 
     [Header("= Colossal Boss = : (3) Spin")]
-    // [SerializeField] float rightWallX;
     [SerializeField] GameObject BoomerangArms;
 
     [Header("= Colossal Boss = : (4) ChargeUp")]
@@ -34,10 +33,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] float flyingOffsetY = 1f;
     [SerializeField] Vector3 flyingOffsetPos;
     private float parentObjX;
+    private float originalScale;
+    private float originalDrag;
 
     protected override void Awake()
     {
         base.Awake();
+        originalScale = movement.rb.gravityScale;
+        originalDrag = movement.rb.drag;
     }
 
     protected override void Start()
@@ -47,10 +50,15 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         initialGroundOffset = bossGroundOffset.position;
         flyingOffsetPos = transform.position;
         flyingOffsetPos.y += flyingOffsetY;
+
+        animator.PlayManualAnim(5, 1f); 
+        //Starts the Boss on the Sleep animation, prevents Idle to Sleep animation
     }
 
     protected override void OnEnable()
     {
+        //Call the Sleep animation again to prevent Idle from taking over
+        animator.PlayManualAnim(5, 2f);
         base.OnEnable();
         parentObjX = transform.parent.transform.position.x;
     }
@@ -327,7 +335,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         yield return new WaitForSeconds(attackDelayTime[2]);
         movement.ToggleFlip(false);
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.35f);
 
         //Attack 2
         animator.PlayManualAnim(8, fullAttackAnimTime[6]); //Alternate animation
@@ -417,8 +425,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     IEnumerator ChargeUp(int iterations = 3)
     {
         isAttacking = true;
-        float originalScale = movement.rb.gravityScale;
-        float originalDrag = movement.rb.drag;
 
         movement.rb.gravityScale = 0;
         movement.rb.drag = 0;
@@ -553,22 +559,40 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     protected override void Die()
     {
         healthBar.gameObject.SetActive(false);
+        isAlive = false;
+
+        //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
+        StopAllCoroutines();
+        canAttack = false;
+        // StopAllCoroutines();
+
+        //Boomerang/Melee Spin attack cancel
         if(BoomerangArms.activeInHierarchy) BoomerangArms.SetActive(false);
 
-        ScreenShakeListener.Instance.Shake(2);
-        movement.rb.simulated = false;
-        GetComponent<BoxCollider2D>().enabled = false;
+        //ChargeUp attack cancel
+        canFly = false;
+        movement.rb.gravityScale = originalScale;
+        movement.rb.drag = originalDrag;
+        
 
+        ScreenShakeListener.Instance.Shake(2);
+        Invoke("ToggleHitbox", 1f);
+        // movement.rb.simulated = false;
+        // GetComponent<BoxCollider2D>().enabled = false;
+
+        playDeathAnim = true;
+
+        //Show death effects then spawn XP Orbs
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
-        //Base_EnemyAnimator checks for isAlive to play Death animation
-        isAlive = false;
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+    }
 
-        //Disable sprite renderer before deleting gameobject
-        //sr.enabled = false;
-        //Invoke("DeleteObj", .5f); //Wait for fade out to finish
+    void ToggleHitbox()
+    {
+        movement.rb.simulated = false;
+        GetComponent<BoxCollider2D>().enabled = false;
     }
 }

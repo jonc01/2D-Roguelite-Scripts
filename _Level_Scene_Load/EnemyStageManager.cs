@@ -52,7 +52,7 @@ public class EnemyStageManager : MonoBehaviour
     {
         for(int i = 0; i < transform.childCount; i++)
         {
-            if(transform.GetChild(i).CompareTag("Enemy"))
+            if(transform.GetChild(i).CompareTag("Enemy") || transform.GetChild(i).CompareTag("Boss"))
             {
                 //Only need the one Enemy parent object, break when found
                 enemyParentObj = transform.GetChild(i).transform;
@@ -65,7 +65,11 @@ public class EnemyStageManager : MonoBehaviour
         if(enemyCount > 0)
         {
             for(int i = 0; i < enemyCount; i++)
-                enemyParentObj.GetChild(i).gameObject.SetActive(false);
+            {
+                var enemyObj = enemyParentObj.GetChild(i).gameObject;
+                enemyObj.SetActive(false);
+                // if(enemyObj.CompareTag("Enemy")) enemyObj.SetActive(false);
+            }
         }
     }
 

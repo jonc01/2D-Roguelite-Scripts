@@ -5,13 +5,13 @@ using UnityEngine;
 public class Base_BossCombat : MonoBehaviour, IDamageable
 {
 
-    [Header("Attack Behavior Setup")]
+    [Header("=== Attack Behavior Setup ===")]
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
     [SerializeField] public Base_CombatBehavior AttackFarBehavior;
     public bool canAttackFar;
     public bool canAttack;
 
-    [Header("References/Setup")]
+    [Header("=== References/Setup ===")]
     public LayerMask playerLayer;
     [SerializeField] protected Transform[] attackPoint;
     public float[] attackRangeX;
@@ -26,18 +26,19 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
     [SerializeField] protected float spawnFXScale = 2.5f; //2.5f default 
-    [Header("*Animation Times")]
+    [Header("=== *Animation Times ===")]
     [SerializeField] protected float[] fullAttackAnimTime; //1f, 1.416667f
     [SerializeField] protected float[] attackDelayTime; //0.0834f, 0.834f
 
     [Space(10)]
 
-    [Header("Start() Reference Initialization")]
+    [Header("=== Start() Reference Initialization ===")]
     public Base_BossMovement movement;
     public Base_BossAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
     [SerializeField] protected EnemyStageManager enemyStageManager;
+    [SerializeField] protected float spawnDelay = 1f;
 
     [Space(10)]
 
@@ -70,6 +71,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Header("--- Status ---")]
     //Bools
     [SerializeField] public bool isAlive;
+    [SerializeField] public bool playDeathAnim;
     [SerializeField] public bool isSpawning;
     [SerializeField] public int currentPhase;
     protected int numAttacks;
@@ -78,8 +80,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool playerToRight;
     Coroutine StunnedCO;
     protected Coroutine AttackingCO;
-    private bool initialEnable;
-    [Header("Attack Logic variables")]
+    [Header("--- Attack Logic variables ---")]
     public bool attackClose;
     public bool attackMain;
     public bool playerInFront;
@@ -91,7 +92,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     protected virtual void Awake()
     {
-        initialEnable = true;
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
         animator = GetComponentInChildren<Base_BossAnimator>();
@@ -112,11 +112,13 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         currentHP = maxHP;
         isAlive = true;
+        playDeathAnim = false;
         isStunned = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
             healthBar.SetHealth(maxHP);
+            healthBar.gameObject.SetActive(false);
         }
 
         //Defaults
@@ -148,15 +150,12 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
-        if(initialEnable) return;
-        float spawnDelay = .5f;
-        animator.PlayManualAnim(5, spawnDelay);
         StartCoroutine(SpawnCO(spawnDelay));
     }
 
     protected virtual void OnDisable()
     { 
-        initialEnable = false; 
+        
     }
 
     // Update is called once per frame
@@ -320,7 +319,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    void StopAttack(bool toggleFlip = false)
+    protected void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;
@@ -381,6 +380,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
+        playDeathAnim = true;
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject
