@@ -17,15 +17,15 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] Transform bossGroundOffset;
 
     [Header("= Colossal Boss = : (1) Melee/Explosion")]
-    [SerializeField] GameObject MeleeExplosionPrefab;
-    [SerializeField] GameObject MeleePrefab;
+    [SerializeField] GameObject MeleePrefab; //Toggled GameObject
+    [SerializeField] PrefabHandler ExplosionHandler;
     [SerializeField] float explosionCastDelay = .2f;
 
     [Header("= Colossal Boss = : (2) SuperAttack")]
     [SerializeField] GameObject SuperAttackExplosionPrefab;
 
     [Header("= Colossal Boss = : (3) Spin")]
-    [SerializeField] GameObject BoomerangArms;
+    [SerializeField] GameObject BoomerangArms; //Toggled GameObject
 
     [Header("= Colossal Boss = : (4) ChargeUp")]
     [SerializeField] private bool canFly;
@@ -295,24 +295,44 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
 //Prefab: Pass in number of explosions to spawn, 
 //  change trackPlayer to Instantiate at Player or in a line after the previous position
-    IEnumerator MeleeExplosionOnly(int iterations, bool trackPlayer = false)
+    IEnumerator MeleeExplosionOnly(int iterations, bool trackPlayer = false, bool multiple = false)
     {
         if(iterations <= 0) yield return null;
         Vector3 castPos;
         //Spawn multiple explosions in a wave
         for(int i=0; i<iterations; i++)
         {
+            if(!isAlive) break;
             if(!trackPlayer)
             {
-                if(!isAlive) break;
                 castPos = GetOwnPosX();
                 if(movement.isFacingRight) castPos.x += i;
                 else castPos.x -= i;
-                Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
             }
             else
             {
-                Instantiate(MeleeExplosionPrefab, GetPlayerPosX(), Quaternion.identity);
+                castPos = GetPlayerPosX();
+            }
+
+            ExplosionHandler.SpawnPrefab(castPos);
+            // Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
+            if(multiple)
+            {
+                yield return new WaitForSeconds(.2f);
+                Vector3 castPos1 = new Vector3(castPos.x+1, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos1);
+                // Instantiate(MeleeExplosionPrefab, castPos1, Quaternion.identity);
+                Vector3 castPos2 = new Vector3(castPos.x-1, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos2);
+                // Instantiate(MeleeExplosionPrefab, castPos2, Quaternion.identity);
+
+                yield return new WaitForSeconds(.2f);
+                Vector3 castPos3 = new Vector3(castPos.x+2, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos3);
+                // Instantiate(MeleeExplosionPrefab, castPos3, Quaternion.identity);
+                Vector3 castPos4 = new Vector3(castPos.x-2, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos4);
+                // Instantiate(MeleeExplosionPrefab, castPos4, Quaternion.identity);
             }
 
             yield return new WaitForSeconds(explosionCastDelay);
@@ -439,7 +459,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
             animator.PlayManualAnim(6, fullAttackAnimTime[4]);
             yield return new WaitForSeconds(attackDelayTime[4]);
             movement.ToggleFlip(false);
-            StartCoroutine(MeleeExplosionOnly(1, true));
+            StartCoroutine(MeleeExplosionOnly(1, true, true));
             yield return new WaitForSeconds((fullAttackAnimTime[4] - attackDelayTime[4])+.1f);
             movement.ToggleFlip(true);
         }
