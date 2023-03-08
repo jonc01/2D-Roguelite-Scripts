@@ -75,7 +75,6 @@ public class CastExplosion : MonoBehaviour
         // Toggle objects are Disabled, otherwise Destroy
         if (TOGGLE) gameObject.SetActive(false);
         else if (!POOLED) Destroy(gameObject);
-        // else Destroy(gameObject);
     }
 
     void CheckHit()

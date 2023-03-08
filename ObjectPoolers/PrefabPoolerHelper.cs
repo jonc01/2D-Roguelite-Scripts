@@ -14,12 +14,10 @@ public class PrefabPoolerHelper : MonoBehaviour
     {
         pool = GetComponentInParent<ObjectPoolerList>();
         if(pool != null) pool.ReturnObject(gameObject);
-        Debug.Log("Getting pool list...");
     }
 
     private void OnEnable()
     {
-        // if(pool == null) pool = GetComponentInParent<ObjectPoolerList>();
         StartCoroutine(PoolObject(poolDelay));
     }
 

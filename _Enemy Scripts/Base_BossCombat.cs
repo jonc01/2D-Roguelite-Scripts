@@ -73,13 +73,17 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] public bool isAlive;
     [SerializeField] public bool playDeathAnim;
     [SerializeField] public bool isSpawning;
-    [SerializeField] public int currentPhase;
-    protected int numAttacks;
     public bool isStunned;
     public bool isAttacking;
     public bool playerToRight;
     Coroutine StunnedCO;
     protected Coroutine AttackingCO;
+    protected Coroutine AttackEndingCO;
+    [Header("--- Health Phases ---")]
+    [SerializeField] public int currentPhase;
+    [SerializeField] protected float[] healthPhase;
+    protected bool changingPhase;
+
     [Header("--- Attack Logic variables ---")]
     public bool attackClose;
     public bool attackMain;
@@ -139,8 +143,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         isAttacking = false;
         canAttack = true;
-        currAttackIndex = 0; //TODO: randomize?
-        currentPhase = 1;
+        currAttackIndex = 0;
+        currentPhase = 0;
+        changingPhase = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -224,7 +229,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     protected virtual IEnumerator Attacking()
     {
-        //TODO: replace with individual attack behaviors
         //Allow flip for a little longer
         isAttacking = true;
         movement.canMove = false;
@@ -306,7 +310,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         if (!isAlive || isSpawning) return;
 
-        //TODO: 
         //StopAllCoroutines(); //This could allow stun locks, depending on how often player can apply stun
         StopAttack();
         StunnedCO = StartCoroutine(Stunned(stunDuration));
@@ -319,7 +322,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    protected void StopAttack(bool toggleFlip = false)
+    protected virtual void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;
@@ -334,13 +337,13 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         if (!isAlive || isSpawning) return;
 
-        HitFlash(); //Set material to white, short delay before resetting
-
         float totalDamage = damageTaken - defense;
 
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
 
+        HitFlash(); //Set material to white, short delay before resetting
+        //Play hit effect, reduce hp
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
@@ -355,7 +358,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         }
     }
 
-    void HitFlash(float resetDelay = .1f)
+    protected void HitFlash(float resetDelay = .1f)
     {
         sr.material = mWhiteFlash;
         Invoke("ResetMaterial", resetDelay);
@@ -390,8 +393,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     protected virtual void DeleteObj()
     {
-        //TODO: bosses won't be deleted, just switch to static death anim
-        Destroy(gameObject);
+        //Bosses won't be deleted, just switch to static death anim
+        // Destroy(gameObject);
     }
 #endregion
 }

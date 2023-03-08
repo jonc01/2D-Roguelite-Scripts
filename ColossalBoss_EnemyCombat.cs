@@ -102,25 +102,20 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     
     IEnumerator AttackCO()
     {
+        // ThresholdCheck(); //TODO: moving to TakeDamage
+
+        // if (currentPhase != activePhase) UpdateThresholdCheck(); //TODO: testing
+        // while(currentPhase != activePhase) yield return null;
+
         timeSinceAttack = 0;
         canAttack = false;
-        ThresholdCheck(); 
         
-        //TODO: TESTING, delete when done to cycle attacks
-        // int randAttack = Random.Range(0, 5);
-        //int randAttack = 1;
-        numAttacks = 1; //
-        // currAttackIndex = 2;
-        // currAttackIndex = randAttack;
-        /////////////////////////////////////////////
         int randIndex;
-        // for(int i=0; i<numAttacks; i++)
-        // {
         //Get random attack index
-        if(currentPhase == 1){
+        if(currentPhase == 0){
             randIndex = Random.Range(0, Phase1AtkPool.Length);
             currAttackIndex = Phase1AtkPool[randIndex];
-        }else if(currentPhase == 2){
+        }else if(currentPhase == 1){
             randIndex = Random.Range(0, Phase2AtkPool.Length);
             currAttackIndex = Phase2AtkPool[randIndex];
         }else{
@@ -131,10 +126,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         switch(currAttackIndex)
         {
             case 0:
-                yield return AttackingCO = StartCoroutine(RangeAttackInit());
+                yield return AttackingCO = StartCoroutine(RangeAttack());
                 break;
             case 1:
-                yield return AttackingCO = StartCoroutine(MeleeAttackInit());
+                yield return AttackingCO = StartCoroutine(MeleeExplosion(4));
                 break;
             case 2:
             //TODO: needs Init setup
@@ -145,14 +140,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 yield return AttackingCO = StartCoroutine(MeleeSpin()); //<50% hp, increased freq
                 break;
             case 4:
-                yield return AttackingCO = StartCoroutine(ChargeAttackInit());
+                yield return AttackingCO = StartCoroutine(ChargeUp());
                 break;
             default:
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
         // }
-        yield return StartCoroutine(AttackEnd());
+        yield return AttackEndingCO = StartCoroutine(AttackEnd());
     }
 
     IEnumerator ManualAttackCO(int attackIndex)
@@ -162,10 +157,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         switch(attackIndex)
         {
             case 0:
-                yield return AttackingCO = StartCoroutine(RangeAttackInit());
+                yield return AttackingCO = StartCoroutine(RangeAttack());
                 break;
             case 1:
-                yield return AttackingCO = StartCoroutine(MeleeAttackInit());
+                yield return AttackingCO = StartCoroutine(MeleeExplosion(4));
                 break;
             case 2:
                 yield return AttackingCO = StartCoroutine(SuperAttack()); //<50% hp
@@ -174,64 +169,57 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 yield return AttackingCO = StartCoroutine(MeleeSpin()); //<50% hp, increased freq
                 break;
             case 4:
-                yield return AttackingCO = StartCoroutine(ChargeAttackInit());
+                yield return AttackingCO = StartCoroutine(ChargeUp());
                 break;
             default:
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
-        yield return StartCoroutine(AttackEnd());
+        // if(AttackEndingCO != null) StopCoroutine(AttackEndingCO); //TODO:
+        yield return AttackEndingCO = StartCoroutine(AttackEnd());
     }
 
-#region Attack Inits
-    void ThresholdCheck() //Determine number of combo attacks and frequency
+#region Health Threshold and Phases
+    void HealthPhaseCheck() //Determine number of combo attacks and frequency
     {
-        float hpThrehold = currentHP/maxHP;
-        //Phase determined by HP thresholds
-        if(hpThrehold > .66f)
-        {
-            currentPhase = 1;
-            // numAttacks = 3;
-            attackEndDelay = .3f;
-        }
-        if(hpThrehold <= .66f)
-        {
-            currentPhase = 2;
-            // numAttacks = 4; 
-            attackEndDelay = 0.1f; //No delay, attackSpeed delay still applies
-        }
-        if(hpThrehold <= .33f)
-        {
-            currentPhase = 3;
-            // numAttacks = 4;
-            attackEndDelay = 0.1f;
-        }
-    }
-
-    IEnumerator RangeAttackInit()
-    {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
+        //HP is at the last Phase, no need to update
+        if(currentPhase == healthPhase.Length-1) return;
         
-        yield return StartCoroutine(RangeAttack());
-        // yield return StartCoroutine(AttackEnd());
-        //yield return new WaitForSeconds(.1f);
+        //Checking if health reaches the next phase threshold
+        float nextHealthThreshold = healthPhase[currentPhase+1];
+        if(currentHP <= nextHealthThreshold)
+        {
+            //Change to next Phase
+            if(changingPhase) return;
+            currentPhase++;
+            StartCoroutine(ChangePhase());
+        }
+        attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
     }
 
-    IEnumerator MeleeAttackInit()
+    IEnumerator ChangePhase()
     {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
-        yield return StartCoroutine(MeleeExplosion(4));
-    }
+        changingPhase = true;
+        //Stop Attack and AttackEnd Coroutines
+        StopAttack();
 
-    //
-
-    IEnumerator ChargeAttackInit() //TODO: move this to Attack() CO
-    {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
-        yield return StartCoroutine(ChargeUp());
+        Debug.Log("Activating Shield, no attack");
+        //Toggle Shield gameobject
+        //Shield.SetActive(true);
+        float baseDefense = defense;
+        defense = 999;
+        movement.canMove = false;
+        canAttack = false;
+        yield return new WaitForSeconds(5);
+        Debug.Log("Deactivating Shield, yes attack");
+        // animator.PlayManualAnim(); //Buff
+        //Shield.SetActive(false);
+        defense = baseDefense;
+        movement.canMove = true;
+        isAttacking = false;
+        yield return new WaitForSeconds(.1f);
+        canAttack = true;
+        changingPhase = false;
     }
 
 #endregion
@@ -377,28 +365,22 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
         movement.canMove = false;
         movement.DisableMove();
-        //Move Boss to a random side of the room
-            //Lerp? or MoveTowards
-
+        //Move Boss to the further side of the room
         bool moveToRightWall; //= (Random.value > 0.5f); //randomize
 
         //Move to the furthest wall, checking x position
         if(transform.position.x < parentObjX) moveToRightWall = true;
         else moveToRightWall = false;
 
-        //-------------------------
-
+        //Disable chasePlayer logic
         chasePlayer = false;
         movement.canMove = true;
         yield return MoveToWall(moveToRightWall);
-        
-        // ------------
 
         ManualFlip(!moveToRightWall); //Boss will have back to the wall and face outward
         movement.canMove = false;
         yield return new WaitForSeconds(0.2f);
         
-
         //Charge attack after moving to the side of the room
         animator.PlayManualAnim(3, fullAttackAnimTime[3]);
         yield return new WaitForSeconds(attackDelayTime[3]);
@@ -575,6 +557,44 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     }
 
 #endregion
+
+    public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
+    {
+        // base.TakeDamage(damageTaken, knockback, strength);
+
+        if (!isAlive || isSpawning) return;
+
+        float totalDamage = damageTaken - defense;
+        //Damage can never be lower than 1
+        if (totalDamage <= 0) totalDamage = 1;
+        
+        HitFlash(); //Set material to white, short delay before resetting
+        //Play hit effect, reduce hp
+        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        currentHP -= totalDamage;
+        healthBar.UpdateHealth(currentHP);
+        //Display Damage number
+        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+
+        //Check Boss HP
+        HealthPhaseCheck();
+
+        if (currentHP <= 0)
+        {
+            isAlive = false;
+            Die();
+        }
+    }
+    
+    protected override void StopAttack(bool toggleFlip = false)
+    {
+        //Stops AttackCO if not null, resets isAttacking and canMove, 
+        //Stops current Attack animation
+        base.StopAttack();
+        //TODO: stop AttackEnd if not null
+        if(AttackEndingCO != null) StopCoroutine(AttackEndingCO);
+        //canAttack = false;
+    }
 
     protected override void Die()
     {
