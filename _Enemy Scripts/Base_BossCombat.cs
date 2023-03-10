@@ -78,11 +78,13 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool playerToRight;
     Coroutine StunnedCO;
     protected Coroutine AttackingCO;
-    protected Coroutine AttackEndingCO;
+    protected Coroutine AttackEndCO;
     [Header("--- Health Phases ---")]
     [SerializeField] public int currentPhase;
     [SerializeField] protected float[] healthPhase;
     protected bool changingPhase;
+    [SerializeField] GameObject PhaseShield;
+    [SerializeField] ToggleEffectAnimator PhaseShieldBreak;
 
     [Header("--- Attack Logic variables ---")]
     public bool attackClose;
@@ -124,6 +126,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
             healthBar.SetHealth(maxHP);
             healthBar.gameObject.SetActive(false);
         }
+
+        if(PhaseShield != null) PhaseShield.SetActive(false);
 
         //Defaults
         // fullAttackAnimTime = 1f;
@@ -325,6 +329,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     protected virtual void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
+        if (AttackEndCO != null) StopCoroutine(AttackEndCO);
         isAttacking = false;
         movement.canMove = true;
         movement.ToggleFlip(toggleFlip);
@@ -332,13 +337,64 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         animator.StopAttackAnimCO();
     }
 
+#region Health Threshold and Phases
+    protected void HealthPhaseCheck() //Determine number of combo attacks and frequency
+    {
+        //HP is at the last Phase, no need to update
+        if(currentPhase == healthPhase.Length-1) return;
+        
+        //Checking if health reaches the next phase threshold
+        float nextHealthThreshold = healthPhase[currentPhase+1];
+        if(currentHP <= nextHealthThreshold)
+        {
+            //Change to next Phase
+            if(changingPhase) return;
+            currentPhase++;
+            StartCoroutine(ChangePhase());
+        }
+        attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
+    }
+
+    IEnumerator ChangePhase()
+    {
+        changingPhase = true;
+        //Stop Attack and AttackEnd Coroutines
+        StopAttack();
+
+        //Toggle Shield gameobject and increase defenses
+        PhaseShieldBreak.PlayAnim(0);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(0)); //anim delay before enabling shield
+
+        PhaseShield.SetActive(true);
+        float baseDefense = defense;
+        defense = 999;
+        movement.canMove = false;
+        canAttack = false;
+        
+        yield return new WaitForSeconds(1.5f);
+        animator.PlayManualAnim(6, 1.083f); //Buff anim
+        yield return new WaitForSeconds(0.667f); //Shorter time to pop shield
+
+        //Toggle Shield gameobject and remove defenses
+        PhaseShieldBreak.PlayAnim(1);
+        PhaseShield.SetActive(false);
+        defense = baseDefense;
+        ScreenShakeListener.Instance.Shake(3);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(1));
+        movement.canMove = true;
+        isAttacking = false;
+        canAttack = true;
+        changingPhase = false;
+    }
+
+#endregion
+
 #region TakeDamage, HitFlash, Die
     public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
         if (!isAlive || isSpawning) return;
 
         float totalDamage = damageTaken - defense;
-
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
 
@@ -350,6 +406,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         //Display Damage number
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+
+        //Check Boss HP
+        HealthPhaseCheck();
 
         if (currentHP <= 0)
         {
@@ -372,29 +431,34 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     protected virtual void Die()
     {
         healthBar.gameObject.SetActive(false);
-        if(AttackingCO != null) StopCoroutine(AttackingCO);
+        canAttack = false;
+        isAlive = false;
+
+        //Attack Coroutine checks
+        StopAttack();
+        StopAllCoroutines();
 
         ScreenShakeListener.Instance.Shake(2);
         movement.rb.simulated = false;
         GetComponent<BoxCollider2D>().enabled = false;
 
+        //Show death effects then spawn XP Orbs
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
-        //Base_EnemyAnimator checks for isAlive to play Death animation
-        isAlive = false;
+        //Base_EnemyAnimator checks for playDeathAnim to play Death animation
         playDeathAnim = true;
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
+        Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
         //Disable sprite renderer before deleting gameobject
         //sr.enabled = false;
-        //Invoke("DeleteObj", .5f); //Wait for fade out to finish
     }
 
-    protected virtual void DeleteObj()
+    void ToggleHitbox()
     {
-        //Bosses won't be deleted, just switch to static death anim
-        // Destroy(gameObject);
+        movement.rb.simulated = false;
+        GetComponent<BoxCollider2D>().enabled = false;
     }
 #endregion
 }

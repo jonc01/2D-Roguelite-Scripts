@@ -79,6 +79,21 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         }
     }
 
+    protected override IEnumerator SpawnCO(float delay)
+    {
+        isSpawning = true; //This prevents the enemy from attacking and taking damage
+        
+        yield return new WaitForSeconds(delay);
+        ExplosionInit(4);
+        
+        animator.PlayManualAnim(4, 1f);
+        yield return new WaitForSeconds(1f); //Wake animation
+        healthBar.gameObject.SetActive(true);
+        //Toggle SR on
+        yield return new WaitForSeconds(0.5f);
+        isSpawning = false;
+    }
+
     protected override void FacePlayer()
     {
         // if(ColossalBoss_Controller.playerDetect)
@@ -102,11 +117,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     
     IEnumerator AttackCO()
     {
-        // ThresholdCheck(); //TODO: moving to TakeDamage
-
-        // if (currentPhase != activePhase) UpdateThresholdCheck(); //TODO: testing
-        // while(currentPhase != activePhase) yield return null;
-
         timeSinceAttack = 0;
         canAttack = false;
         
@@ -146,8 +156,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
-        // }
-        yield return AttackEndingCO = StartCoroutine(AttackEnd());
+        yield return AttackEndCO = StartCoroutine(AttackEnd());
     }
 
     IEnumerator ManualAttackCO(int attackIndex)
@@ -175,54 +184,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
-        // if(AttackEndingCO != null) StopCoroutine(AttackEndingCO); //TODO:
-        yield return AttackEndingCO = StartCoroutine(AttackEnd());
+        yield return AttackEndCO = StartCoroutine(AttackEnd());
     }
-
-#region Health Threshold and Phases
-    void HealthPhaseCheck() //Determine number of combo attacks and frequency
-    {
-        //HP is at the last Phase, no need to update
-        if(currentPhase == healthPhase.Length-1) return;
-        
-        //Checking if health reaches the next phase threshold
-        float nextHealthThreshold = healthPhase[currentPhase+1];
-        if(currentHP <= nextHealthThreshold)
-        {
-            //Change to next Phase
-            if(changingPhase) return;
-            currentPhase++;
-            StartCoroutine(ChangePhase());
-        }
-        attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
-    }
-
-    IEnumerator ChangePhase()
-    {
-        changingPhase = true;
-        //Stop Attack and AttackEnd Coroutines
-        StopAttack();
-
-        Debug.Log("Activating Shield, no attack");
-        //Toggle Shield gameobject
-        //Shield.SetActive(true);
-        float baseDefense = defense;
-        defense = 999;
-        movement.canMove = false;
-        canAttack = false;
-        yield return new WaitForSeconds(5);
-        Debug.Log("Deactivating Shield, yes attack");
-        // animator.PlayManualAnim(); //Buff
-        //Shield.SetActive(false);
-        defense = baseDefense;
-        movement.canMove = true;
-        isAttacking = false;
-        yield return new WaitForSeconds(.1f);
-        canAttack = true;
-        changingPhase = false;
-    }
-
-#endregion
 
 #region Attack Coroutines
 //Attack[0]: Shoots at the ground in front
@@ -256,7 +219,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     }
 
 //Attack[1]: Punch ground and spawn a wave of explosions forward
-    IEnumerator MeleeExplosion(int numExplosions = 3) //1
+    IEnumerator MeleeExplosion(int numExplosions = 4) //1
     {
         movement.canMove = false;
         movement.DisableMove();
@@ -301,7 +264,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
             {
                 castPos = GetPlayerPosX();
             }
-
             ExplosionHandler.SpawnPrefab(castPos);
             // Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
             if(multiple)
@@ -325,6 +287,22 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
             yield return new WaitForSeconds(explosionCastDelay);
         }
+    }
+
+    void ExplosionInit(int iterations = 4, float yOffset = 5)
+    {
+        //This doesn't quite work, but does fix the pooled explosions issue all being called properly
+        Vector3 castPos = new Vector3(transform.position.x, transform.position.y - yOffset, 0);
+        for(int i=0; i<iterations; i++)
+        {
+            ExplosionHandler.SpawnPrefab(castPos);
+        }
+        Invoke("ShakeEvent", .33f);
+    }
+
+    void ShakeEvent()
+    {
+        ScreenShakeListener.Instance.Shake(3);
     }
 
 //Attack[2]: 
@@ -353,8 +331,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
         yield return new WaitForSeconds(fullAttackAnimTime[6] - attackDelayTime[6]);
         isAttacking = false;
-
-        // Instantiate(SuperAttackExplosionPrefab, transform.position, Quaternion.identity);
     }
 
 //Attack[3]: Boss moves towards a wall then launches its arms as a boomerang towards 
@@ -465,7 +441,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     IEnumerator AttackEnd()
     {
         //Use next attack, reset counter if out of bounds
-        if(currAttackIndex >= attackPoint.Length) currAttackIndex = 0;
+        // if(currAttackIndex >= attackPoint.Length) currAttackIndex = 0; //TODO:
 
         // float nextAttackDelay;
         // // if(currAttackIndex == 0) nextAttackDelay = 0;
@@ -558,43 +534,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
 #endregion
 
-    public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
-    {
-        // base.TakeDamage(damageTaken, knockback, strength);
-
-        if (!isAlive || isSpawning) return;
-
-        float totalDamage = damageTaken - defense;
-        //Damage can never be lower than 1
-        if (totalDamage <= 0) totalDamage = 1;
-        
-        HitFlash(); //Set material to white, short delay before resetting
-        //Play hit effect, reduce hp
-        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
-        currentHP -= totalDamage;
-        healthBar.UpdateHealth(currentHP);
-        //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
-
-        //Check Boss HP
-        HealthPhaseCheck();
-
-        if (currentHP <= 0)
-        {
-            isAlive = false;
-            Die();
-        }
-    }
-    
-    protected override void StopAttack(bool toggleFlip = false)
-    {
-        //Stops AttackCO if not null, resets isAttacking and canMove, 
-        //Stops current Attack animation
-        base.StopAttack();
-        //TODO: stop AttackEnd if not null
-        if(AttackEndingCO != null) StopCoroutine(AttackEndingCO);
-        //canAttack = false;
-    }
 
     protected override void Die()
     {
@@ -617,9 +556,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         
 
         ScreenShakeListener.Instance.Shake(2);
-        Invoke("ToggleHitbox", 1f);
-        // movement.rb.simulated = false;
-        // GetComponent<BoxCollider2D>().enabled = false;
+        Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
 
         playDeathAnim = true;
 
