@@ -129,7 +129,7 @@ public class Base_BossAnimator : MonoBehaviour
     {
         if (Time.time < lockedTill) return currentState;
 
-        if (!combat.isAlive) return Death;
+        if (combat.playDeathAnim) return Death;
         //if (movement.isJumping) return Jump;
 
         //if (movement.isGrounded)

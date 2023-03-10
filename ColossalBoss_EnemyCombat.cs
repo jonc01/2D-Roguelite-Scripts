@@ -17,16 +17,15 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] Transform bossGroundOffset;
 
     [Header("= Colossal Boss = : (1) Melee/Explosion")]
-    [SerializeField] GameObject MeleeExplosionPrefab;
-    [SerializeField] GameObject MeleePrefab;
+    [SerializeField] GameObject MeleePrefab; //Toggled GameObject
+    [SerializeField] PrefabHandler ExplosionHandler;
     [SerializeField] float explosionCastDelay = .2f;
 
     [Header("= Colossal Boss = : (2) SuperAttack")]
     [SerializeField] GameObject SuperAttackExplosionPrefab;
 
     [Header("= Colossal Boss = : (3) Spin")]
-    // [SerializeField] float rightWallX;
-    [SerializeField] GameObject BoomerangArms;
+    [SerializeField] GameObject BoomerangArms; //Toggled GameObject
 
     [Header("= Colossal Boss = : (4) ChargeUp")]
     [SerializeField] private bool canFly;
@@ -34,10 +33,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     [SerializeField] float flyingOffsetY = 1f;
     [SerializeField] Vector3 flyingOffsetPos;
     private float parentObjX;
+    private float originalScale;
+    private float originalDrag;
 
     protected override void Awake()
     {
         base.Awake();
+        originalScale = movement.rb.gravityScale;
+        originalDrag = movement.rb.drag;
     }
 
     protected override void Start()
@@ -47,10 +50,15 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         initialGroundOffset = bossGroundOffset.position;
         flyingOffsetPos = transform.position;
         flyingOffsetPos.y += flyingOffsetY;
+
+        animator.PlayManualAnim(5, 1f); 
+        //Starts the Boss on the Sleep animation, prevents Idle to Sleep animation
     }
 
     protected override void OnEnable()
     {
+        //Call the Sleep animation again to prevent Idle from taking over
+        animator.PlayManualAnim(5, 2f);
         base.OnEnable();
         parentObjX = transform.parent.transform.position.x;
     }
@@ -69,6 +77,21 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
             movement.canMove = false;
             canFly = false;
         }
+    }
+
+    protected override IEnumerator SpawnCO(float delay)
+    {
+        isSpawning = true; //This prevents the enemy from attacking and taking damage
+        
+        yield return new WaitForSeconds(delay);
+        ExplosionInit(4);
+        
+        animator.PlayManualAnim(4, 1f);
+        yield return new WaitForSeconds(1f); //Wake animation
+        healthBar.gameObject.SetActive(true);
+        //Toggle SR on
+        yield return new WaitForSeconds(0.5f);
+        isSpawning = false;
     }
 
     protected override void FacePlayer()
@@ -96,23 +119,13 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     {
         timeSinceAttack = 0;
         canAttack = false;
-        ThresholdCheck(); 
         
-        //TODO: TESTING, delete when done to cycle attacks
-        // int randAttack = Random.Range(0, 5);
-        //int randAttack = 1;
-        numAttacks = 1; //
-        // currAttackIndex = 2;
-        // currAttackIndex = randAttack;
-        /////////////////////////////////////////////
         int randIndex;
-        // for(int i=0; i<numAttacks; i++)
-        // {
         //Get random attack index
-        if(currentPhase == 1){
+        if(currentPhase == 0){
             randIndex = Random.Range(0, Phase1AtkPool.Length);
             currAttackIndex = Phase1AtkPool[randIndex];
-        }else if(currentPhase == 2){
+        }else if(currentPhase == 1){
             randIndex = Random.Range(0, Phase2AtkPool.Length);
             currAttackIndex = Phase2AtkPool[randIndex];
         }else{
@@ -123,10 +136,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         switch(currAttackIndex)
         {
             case 0:
-                yield return AttackingCO = StartCoroutine(RangeAttackInit());
+                yield return AttackingCO = StartCoroutine(RangeAttack());
                 break;
             case 1:
-                yield return AttackingCO = StartCoroutine(MeleeAttackInit());
+                yield return AttackingCO = StartCoroutine(MeleeExplosion(4));
                 break;
             case 2:
             //TODO: needs Init setup
@@ -137,14 +150,13 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 yield return AttackingCO = StartCoroutine(MeleeSpin()); //<50% hp, increased freq
                 break;
             case 4:
-                yield return AttackingCO = StartCoroutine(ChargeAttackInit());
+                yield return AttackingCO = StartCoroutine(ChargeUp());
                 break;
             default:
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
-        // }
-        yield return StartCoroutine(AttackEnd());
+        yield return AttackEndCO = StartCoroutine(AttackEnd());
     }
 
     IEnumerator ManualAttackCO(int attackIndex)
@@ -154,10 +166,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         switch(attackIndex)
         {
             case 0:
-                yield return AttackingCO = StartCoroutine(RangeAttackInit());
+                yield return AttackingCO = StartCoroutine(RangeAttack());
                 break;
             case 1:
-                yield return AttackingCO = StartCoroutine(MeleeAttackInit());
+                yield return AttackingCO = StartCoroutine(MeleeExplosion(4));
                 break;
             case 2:
                 yield return AttackingCO = StartCoroutine(SuperAttack()); //<50% hp
@@ -166,67 +178,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 yield return AttackingCO = StartCoroutine(MeleeSpin()); //<50% hp, increased freq
                 break;
             case 4:
-                yield return AttackingCO = StartCoroutine(ChargeAttackInit());
+                yield return AttackingCO = StartCoroutine(ChargeUp());
                 break;
             default:
                 // AttackingCO = StartCoroutine(MeleeExplosion());
                 break;
         }
-        yield return StartCoroutine(AttackEnd());
+        yield return AttackEndCO = StartCoroutine(AttackEnd());
     }
-
-#region Attack Inits
-    void ThresholdCheck() //Determine number of combo attacks and frequency
-    {
-        float hpThrehold = currentHP/maxHP;
-        //Phase determined by HP thresholds
-        if(hpThrehold > .66f)
-        {
-            currentPhase = 1;
-            // numAttacks = 3;
-            attackEndDelay = .3f;
-        }
-        if(hpThrehold <= .66f)
-        {
-            currentPhase = 2;
-            // numAttacks = 4; 
-            attackEndDelay = 0.1f; //No delay, attackSpeed delay still applies
-        }
-        if(hpThrehold <= .33f)
-        {
-            currentPhase = 3;
-            // numAttacks = 4;
-            attackEndDelay = 0.1f;
-        }
-    }
-
-    IEnumerator RangeAttackInit()
-    {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
-        
-        yield return StartCoroutine(RangeAttack());
-        // yield return StartCoroutine(AttackEnd());
-        //yield return new WaitForSeconds(.1f);
-    }
-
-    IEnumerator MeleeAttackInit()
-    {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
-        yield return StartCoroutine(MeleeExplosion(4));
-    }
-
-    //
-
-    IEnumerator ChargeAttackInit() //TODO: move this to Attack() CO
-    {
-        //TODO: this function might not be needed at all
-        attackEndDelay = 0; //TODO: TESTING might be fine
-        yield return StartCoroutine(ChargeUp());
-    }
-
-#endregion
 
 #region Attack Coroutines
 //Attack[0]: Shoots at the ground in front
@@ -260,7 +219,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     }
 
 //Attack[1]: Punch ground and spawn a wave of explosions forward
-    IEnumerator MeleeExplosion(int numExplosions = 3) //1
+    IEnumerator MeleeExplosion(int numExplosions = 4) //1
     {
         movement.canMove = false;
         movement.DisableMove();
@@ -287,28 +246,63 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
 //Prefab: Pass in number of explosions to spawn, 
 //  change trackPlayer to Instantiate at Player or in a line after the previous position
-    IEnumerator MeleeExplosionOnly(int iterations, bool trackPlayer = false)
+    IEnumerator MeleeExplosionOnly(int iterations, bool trackPlayer = false, bool multiple = false)
     {
         if(iterations <= 0) yield return null;
         Vector3 castPos;
         //Spawn multiple explosions in a wave
         for(int i=0; i<iterations; i++)
         {
+            if(!isAlive) break;
             if(!trackPlayer)
             {
-                if(!isAlive) break;
                 castPos = GetOwnPosX();
                 if(movement.isFacingRight) castPos.x += i;
                 else castPos.x -= i;
-                Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
             }
             else
             {
-                Instantiate(MeleeExplosionPrefab, GetPlayerPosX(), Quaternion.identity);
+                castPos = GetPlayerPosX();
+            }
+            ExplosionHandler.SpawnPrefab(castPos);
+            // Instantiate(MeleeExplosionPrefab, castPos, Quaternion.identity);
+            if(multiple)
+            {
+                yield return new WaitForSeconds(.2f);
+                Vector3 castPos1 = new Vector3(castPos.x+1, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos1);
+                // Instantiate(MeleeExplosionPrefab, castPos1, Quaternion.identity);
+                Vector3 castPos2 = new Vector3(castPos.x-1, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos2);
+                // Instantiate(MeleeExplosionPrefab, castPos2, Quaternion.identity);
+
+                yield return new WaitForSeconds(.2f);
+                Vector3 castPos3 = new Vector3(castPos.x+2, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos3);
+                // Instantiate(MeleeExplosionPrefab, castPos3, Quaternion.identity);
+                Vector3 castPos4 = new Vector3(castPos.x-2, castPos.y, 0);
+                ExplosionHandler.SpawnPrefab(castPos4);
+                // Instantiate(MeleeExplosionPrefab, castPos4, Quaternion.identity);
             }
 
             yield return new WaitForSeconds(explosionCastDelay);
         }
+    }
+
+    void ExplosionInit(int iterations = 4, float yOffset = 5)
+    {
+        //This doesn't quite work, but does fix the pooled explosions issue all being called properly
+        Vector3 castPos = new Vector3(transform.position.x, transform.position.y - yOffset, 0);
+        for(int i=0; i<iterations; i++)
+        {
+            ExplosionHandler.SpawnPrefab(castPos);
+        }
+        Invoke("ShakeEvent", .33f);
+    }
+
+    void ShakeEvent()
+    {
+        ScreenShakeListener.Instance.Shake(3);
     }
 
 //Attack[2]: 
@@ -327,7 +321,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         yield return new WaitForSeconds(attackDelayTime[2]);
         movement.ToggleFlip(false);
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.35f);
 
         //Attack 2
         animator.PlayManualAnim(8, fullAttackAnimTime[6]); //Alternate animation
@@ -337,8 +331,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
         yield return new WaitForSeconds(fullAttackAnimTime[6] - attackDelayTime[6]);
         isAttacking = false;
-
-        // Instantiate(SuperAttackExplosionPrefab, transform.position, Quaternion.identity);
     }
 
 //Attack[3]: Boss moves towards a wall then launches its arms as a boomerang towards 
@@ -349,28 +341,22 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
         movement.canMove = false;
         movement.DisableMove();
-        //Move Boss to a random side of the room
-            //Lerp? or MoveTowards
-
+        //Move Boss to the further side of the room
         bool moveToRightWall; //= (Random.value > 0.5f); //randomize
 
         //Move to the furthest wall, checking x position
         if(transform.position.x < parentObjX) moveToRightWall = true;
         else moveToRightWall = false;
 
-        //-------------------------
-
+        //Disable chasePlayer logic
         chasePlayer = false;
         movement.canMove = true;
         yield return MoveToWall(moveToRightWall);
-        
-        // ------------
 
         ManualFlip(!moveToRightWall); //Boss will have back to the wall and face outward
         movement.canMove = false;
         yield return new WaitForSeconds(0.2f);
         
-
         //Charge attack after moving to the side of the room
         animator.PlayManualAnim(3, fullAttackAnimTime[3]);
         yield return new WaitForSeconds(attackDelayTime[3]);
@@ -417,8 +403,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     IEnumerator ChargeUp(int iterations = 3)
     {
         isAttacking = true;
-        float originalScale = movement.rb.gravityScale;
-        float originalDrag = movement.rb.drag;
 
         movement.rb.gravityScale = 0;
         movement.rb.drag = 0;
@@ -433,7 +417,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
             animator.PlayManualAnim(6, fullAttackAnimTime[4]);
             yield return new WaitForSeconds(attackDelayTime[4]);
             movement.ToggleFlip(false);
-            StartCoroutine(MeleeExplosionOnly(1, true));
+            StartCoroutine(MeleeExplosionOnly(1, true, true));
             yield return new WaitForSeconds((fullAttackAnimTime[4] - attackDelayTime[4])+.1f);
             movement.ToggleFlip(true);
         }
@@ -457,7 +441,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     IEnumerator AttackEnd()
     {
         //Use next attack, reset counter if out of bounds
-        if(currAttackIndex >= attackPoint.Length) currAttackIndex = 0;
+        // if(currAttackIndex >= attackPoint.Length) currAttackIndex = 0; //TODO:
 
         // float nextAttackDelay;
         // // if(currAttackIndex == 0) nextAttackDelay = 0;
@@ -550,25 +534,42 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
 #endregion
 
+
     protected override void Die()
     {
         healthBar.gameObject.SetActive(false);
+        isAlive = false;
+
+        //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
+        StopAllCoroutines();
+        canAttack = false;
+        // StopAllCoroutines();
+
+        //Boomerang/Melee Spin attack cancel
         if(BoomerangArms.activeInHierarchy) BoomerangArms.SetActive(false);
 
-        ScreenShakeListener.Instance.Shake(2);
-        movement.rb.simulated = false;
-        GetComponent<BoxCollider2D>().enabled = false;
+        //ChargeUp attack cancel
+        canFly = false;
+        movement.rb.gravityScale = originalScale;
+        movement.rb.drag = originalDrag;
+        
 
+        ScreenShakeListener.Instance.Shake(2);
+        Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
+
+        playDeathAnim = true;
+
+        //Show death effects then spawn XP Orbs
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
-        //Base_EnemyAnimator checks for isAlive to play Death animation
-        isAlive = false;
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+    }
 
-        //Disable sprite renderer before deleting gameobject
-        //sr.enabled = false;
-        //Invoke("DeleteObj", .5f); //Wait for fade out to finish
+    void ToggleHitbox()
+    {
+        movement.rb.simulated = false;
+        GetComponent<BoxCollider2D>().enabled = false;
     }
 }

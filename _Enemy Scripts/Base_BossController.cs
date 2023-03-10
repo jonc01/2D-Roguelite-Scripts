@@ -39,7 +39,6 @@ public class Base_BossController : MonoBehaviour
         ChasePlayer();
         PlayerToRightCheck();
 
-        // if (!combat.canAttack) return;
         // LedgeWallCheck();
         AttackCheck();
     }
@@ -58,8 +57,6 @@ public class Base_BossController : MonoBehaviour
 
     protected virtual void AttackCheck()
     {
-        combat.Attack();
-
         //These variables determine lunge distance and direction during attacks
         combat.playerInFront = playerDetect.playerDetectFront;
         combat.attackClose = playerDetect.PlayerDistTooClose();
@@ -67,8 +64,9 @@ public class Base_BossController : MonoBehaviour
         combat.backToWall = playerDetect.wallDetectBack; //Wall detect only checks behind boss
         combat.faceToWall = playerDetect.wallDetectFront;
 
-        // if(!combat.isAttacking) return;
         combat.distanceToPlayer = PlayerDistCheck();
+
+        combat.Attack();
     }
 
     protected virtual void ChasePlayer()

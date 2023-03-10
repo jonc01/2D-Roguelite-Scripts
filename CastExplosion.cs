@@ -29,6 +29,7 @@ public class CastExplosion : MonoBehaviour
 
     [Header("=== TOGGLE Prefab ===")]
     [SerializeField] bool TOGGLE = false;
+    [SerializeField] bool POOLED = false;
 
     [Space(10)]
     [Header("Damage Variables")]
@@ -47,12 +48,13 @@ public class CastExplosion : MonoBehaviour
     void Start()
     {
         //! - Make sure animations are default set to a blank frame anim in animation controller
-        if (!TOGGLE) StartCoroutine(PlayAnims());
+        // if (!TOGGLE) StartCoroutine(PlayAnims());
     }
 
     void OnEnable()
     {
-        if (TOGGLE) StartCoroutine(PlayAnims());
+        // if (TOGGLE) StartCoroutine(PlayAnims());
+        StartCoroutine(PlayAnims());
     }
 
     IEnumerator PlayAnims()
@@ -72,7 +74,7 @@ public class CastExplosion : MonoBehaviour
         
         // Toggle objects are Disabled, otherwise Destroy
         if (TOGGLE) gameObject.SetActive(false);
-        else Destroy(gameObject);
+        else if (!POOLED) Destroy(gameObject);
     }
 
     void CheckHit()

@@ -7,6 +7,7 @@ public class KillEffectsAnimator : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] string animationName;
     [SerializeField] float animationTime;
+    [SerializeField] bool TOGGLE = false;
 
     private void OnEnable()
     {
@@ -16,6 +17,7 @@ public class KillEffectsAnimator : MonoBehaviour
 
     private void DeleteObj()
     {
-        Destroy(gameObject);
+        if(TOGGLE) gameObject.SetActive(false);
+        else Destroy(gameObject);
     }
 }

@@ -5,13 +5,13 @@ using UnityEngine;
 public class Base_BossCombat : MonoBehaviour, IDamageable
 {
 
-    [Header("Attack Behavior Setup")]
+    [Header("=== Attack Behavior Setup ===")]
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
     [SerializeField] public Base_CombatBehavior AttackFarBehavior;
     public bool canAttackFar;
     public bool canAttack;
 
-    [Header("References/Setup")]
+    [Header("=== References/Setup ===")]
     public LayerMask playerLayer;
     [SerializeField] protected Transform[] attackPoint;
     public float[] attackRangeX;
@@ -26,18 +26,19 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
     [SerializeField] protected float spawnFXScale = 2.5f; //2.5f default 
-    [Header("*Animation Times")]
+    [Header("=== *Animation Times ===")]
     [SerializeField] protected float[] fullAttackAnimTime; //1f, 1.416667f
     [SerializeField] protected float[] attackDelayTime; //0.0834f, 0.834f
 
     [Space(10)]
 
-    [Header("Start() Reference Initialization")]
+    [Header("=== Start() Reference Initialization ===")]
     public Base_BossMovement movement;
     public Base_BossAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
     [SerializeField] protected EnemyStageManager enemyStageManager;
+    [SerializeField] protected float spawnDelay = 1f;
 
     [Space(10)]
 
@@ -70,16 +71,22 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Header("--- Status ---")]
     //Bools
     [SerializeField] public bool isAlive;
+    [SerializeField] public bool playDeathAnim;
     [SerializeField] public bool isSpawning;
-    [SerializeField] public int currentPhase;
-    protected int numAttacks;
     public bool isStunned;
     public bool isAttacking;
     public bool playerToRight;
     Coroutine StunnedCO;
     protected Coroutine AttackingCO;
-    private bool initialEnable;
-    [Header("Attack Logic variables")]
+    protected Coroutine AttackEndCO;
+    [Header("--- Health Phases ---")]
+    [SerializeField] public int currentPhase;
+    [SerializeField] protected float[] healthPhase;
+    protected bool changingPhase;
+    [SerializeField] GameObject PhaseShield;
+    [SerializeField] ToggleEffectAnimator PhaseShieldBreak;
+
+    [Header("--- Attack Logic variables ---")]
     public bool attackClose;
     public bool attackMain;
     public bool playerInFront;
@@ -91,7 +98,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     protected virtual void Awake()
     {
-        initialEnable = true;
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
         animator = GetComponentInChildren<Base_BossAnimator>();
@@ -112,12 +118,16 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         currentHP = maxHP;
         isAlive = true;
+        playDeathAnim = false;
         isStunned = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
             healthBar.SetHealth(maxHP);
+            healthBar.gameObject.SetActive(false);
         }
+
+        if(PhaseShield != null) PhaseShield.SetActive(false);
 
         //Defaults
         // fullAttackAnimTime = 1f;
@@ -137,8 +147,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         isAttacking = false;
         canAttack = true;
-        currAttackIndex = 0; //TODO: randomize?
-        currentPhase = 1;
+        currAttackIndex = 0;
+        currentPhase = 0;
+        changingPhase = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -148,15 +159,12 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
-        if(initialEnable) return;
-        float spawnDelay = .5f;
-        animator.PlayManualAnim(5, spawnDelay);
         StartCoroutine(SpawnCO(spawnDelay));
     }
 
     protected virtual void OnDisable()
     { 
-        initialEnable = false; 
+        
     }
 
     // Update is called once per frame
@@ -225,7 +233,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     protected virtual IEnumerator Attacking()
     {
-        //TODO: replace with individual attack behaviors
         //Allow flip for a little longer
         isAttacking = true;
         movement.canMove = false;
@@ -307,7 +314,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         if (!isAlive || isSpawning) return;
 
-        //TODO: 
         //StopAllCoroutines(); //This could allow stun locks, depending on how often player can apply stun
         StopAttack();
         StunnedCO = StartCoroutine(Stunned(stunDuration));
@@ -320,9 +326,10 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    void StopAttack(bool toggleFlip = false)
+    protected virtual void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
+        if (AttackEndCO != null) StopCoroutine(AttackEndCO);
         isAttacking = false;
         movement.canMove = true;
         movement.ToggleFlip(toggleFlip);
@@ -330,24 +337,78 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         animator.StopAttackAnimCO();
     }
 
+#region Health Threshold and Phases
+    protected void HealthPhaseCheck() //Determine number of combo attacks and frequency
+    {
+        //HP is at the last Phase, no need to update
+        if(currentPhase == healthPhase.Length-1) return;
+        
+        //Checking if health reaches the next phase threshold
+        float nextHealthThreshold = healthPhase[currentPhase+1];
+        if(currentHP <= nextHealthThreshold)
+        {
+            //Change to next Phase
+            if(changingPhase) return;
+            currentPhase++;
+            StartCoroutine(ChangePhase());
+        }
+        attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
+    }
+
+    IEnumerator ChangePhase()
+    {
+        changingPhase = true;
+        //Stop Attack and AttackEnd Coroutines
+        StopAttack();
+
+        //Toggle Shield gameobject and increase defenses
+        PhaseShieldBreak.PlayAnim(0);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(0)); //anim delay before enabling shield
+
+        PhaseShield.SetActive(true);
+        float baseDefense = defense;
+        defense = 999;
+        movement.canMove = false;
+        canAttack = false;
+        
+        yield return new WaitForSeconds(1.5f);
+        animator.PlayManualAnim(6, 1.083f); //Buff anim
+        yield return new WaitForSeconds(0.667f); //Shorter time to pop shield
+
+        //Toggle Shield gameobject and remove defenses
+        PhaseShieldBreak.PlayAnim(1);
+        PhaseShield.SetActive(false);
+        defense = baseDefense;
+        ScreenShakeListener.Instance.Shake(3);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(1));
+        movement.canMove = true;
+        isAttacking = false;
+        canAttack = true;
+        changingPhase = false;
+    }
+
+#endregion
+
 #region TakeDamage, HitFlash, Die
     public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
     {
         if (!isAlive || isSpawning) return;
 
-        HitFlash(); //Set material to white, short delay before resetting
-
         float totalDamage = damageTaken - defense;
-
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
 
+        HitFlash(); //Set material to white, short delay before resetting
+        //Play hit effect, reduce hp
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
 
         //Display Damage number
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+
+        //Check Boss HP
+        HealthPhaseCheck();
 
         if (currentHP <= 0)
         {
@@ -356,7 +417,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         }
     }
 
-    void HitFlash(float resetDelay = .1f)
+    protected void HitFlash(float resetDelay = .1f)
     {
         sr.material = mWhiteFlash;
         Invoke("ResetMaterial", resetDelay);
@@ -370,28 +431,34 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     protected virtual void Die()
     {
         healthBar.gameObject.SetActive(false);
-        if(AttackingCO != null) StopCoroutine(AttackingCO);
+        canAttack = false;
+        isAlive = false;
+
+        //Attack Coroutine checks
+        StopAttack();
+        StopAllCoroutines();
 
         ScreenShakeListener.Instance.Shake(2);
         movement.rb.simulated = false;
         GetComponent<BoxCollider2D>().enabled = false;
 
+        //Show death effects then spawn XP Orbs
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
-        //Base_EnemyAnimator checks for isAlive to play Death animation
-        isAlive = false;
+        //Base_EnemyAnimator checks for playDeathAnim to play Death animation
+        playDeathAnim = true;
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
+        Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
         //Disable sprite renderer before deleting gameobject
         //sr.enabled = false;
-        //Invoke("DeleteObj", .5f); //Wait for fade out to finish
     }
 
-    protected virtual void DeleteObj()
+    void ToggleHitbox()
     {
-        //TODO: bosses won't be deleted, just switch to static death anim
-        Destroy(gameObject);
+        movement.rb.simulated = false;
+        GetComponent<BoxCollider2D>().enabled = false;
     }
 #endregion
 }
