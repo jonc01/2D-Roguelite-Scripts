@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+// using UnityEngine.UI;
 
 [CreateAssetMenu(menuName = "Scriptable Objects/Augment")]
 public class Augment : ScriptableObject
@@ -9,7 +9,7 @@ public class Augment : ScriptableObject
     public int AugmentID;
     public Color32 TierColor;
     public int Tier = 0; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
-    public int MaxUpgradeLevel = 1;
+    public int MaxUpgradeLevel = 1; //TODO: might not use this system
     public Sprite AugmentIcon;
     public string Name;
     public string Description;
@@ -21,7 +21,7 @@ public class Augment : ScriptableObject
     public enum BuffedStat { 
         Health, Defense, MoveSpeed, 
         AttackDamage, AttackSpeed, CritChance, CritMultiplier};
-    //TODO: figure out how to assign a stat to buff
+    //TODO: figure out how to buff the specified player stat
     
     [Header("= Debuffed Stats =")]
     public float FlatDecrease;
@@ -35,7 +35,6 @@ public class Augment : ScriptableObject
         //BuffedStat: 3
     //BuffedStat[3] += 2;
     //Translated: +2 to AttackDamage
-
 
 
 

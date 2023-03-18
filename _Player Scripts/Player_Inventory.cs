@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player_Inventory : MonoBehaviour
 {
     [Header("References")]
+    [SerializeField] AugmentManager augmentManager;
     [SerializeField] Base_PlayerCombat combat;
     [SerializeField] Base_PlayerMovement movement;
 
@@ -52,14 +53,25 @@ public class Player_Inventory : MonoBehaviour
     }
 
 #region Augments
-//Public calls
-    public void AddAugment(GameObject obj)
+    public void UpdateAugments()
     {
-        //Get current Augment index
-        //Add to UI bar, also a list, place in next open visual slot
+        for(int i=0; i<augmentManager.activeSlots; i++)
+        {
+            //augmentManager.Slots[i]. ... //TODO: update player stats
+        }
     }
 
-    public void RemoveAugment(GameObject obj)
+////////////////
+//TODO: might just use augmentManager instead of here
+
+    public void AddAugment(Augment aug)
+    {
+        //Get current Augment index
+
+        // UI_AugmentDisplay
+    }
+
+    public void RemoveAugment(Augment aug)
     {
 
     }
