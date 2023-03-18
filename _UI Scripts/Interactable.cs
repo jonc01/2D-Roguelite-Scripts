@@ -3,12 +3,19 @@ using UnityEngine.Events;
 
 public class Interactable : MonoBehaviour
 {
-    public GameObject textPrompt;
-    public bool isInRange;
-    public UnityEvent interactAction;
+    [SerializeField] public GameObject textPrompt;
+    [SerializeField] public bool isInRange;
+    [SerializeField] public UnityEvent interactAction;
+
+    void Start()
+    {
+        textPrompt.SetActive(false);
+    }
 
     void Update()
     {
+        if (!isInRange) return;
+        
         if (Input.GetButtonDown("Interact"))
         {
             interactAction.Invoke();

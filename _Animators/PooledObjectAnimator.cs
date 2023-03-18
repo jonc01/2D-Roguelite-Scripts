@@ -10,6 +10,7 @@ public class PooledObjectAnimator : MonoBehaviour
     [SerializeField] ObjectPoolerList pool;
     [SerializeField] Animator animator;
     [SerializeField] private string animName;
+    [SerializeField] private int hashedAnimName;
     [SerializeField] private float animTime;
     private GameObject prefab;
 
@@ -20,7 +21,7 @@ public class PooledObjectAnimator : MonoBehaviour
 
     private void OnEnable()
     {
-        animator.Play(animName);
+        animator.Play(hashedAnimName);
         StartCoroutine(PoolObject(animTime));
     }
 

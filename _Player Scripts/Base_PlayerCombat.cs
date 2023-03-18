@@ -55,7 +55,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float kbResist; //Knockback resist
 
     [SerializeField]
-    float attackDamage,
+    public float attackDamage,
         attackSpeed,
         critChance,
         critMultiplier,
