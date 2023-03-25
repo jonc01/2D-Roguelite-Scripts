@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player_Inventory : MonoBehaviour
+public class PlayerAugmentInventory : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] AugmentManager augmentManager;
@@ -52,34 +52,57 @@ public class Player_Inventory : MonoBehaviour
         base_MoveSpeed = movement.moveSpeed;
     }
 
+    private void ResetPlayerStats()
+    {
+        //Resets certain player stats before adding augments
+        combat.attackDamage = base_AttackDamage;
+        combat.attackSpeed = base_AttackSpeed;
+        combat.knockbackStrength = base_KnockbackStrength;
+        combat.maxHP = base_MaxHP;
+        combat.defense = base_Defense;
+        combat.kbResist = base_kbResist;
+        movement.moveSpeed = base_MoveSpeed;
+    }
+
 #region Augments
     public void UpdateAugments()
     {
+        ResetPlayerStats();
         for(int i=0; i<augmentManager.activeSlots; i++)
         {
             //augmentManager.Slots[i]. ... //TODO: update player stats
         }
     }
 
+    private void ApplyAugment(AugmentScript augment)
+    {
+        int statIndex = augment.BuffedStat;
+        // int statIndex = augment.DebuffedStat;
+        // switch(statIndex)
+        // {
+        //     case 0: combat.maxHP += augment.
+        // }
+    }
+
 ////////////////
 //TODO: might just use augmentManager instead of here
 
-    public void AddAugment(Augment aug)
-    {
-        //Get current Augment index
+//     public void AddAugment(Augment aug)
+//     {
+//         //Get current Augment index
 
-        // UI_AugmentDisplay
-    }
+//         // UI_AugmentDisplay
+//     }
 
-    public void RemoveAugment(Augment aug)
-    {
+//     public void RemoveAugment(Augment aug)
+//     {
 
-    }
-//Private calls
-    private void NewAugment()
-    {
+//     }
+// //Private calls
+//     private void NewAugment()
+//     {
         
-    }
+//     }
 
 #endregion
 

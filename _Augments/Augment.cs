@@ -7,11 +7,12 @@ using UnityEngine;
 public class Augment : ScriptableObject
 {
     public int AugmentID;
-    public Color32 TierColor;
+    // public Color32 TierColor;
     public int Tier = 0; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
-    public int MaxUpgradeLevel = 1; //TODO: might not use this system
+    public int MinLevel = 1; //TODO: might not use this system
     public Sprite AugmentIcon;
     public string Name;
+    [Multiline(10)]
     public string Description;
     // public enum Tier { Common, Rare, Epic, Legendary, Blessed, Cursed };
     [Header("= Buffed Stats =")]
