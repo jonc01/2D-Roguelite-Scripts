@@ -44,6 +44,7 @@ public class PauseMenu : MonoBehaviour
         videoSettings.SetActive(false);
         Time.timeScale = 1f;
         GameIsPaused = false;
+        GameManager.Instance.TogglePlayerInput(true);
     }
 
     void Pause()
@@ -51,6 +52,14 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         GameIsPaused = true;
+        GameManager.Instance.TogglePlayerInput(false);
+    }
+
+    public void PauseTimeOnly()
+    {
+        Time.timeScale = 0f;
+        GameIsPaused = true;
+        GameManager.Instance.TogglePlayerInput(false);
     }
 
     public void RestartLevel() //For use with Demo level only //TODO: remove once stages are added
@@ -58,12 +67,11 @@ public class PauseMenu : MonoBehaviour
         //TODO: needs more testing
 
         //Load TutorialStage or FirstStage instead, Restart Run
-        AsyncLevelLoader.asyncLevelLoader.StartGame("TutorialStage", currentStage);
+        AsyncLevelLoader.asyncLevelLoader.StartGame("Tileset1_LevelGen", currentStage);
         //!TODO: doesn't work 
 
         //!!TODO: use same approach as LoadPlayer, isn't working now because it doesn't load the duplicate stage
         
-
         Resume();
     }
 

@@ -120,6 +120,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     private void Update()
     {
+        if (!allowInput) return;
         if (!isAlive) return;
         timeSinceAttack += Time.deltaTime;
         timeSinceAirAttack += Time.deltaTime;

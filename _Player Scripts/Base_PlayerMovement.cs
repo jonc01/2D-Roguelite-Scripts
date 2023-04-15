@@ -112,6 +112,7 @@ public class Base_PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (!allowInput) return;
         if (!combat.isAlive) return;
 
         CheckCoyoteTime();

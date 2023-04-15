@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAugmentInventory : MonoBehaviour
+public class AugmentInventory : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] AugmentManager augmentManager;
+    // [SerializeField] AugmentManager augmentManager;
     [SerializeField] Base_PlayerCombat combat;
     [SerializeField] Base_PlayerMovement movement;
-
+    [Header("====== BASE STATS ======")]
     [Header("=== Base Attack Stats ===")]
     public float base_AttackDamage;
     public float base_AttackSpeed;
@@ -21,13 +21,27 @@ public class PlayerAugmentInventory : MonoBehaviour
 
     [Header("=== Base Movement Stats ===")]
     public float base_MoveSpeed;
+    [Space(10)]
+    [Header("====== MODIFIED STATS ======")]
+    [Header("=== Base Attack Stats ===")]
+    public float modified_AttackDamage;
+    public float modified_AttackSpeed;
+    public float modified_KnockbackStrength;
+
+    [Header("=== Base Defense Stats ===")]
+    public float modified_MaxHP;
+    public float modified_Defense;
+    public float modified_kbResist;
+
+    [Header("=== Base Movement Stats ===")]
+    public float modified_MoveSpeed;
 
     [Header("Augments")]
-    [SerializeField] private List<GameObject> AugmentsOwned;
+    [SerializeField] private List<GameObject> heldAugments;
 
     void Awake()
     {
-        AugmentsOwned = new List<GameObject>();
+        heldAugments = new List<GameObject>();
         
         if(combat == null) combat = GetComponentInParent<Base_PlayerCombat>();
         if(movement == null) movement = GetComponentInParent<Base_PlayerMovement>();
@@ -52,7 +66,7 @@ public class PlayerAugmentInventory : MonoBehaviour
         base_MoveSpeed = movement.moveSpeed;
     }
 
-    private void ResetPlayerStats()
+    private void ResetPlayerStats() //OnDeath or on augment wipe
     {
         //Resets certain player stats before adding augments
         combat.attackDamage = base_AttackDamage;
@@ -68,13 +82,15 @@ public class PlayerAugmentInventory : MonoBehaviour
     public void UpdateAugments()
     {
         ResetPlayerStats();
-        for(int i=0; i<augmentManager.activeSlots; i++)
-        {
-            //augmentManager.Slots[i]. ... //TODO: update player stats
-        }
+        // for(int i=0; i<augmentManager.activeSlots; i++)
+        // {
+        //     //augmentManager.Slots[i]. ... //TODO: update player stats
+        // }
+
+        
     }
 
-    private void ApplyAugment(AugmentScript augment)
+    private void PickUpAugment(AugmentScript augment)
     {
         int statIndex = augment.BuffedStat;
         // int statIndex = augment.DebuffedStat;
@@ -82,6 +98,16 @@ public class PlayerAugmentInventory : MonoBehaviour
         // {
         //     case 0: combat.maxHP += augment.
         // }
+
+        //TODO:
+        // Either call the code from the augment directly, or do it here with switch cases?
+        // 0 = damaage
+
+        switch(statIndex)
+        {
+            case 0: combat.attackDamage += augment.buffedAmount; break;
+            case 1: combat.maxHP += augment.buffedAmount; break;
+        }
     }
 
 ////////////////
