@@ -296,13 +296,30 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         KnockbackNullCheckCO();
 
+        if (strength <= 0 ) return;
+        if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
+        if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
+
         if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
 
         isKnockedback = true;
         movement.ToggleFlip(false);
 
         float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        KnockbackCO = StartCoroutine(KnockbackReset(delay));
+    }
+
+    public virtual void Lunge(bool lungeToRight, float strength = 8, float delay = .1f)
+    {
+        KnockbackNullCheckCO();
+
+        isKnockedback = true;
+        movement.ToggleFlip(false);
+
+        float temp = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 

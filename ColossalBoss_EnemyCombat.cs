@@ -555,14 +555,14 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         movement.rb.drag = originalDrag;
         
 
-        ScreenShakeListener.Instance.Shake(2);
         Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
 
         playDeathAnim = true;
 
         //Show death effects then spawn XP Orbs
+        ScreenShakeListener.Instance.Shake(3);
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
-        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        // InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
     }
@@ -571,5 +571,12 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     {
         movement.rb.simulated = false;
         GetComponent<BoxCollider2D>().enabled = false;
+
+        Vector3 offset = hitEffectsOffset.position;
+        offset.y -= .35f;
+
+        ScreenShakeListener.Instance.Shake(3);
+        InstantiateManager.Instance.HitEffects.ShowKillEffect(offset);
+        InstantiateManager.Instance.XPOrbs.SpawnOrbs(offset, totalXPOrbs);
     }
 }

@@ -6,24 +6,39 @@ public class ShopController : MonoBehaviour
 {
     [SerializeField] GameObject interactPrompt;
     [SerializeField] GameObject inputPrompt;
+    [SerializeField] GameObject shopWindow;
     private bool canTakeInput;
 
     void Start()
     {
         ToggleText(false);
         canTakeInput = false;
+        OpenShop(false);
     }
 
     void Update()
     {
         if(!canTakeInput) return;
+        //Checks if game is already paused, or input is disabled
+        if(!GameManager.Instance.inputAllowed) return; 
 
         if(Input.GetButtonDown("Interact"))
         {
-            //shop.OpenShop(); //TODO: add after Shops are added
-            Debug.Log("Test Shop open");
+            OpenShop();
             ToggleText(false);
         }
+        
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            OpenShop(false);
+            ToggleText(true);
+        }
+    }
+
+    private void OpenShop(bool open = true)
+    {
+        if(shopWindow == null) return;
+        shopWindow.SetActive(open);
     }
 
     private void ToggleText(bool toggle)

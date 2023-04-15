@@ -19,6 +19,8 @@ public class Base_CombatBehavior : MonoBehaviour
     [Header("Debugging")]
     public bool playerHit;
     public bool canAttack;
+    [Header("Status")]
+    public bool knockbackImmune;
 
     protected virtual void Start()
     {

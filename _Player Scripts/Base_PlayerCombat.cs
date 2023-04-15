@@ -55,7 +55,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float kbResist; //Knockback resist
 
     [SerializeField]
-    float attackDamage,
+    public float attackDamage,
         attackSpeed,
         critChance,
         critMultiplier,
@@ -120,6 +120,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     private void Update()
     {
+        if (!allowInput) return;
         if (!isAlive) return;
         timeSinceAttack += Time.deltaTime;
         timeSinceAirAttack += Time.deltaTime;

@@ -8,7 +8,7 @@ public class Melee_Lunge : Base_CombatBehavior
 
     [Header("Lunge")]
     [SerializeField] bool canLunge;
-    [SerializeField] bool isLunging;
+    [SerializeField] public bool isLunging;
     Coroutine LungingCO;
 
     [SerializeField] bool allowCollision;
@@ -36,6 +36,7 @@ public class Melee_Lunge : Base_CombatBehavior
 
     IEnumerator LungeCO()
     {
+        knockbackImmune = true;
         playerHit = false;
         canLunge = false;
         movement.ToggleFlip(false);
@@ -44,13 +45,14 @@ public class Melee_Lunge : Base_CombatBehavior
 
         //Start Lunge animation
         combat.animator.PlayManualAnim(0, fullAnimTime);
-        InstantiateManager.Instance.Indicator.PlayIndicator(combat.hitEffectsOffset.position, 0);
+        InstantiateManager.Instance.Indicator.PlayIndicator(combat.hitEffectsOffset.position, 0, 1.6f);
         
         yield return new WaitForSeconds(animDelay); //Charge up portion of animation
         allowCollision = true;
-        combat.GetKnockback(!movement.isFacingRight, 8f, .2f); //Re-using GetKnockback
+        combat.Lunge(movement.isFacingRight, 8f, .2f);
 
         yield return new WaitForSeconds(animEndingTime);
+        knockbackImmune = false;
         allowCollision = false;
         yield return new WaitForSeconds(attackSpeed);
         canLunge = true;
