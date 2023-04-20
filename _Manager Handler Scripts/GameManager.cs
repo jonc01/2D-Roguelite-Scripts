@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public Base_PlayerMovement PlayerMovement;
     private Base_PlayerCombat PlayerCombat;
     public Transform PlayerTargetOffset;
+    public AugmentInventory AugmentInventory;
     public Inventory Inventory;
     public int PlayerCurrPlatform;
     public bool inputAllowed;

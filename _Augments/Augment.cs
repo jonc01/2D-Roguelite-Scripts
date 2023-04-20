@@ -25,9 +25,9 @@ public class Augment : ScriptableObject
     public enum _BuffedStat { 
         Health, Defense, MoveSpeed, 
         AttackDamage, AttackSpeed, 
-        CritChance, CritMultiplier};
+        CritChance, CritMultiplier };
     public _BuffedStat BuffedStat;
-    //TODO: figure out how to buff the specified player stat
+    //TODO: figure out how to buff the specified player stat//needs testing, might work
     
     [Header("= Debuffed Stats =")]
     public float StatDecrease;

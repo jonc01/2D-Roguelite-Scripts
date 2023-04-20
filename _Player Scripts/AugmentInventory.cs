@@ -37,11 +37,11 @@ public class AugmentInventory : MonoBehaviour
     public float modified_MoveSpeed;
 
     [Header("Augments")]
-    [SerializeField] private List<GameObject> heldAugments;
+    [SerializeField] private List<AugmentScript> heldAugments;
 
     void Awake()
     {
-        heldAugments = new List<GameObject>();
+        heldAugments = new List<AugmentScript>();
         
         if(combat == null) combat = GetComponentInParent<Base_PlayerCombat>();
         if(movement == null) movement = GetComponentInParent<Base_PlayerMovement>();
@@ -69,45 +69,88 @@ public class AugmentInventory : MonoBehaviour
     private void ResetPlayerStats() //OnDeath or on augment wipe
     {
         //Resets certain player stats before adding augments
+        combat.maxHP = base_MaxHP;
+        combat.defense = base_Defense;
+        movement.moveSpeed = base_MoveSpeed;
         combat.attackDamage = base_AttackDamage;
         combat.attackSpeed = base_AttackSpeed;
         combat.knockbackStrength = base_KnockbackStrength;
-        combat.maxHP = base_MaxHP;
-        combat.defense = base_Defense;
         combat.kbResist = base_kbResist;
-        movement.moveSpeed = base_MoveSpeed;
+    }
+
+    private void ModifyPlayerStats()
+    {
+        //Applies augmented/modified stats
+        combat.maxHP += modified_MaxHP;
+        combat.defense += modified_Defense;
+        movement.moveSpeed += modified_MoveSpeed;
+        combat.attackDamage += modified_AttackDamage;
+        combat.attackSpeed += modified_AttackSpeed;
+        combat.knockbackStrength += modified_KnockbackStrength;
+        combat.kbResist += modified_kbResist;
     }
 
 #region Augments
     public void UpdateAugments()
     {
+        float tempPlayerHP = combat.currentHP; //Store Player HP in case of max health being reduced
+        
+        //Reset Player stats before re-applying stat boosts
         ResetPlayerStats();
+
+
         // for(int i=0; i<augmentManager.activeSlots; i++)
         // {
         //     //augmentManager.Slots[i]. ... //TODO: update player stats
+        //      PickUpAugment()
         // }
 
+        for(int i=0; i<heldAugments.Count; i++)
+        {
+            ApplyAugmentStats(heldAugments[i]);
+        }
+
+        ModifyPlayerStats();
         
+        //Update health
+        if(combat.currentHP < tempPlayerHP) combat.currentHP = combat.maxHP;
+        else combat.currentHP = tempPlayerHP;
+    }
+
+    public void AddAugment(AugmentScript augment)
+    {
+        heldAugments.Add(augment);
+        UpdateAugments();
+    }
+
+    public void RemoveAugment(AugmentScript augment)
+    {
+        heldAugments.Remove(augment);
+        //TODO: need to return to pool
+    }
+
+    private void ApplyAugmentStats(AugmentScript augment)
+    {
+        int statIndex = (int)augment.BuffedStat; //TODO: check typecast
+        // int statIndex = augment.DebuffedStat;
+
+        //TODO:
+        // Either call the code from the augment directly, or do it here with switch cases?
+        switch(statIndex)
+        {
+            case 0: modified_MaxHP += augment.buffedAmount; break;
+            case 1: modified_Defense += augment.buffedAmount; break;
+            case 2: modified_MoveSpeed += augment.buffedAmount; break;
+            case 3: modified_AttackDamage += augment.buffedAmount; break;
+            case 4: modified_AttackSpeed += augment.buffedAmount; break;
+            //case 5: crit chance?
+            default: break;
+        }
     }
 
     private void PickUpAugment(AugmentScript augment)
     {
-        int statIndex = augment.BuffedStat;
-        // int statIndex = augment.DebuffedStat;
-        // switch(statIndex)
-        // {
-        //     case 0: combat.maxHP += augment.
-        // }
-
-        //TODO:
-        // Either call the code from the augment directly, or do it here with switch cases?
-        // 0 = damaage
-
-        switch(statIndex)
-        {
-            case 0: combat.attackDamage += augment.buffedAmount; break;
-            case 1: combat.maxHP += augment.buffedAmount; break;
-        }
+        //TODO: might not use?, called in AugmentDisplay (since it has direct access to AugmentScript listed)
     }
 
 ////////////////
