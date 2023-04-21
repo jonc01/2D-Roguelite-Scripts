@@ -407,11 +407,12 @@ public class Base_PlayerCombat : MonoBehaviour
         CheckDie();
     }
 
-    public void HealPlayer(float healAmount)
+    public void HealPlayer(float healAmount, bool showNumber = true)
     {
         if (!isAlive) return;
 
-        InstantiateManager.Instance.TextPopups.ShowHeal(healAmount, textPopupOffset.position);
+        if(showNumber)
+            InstantiateManager.Instance.TextPopups.ShowHeal(healAmount, textPopupOffset.position);
 
         if (currentHP < maxHP) currentHP += healAmount;
         if (currentHP > maxHP) currentHP = maxHP;

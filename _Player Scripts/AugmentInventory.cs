@@ -98,13 +98,6 @@ public class AugmentInventory : MonoBehaviour
         //Reset Player stats before re-applying stat boosts
         ResetPlayerStats();
 
-
-        // for(int i=0; i<augmentManager.activeSlots; i++)
-        // {
-        //     //augmentManager.Slots[i]. ... //TODO: update player stats
-        //      PickUpAugment()
-        // }
-
         for(int i=0; i<heldAugments.Count; i++)
         {
             ApplyAugmentStats(heldAugments[i]);
@@ -115,6 +108,8 @@ public class AugmentInventory : MonoBehaviour
         //Update health
         if(combat.currentHP < tempPlayerHP) combat.currentHP = combat.maxHP;
         else combat.currentHP = tempPlayerHP;
+
+        combat.HealPlayer(0, false);
     }
 
     public void AddAugment(AugmentScript augment)
@@ -146,11 +141,6 @@ public class AugmentInventory : MonoBehaviour
             //case 5: crit chance?
             default: break;
         }
-    }
-
-    private void PickUpAugment(AugmentScript augment)
-    {
-        //TODO: might not use?, called in AugmentDisplay (since it has direct access to AugmentScript listed)
     }
 
 ////////////////
