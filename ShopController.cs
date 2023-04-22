@@ -7,10 +7,15 @@ public class ShopController : MonoBehaviour
     [SerializeField] GameObject interactPrompt;
     [SerializeField] GameObject inputPrompt;
     [SerializeField] GameObject shopWindow;
+    public AugmentPool augmentPool;
     private bool canTakeInput;
+    public bool oneTimePurchaseDone;
 
     void Start()
     {
+        //augmentPool reference for cross-scene ref
+        if(augmentPool == null) augmentPool = GameManager.Instance.AugmentPool;
+        oneTimePurchaseDone = false;
         ToggleText(false);
         canTakeInput = false;
         OpenShop(false);
@@ -20,7 +25,8 @@ public class ShopController : MonoBehaviour
     {
         if(!canTakeInput) return;
         //Checks if game is already paused, or input is disabled
-        if(!GameManager.Instance.inputAllowed) return; 
+        if(!GameManager.Instance.inputAllowed) return;
+        if(oneTimePurchaseDone) return;
 
         if(Input.GetButtonDown("Interact"))
         {
@@ -49,6 +55,7 @@ public class ShopController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
+        if(oneTimePurchaseDone) return;
         if(!collider.CompareTag("Player")) return;
         ToggleText(true);
         canTakeInput = true;

@@ -6,15 +6,17 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public bool inputAllowed;
     public PauseMenu Pause;
     public Transform Player;
 
     public Base_PlayerMovement PlayerMovement;
     private Base_PlayerCombat PlayerCombat;
     public Transform PlayerTargetOffset;
+    public AugmentInventory AugmentInventory;
     public Inventory Inventory;
     public int PlayerCurrPlatform;
-    public bool inputAllowed;
+    public AugmentPool AugmentPool;
 
     private void Awake()
     {
@@ -26,6 +28,8 @@ public class GameManager : MonoBehaviour
         PlayerCombat = Player.GetComponent<Base_PlayerCombat>();
         PlayerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
         if (Inventory == null) Inventory = GetComponent<Inventory>();
+
+        inputAllowed = true;
     }
 
     private void Update()

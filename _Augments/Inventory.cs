@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
-    public int goldAmount;
+    public int goldAmount; //XPAmount
 
     [Header("References")]
     [SerializeField] TextMeshProUGUI goldCount;
@@ -16,7 +16,7 @@ public class Inventory : MonoBehaviour
         if (goldCount != null) UpdateGold();
     }
 
-    public void GiveGold(int amount)
+    public void UpdateGold(int amount)
     {
         goldAmount += amount;
         if (goldCount != null) UpdateGold();

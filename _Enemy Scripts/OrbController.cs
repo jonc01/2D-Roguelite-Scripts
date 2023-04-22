@@ -90,7 +90,7 @@ public class OrbController : MonoBehaviour
         //Check to make sure hits aren't registered multiple times on collision
         if (hitDone) return;
         hitDone = true;
-        inventory.GiveGold(1);
+        inventory.UpdateGold(1); //GiveXP
         animator.Play("PuffOfSmoke");
 
         Invoke("DestroyObject", 0.67f); //Delay to play animation
