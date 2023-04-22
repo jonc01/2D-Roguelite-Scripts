@@ -5,7 +5,7 @@ using UnityEngine;
 public class AugmentInventory : MonoBehaviour
 {
     [Header("References")]
-    // [SerializeField] AugmentManager augmentManager;
+    [SerializeField] AugmentInventoryDisplay augmentInventoryDisplay;
     [SerializeField] Base_PlayerCombat combat;
     [SerializeField] Base_PlayerMovement movement;
     [Header("====== BASE STATS ======")]
@@ -115,6 +115,7 @@ public class AugmentInventory : MonoBehaviour
     public void AddAugment(AugmentScript augment)
     {
         heldAugments.Add(augment);
+        if(augmentInventoryDisplay != null) augmentInventoryDisplay.AddAugmentToDisplay(heldAugments);
         UpdateAugments();
     }
 
@@ -142,26 +143,6 @@ public class AugmentInventory : MonoBehaviour
             default: break;
         }
     }
-
-////////////////
-//TODO: might just use augmentManager instead of here
-
-//     public void AddAugment(Augment aug)
-//     {
-//         //Get current Augment index
-
-//         // UI_AugmentDisplay
-//     }
-
-//     public void RemoveAugment(Augment aug)
-//     {
-
-//     }
-// //Private calls
-//     private void NewAugment()
-//     {
-        
-//     }
 
 #endregion
 
