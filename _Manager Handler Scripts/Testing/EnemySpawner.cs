@@ -7,6 +7,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] Transform spawnOffset;
     [SerializeField] Animator anim;
 
+    [Header("Custom Variables")]
+    [SerializeField] int totalSpawns = 1;
 
     void Start()
     {
@@ -15,6 +17,9 @@ public class EnemySpawner : MonoBehaviour
 
     public void SpawnEnemy()
     {
-        Instantiate(enemyPrefab, spawnOffset.position, Quaternion.identity);
+        for(int i=0; i<totalSpawns; i++)
+        {
+            Instantiate(enemyPrefab, spawnOffset.position, Quaternion.identity);
+        }
     }
 }
