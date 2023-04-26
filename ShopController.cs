@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ShopController : MonoBehaviour
 {
+    [Header("Testing")]
+    [SerializeField] private bool DEBUGGING = false;
+    [Space(10)]
     [SerializeField] GameObject interactPrompt;
     [SerializeField] GameObject inputPrompt;
     [SerializeField] GameObject shopWindow;
@@ -26,7 +29,7 @@ public class ShopController : MonoBehaviour
         if(!canTakeInput) return;
         //Checks if game is already paused, or input is disabled
         if(!GameManager.Instance.inputAllowed) return;
-        if(oneTimePurchaseDone) return;
+        if(oneTimePurchaseDone && !DEBUGGING) return;
 
         if(Input.GetButtonDown("Interact"))
         {
@@ -55,7 +58,7 @@ public class ShopController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        if(oneTimePurchaseDone) return;
+        if(oneTimePurchaseDone && !DEBUGGING) return;
         if(!collider.CompareTag("Player")) return;
         ToggleText(true);
         canTakeInput = true;

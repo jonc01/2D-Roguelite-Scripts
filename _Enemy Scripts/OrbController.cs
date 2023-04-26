@@ -61,7 +61,7 @@ public class OrbController : MonoBehaviour
         var step = orbSpeed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, player.position, step);
 
-        if(Vector3.Distance(transform.position, player.position) < 0.1f)
+        if(Vector3.Distance(transform.position, player.position) < 0.2f)
         {
             HitPlayer();
         }
