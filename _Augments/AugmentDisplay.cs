@@ -104,7 +104,6 @@ public class AugmentDisplay : MonoBehaviour
         ToggleOverlay(false);
         DisplayName.text = augmentScript.Name;
         AugmentIcon_Image.sprite = augmentScript.Icon_Image;
-        Border_Image.sprite = augmentScript.Border_Image;
         DisplayDescription.text = augmentScript.Description;
         DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         if(PriceDisplay != null) PriceDisplay.text = Price.ToString();

@@ -11,7 +11,7 @@ public class AugmentScript : MonoBehaviour
 
     [Header("Stats from Scriptable Object")]
     public int Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
-    public int AugmentLevel; //Randomized in AugmentSelectMenu, 0-5
+    public int AugmentLevel; //Randomized in AugmentSelectMenu, 1-5
     public int BuffedStat;
     public float buffedAmount;
     public float buffedAmountPercent;
@@ -20,7 +20,6 @@ public class AugmentScript : MonoBehaviour
     public float debuffedAmountPercent;
     [Header("Icons")]
     [SerializeField] public Sprite Icon_Image;
-    [SerializeField] public Sprite Border_Image; //TODO: might not use 
 
     [Header("Display - Set by reference")]
     [SerializeField] public string Name;
@@ -57,8 +56,7 @@ public class AugmentScript : MonoBehaviour
 
     public void UpdateLevel(int level)
     {
-        if(level == AugmentLevel) return;
-
+        AugmentLevel = level;
         UpdateStatsToLevel();
     }
 
@@ -67,8 +65,12 @@ public class AugmentScript : MonoBehaviour
     private void UpdateStatsToLevel()
     {
         // if(AugmentLevel >= augmentScrObj.MaxUpgradeLevel) return;
+        int scaledLevel = (AugmentLevel - 1);
         //Upgrade stats
-
+        if(buffedAmount != 0) buffedAmount += scaledLevel;
+        if(buffedAmountPercent != 0f) buffedAmountPercent += scaledLevel * .02f;
+        if(debuffedAmount != 0) debuffedAmount -= scaledLevel;
+        if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledLevel * .02f;
     }
 
 #endregion

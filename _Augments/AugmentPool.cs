@@ -70,7 +70,9 @@ public class AugmentPool : MonoBehaviour
     public void RandomizeAugmentStats(AugmentScript augment)
     {
         //Can be called from other scripts if the Player wants to reroll the Level
-        augment.AugmentLevel = Random.Range(1, 6); //maxExclusive
+        int randLevel = RandomAugmentLevel(); //maxExclusive
+        augment.UpdateLevel(randLevel);
+
         //TODO: Need weights for each Level
     }
 
@@ -100,40 +102,22 @@ public class AugmentPool : MonoBehaviour
         else SwapAugmentList(augment, shopListedAugments, ownedAugments);
     }
 
-    //////////////////// TODO: TESTING
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.L))
-        {
-            for(int i=0; i<100; i++)
-            {
-                RandomAugmentTier();
-            }
-        }
-    }
-
-    ///////////////////////////////////////////////////
-
     public int RandomAugmentTier()
     {
-        int augmentTier;
+        int augmentTier; //1-5
         float rand = Random.Range(0f, 1.01f);
-        // float rand = Random.Range(0f, 1f);
         
-        
-        if(rand >= .58f) {augmentTier = 1; Debug.Log("Common - 42%");}
-        else if(rand >= .27f) {augmentTier = 2; Debug.Log("Rare - 32%");}
-        else if(rand >= .8f) {augmentTier = 3; Debug.Log("Epic - 19%");}
-        else if(rand >= .1f) {augmentTier = 4; Debug.Log("Legendary - 5%");} //6
-        else {augmentTier = 5; Debug.Log("Oc/Un - 2%");} //1%
+        if(rand >= .50f) augmentTier = 0; //Common - 50%
+        else if(rand >= .20f) augmentTier = 1; //Rare - 30%
+        else if(rand >= .04f) augmentTier = 2; //Epic - 16%
+        else if(rand >= .01f) augmentTier = 3; //Legendary - 3%
+        else{ //Overcharged or Unstable - 1%
+            rand = Random.Range(0f, 1.0f);
+            if(rand >= .5f) augmentTier = 4;
+            else augmentTier = 5;
+        }
 
         return augmentTier;
-        // Common 42%
-        // Rare 32%
-        // Epic	19%
-        // Legendary 5%
-        // Overcharged 1% (50/50 to be Unstable)
-        // Unstable 1% (50/50 to be Overcharged)
     }
 
     public int RandomAugmentLevel()
@@ -141,21 +125,14 @@ public class AugmentPool : MonoBehaviour
         int augmentLevel = 1; //1-5
         float rand = Random.Range(0f, 1.01f);
         
-        if(rand >= .58f) augmentLevel = 1; //TODO: change weights
-        else if(rand >= .27f) augmentLevel = 2;
-        else if(rand >= .8f) augmentLevel = 3;
-        else if(rand >= .1f) augmentLevel = 4;
-        else augmentLevel = 5;
+        if(rand >= .50f) augmentLevel = 1; //- 50%
+        else if(rand >= .20f) augmentLevel = 2; //- 30%
+        else if(rand >= .04f) augmentLevel = 3; //- 16%
+        else if(rand >= .01f) augmentLevel = 4; //- 3%
+        else augmentLevel = 5; //- 1%
 
         return augmentLevel;
-        // Level 1 42%
-        // Level 2 32%
-        // Level 3	19%
-        // Level 4 5%
-        // Level 5 2%
     }
-
-    ////////////////////
 
     public void EmptyStock()
     {
