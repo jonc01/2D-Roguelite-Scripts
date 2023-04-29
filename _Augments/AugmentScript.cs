@@ -45,11 +45,11 @@ public class AugmentScript : MonoBehaviour
         if(augmentScrObj == null) { Debug.Log("No Augment Scriptable Object referenced!"); return; }
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
-        Description = augmentScrObj.Description; //TODO: setup for mouse hover
+        Description = augmentScrObj.Description;
         BuffedStat = (int)augmentScrObj.BuffedStat;
         buffedAmount = augmentScrObj.StatIncrease;
         Debug.Log("Augment Stats loaded");
-        // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", use + or - for changes
+        // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
     }
 //
  
