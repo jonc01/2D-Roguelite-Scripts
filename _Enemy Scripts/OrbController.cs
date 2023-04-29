@@ -10,7 +10,6 @@ public class OrbController : MonoBehaviour
 
     [Header("Debugging")]
     [SerializeField] private bool findPlayer;
-    [SerializeField] private float timeSpentFlying;
 
     [Space(10)]
 
@@ -36,7 +35,6 @@ public class OrbController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         collider = GetComponent<CircleCollider2D>();
         findPlayer = false;
-        timeSpentFlying = 0;
 
         xV = Random.Range(xVelocityLower, xVelocityUpper);
         yV = Random.Range(yVelocityLower, yVelocityUpper);
@@ -59,11 +57,11 @@ public class OrbController : MonoBehaviour
     {
         if (!findPlayer) return;
 
-        timeSpentFlying += Time.deltaTime * 4f;
-        var step = (orbSpeed + timeSpentFlying) * Time.deltaTime;
+        orbSpeed *= 1.08f;
+        var step = orbSpeed * Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position, player.position, step);
 
-        if(Vector3.Distance(transform.position, player.position) < 0.1f)
+        if(Vector3.Distance(transform.position, player.position) < 0.2f)
         {
             HitPlayer();
         }
@@ -73,7 +71,6 @@ public class OrbController : MonoBehaviour
     {
         if (player != null) yield return null;
         yield return new WaitForSeconds(startChaseDelay);
-        timeSpentFlying = .1f;
         DisableColliderGrav();
     }
 
