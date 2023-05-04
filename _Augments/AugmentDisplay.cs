@@ -13,6 +13,7 @@ public class AugmentDisplay : MonoBehaviour
     [Space(10)]
     [Header("Display Toggles")]
     [SerializeField] GameObject selectedOverlay;
+    [SerializeField] private TextMeshProUGUI selectedOverlayText;
     [SerializeField] GameObject FullDisplayParent;
 
     [Space(10)]
@@ -47,6 +48,8 @@ public class AugmentDisplay : MonoBehaviour
 
         if(!alwaysDisplay) ToggleDescriptionDisplay(false);
         else ToggleDescriptionDisplay(true);
+
+        if(selectedOverlayText == null && selectedOverlay != null) selectedOverlayText = selectedOverlay.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     void OnEnable()
@@ -56,21 +59,19 @@ public class AugmentDisplay : MonoBehaviour
         RefreshInfo();
         StartCoroutine(RevealAugment());
     }
-
-    void Update()
-    {
-        //TODO: TESTING, DELETE, should be displaying on MouseHoverOver
-        if(Input.GetKeyDown(KeyCode.B)) //works
-        {
-            bool currToggle = ToggleDescParent.activeSelf;
-            ToggleDescriptionDisplay(!currToggle);
-        }
-    }
     
-    private void ToggleOverlay(bool toggle)
+    public void ToggleOverlay(bool toggle, bool purchased = true)
     {
         if(selectedOverlay == null) return;
-        selectedOverlay.SetActive(toggle);
+
+        // selectedOverlay.SetActive(toggle);
+        
+        if(selectedOverlayText == null) return;
+        if(selectedOverlayText.IsActive())
+        {
+            if(purchased) selectedOverlayText.text = "Purchased"; //default
+            else selectedOverlayText.text = "Max Level";
+        }
     }
 
     IEnumerator RevealAugment()
@@ -97,7 +98,7 @@ public class AugmentDisplay : MonoBehaviour
         ToggleOverlay(true);
     }
 
-    public void RefreshInfo()
+    public void RefreshInfo(bool upgrade = false)
     {
         if(augmentScript == null) return;
 
@@ -105,7 +106,12 @@ public class AugmentDisplay : MonoBehaviour
         DisplayName.text = augmentScript.Name;
         AugmentIcon_Image.sprite = augmentScript.Icon_Image;
         DisplayDescription.text = augmentScript.Description;
-        DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+
+        // DisplayLevel.text = "Lv" + augmentScript.AugmentLevel; //default
+
+        if(upgrade) DisplayLevel.text = "Lv" + ((int)augmentScript.AugmentLevel+1); //TODO: testing, needs update/refresh
+        else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+
         if(PriceDisplay != null) PriceDisplay.text = Price.ToString();
         GetBorderColor();
     }

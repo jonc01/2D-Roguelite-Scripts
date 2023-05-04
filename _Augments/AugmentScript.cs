@@ -71,6 +71,8 @@ public class AugmentScript : MonoBehaviour
         if(buffedAmountPercent != 0f) buffedAmountPercent += scaledLevel * .02f;
         if(debuffedAmount != 0) debuffedAmount -= scaledLevel;
         if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledLevel * .02f;
+
+        //TODO: update description
     }
 
 #endregion
