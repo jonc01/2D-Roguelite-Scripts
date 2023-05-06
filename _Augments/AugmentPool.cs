@@ -7,7 +7,7 @@ public class AugmentPool : MonoBehaviour
     //Manager Script
     //Pool of possible augments that can be found, can changed based on tileset
 
-    public int totalUnownedAugments;
+    // public int totalUnownedAugments;
     public int totalOwnedAugments;
 
     [Header("Augment Lists by Tier")]
@@ -15,12 +15,14 @@ public class AugmentPool : MonoBehaviour
     
     [Header("Augment Lists")]
     public List<AugmentScript> ownedAugments; //picked augments and can be pulled from with a higher level
-    public List<AugmentScript> shopListedAugments; //augments being listed in the Shop, temporarily filled to prevent duplicates
+    public List<AugmentScript> listedAugmentsTEMP; //augments being listed in the Shop, temporarily filled to prevent duplicates
+    public List<AugmentScript> currentListedAugments; //holds all currently listed augments
+    [SerializeField] private AugmentInventory augmentInventory;
 
     void Start()
     {
-        // augmentPoolHelpers = new AugmentPoolHelper[6]; //Setup in Inspector
         UpdatePoolSizes();
+        if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
     }
 
     private void UpdatePoolSizes()
@@ -33,19 +35,20 @@ public class AugmentPool : MonoBehaviour
         UpdatePoolSizes(); //Update count for randIndex
 
         //Get a duplicate augment if the Player has all unique augments
-        if(totalUnownedAugments == 0)
-        {
-            return GetNewDuplicateAugment();
-        }
-        else //Get random index of unowned augments, and randomize level
-        {
-            int currTier = RandomAugmentTier();
-            AugmentScript newAugment = augmentPoolHelpers[currTier].GetRandomAugment();
-            RandomizeAugmentStats(newAugment);
-            SwapAugmentList(newAugment, GetAugmentList(newAugment), shopListedAugments);
-            UpdatePoolSizes(); //Update again for referenced counts
-            return newAugment;
-        }
+        // if(totalUnownedAugments == 0)
+        // {
+        //     return GetNewDuplicateAugment();
+        // }
+        // else
+        // {
+        //Get random index of unowned augments, and randomize level
+        int currTier = RandomAugmentTier();
+        AugmentScript newAugment = augmentPoolHelpers[currTier].GetRandomAugment();
+
+        RandomizeAugmentStats(newAugment);
+        SwapAugmentList(newAugment, GetAugmentList(newAugment), listedAugmentsTEMP);
+        UpdatePoolSizes(); //Update again for referenced counts
+        return newAugment;
     }
 
     public AugmentScript GetAugmentFromPool()//List<AugmentScript> augmentList)
@@ -70,26 +73,51 @@ public class AugmentPool : MonoBehaviour
         //Moves an Augment from one list to another
         newList.Add(addedAugment);
         currList.Remove(addedAugment);
+
+        if(newList == listedAugmentsTEMP)
+        {
+            currentListedAugments.Add(addedAugment); //Add a copy to listedAugments
+        }
     }
 
-    public void ChooseAugment(AugmentScript chosenAugment)
+    public void ChooseAugment(AugmentScript chosenAugment)//, int augmentLevel) //TODO: testing
     {
-        //Check if chosenAugment is already owned
-        if(ownedAugments.Contains(chosenAugment)) return;
-        //Move to ownedAugments if not already owned (duplicate)
-        //Else move back to original List
+        //Check if chosenAugment is already owned, remove old and reset stats
+        // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
+        if(ownedAugments.Contains(chosenAugment))
+        {
+            augmentInventory.RemoveAugment(chosenAugment);
+        }
+        // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
         SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
+
+        augmentInventory.AddAugment(chosenAugment);
         
         //Augment was chosen, move the remaining listed augments back to unowned
-        //EmptyStock() is called in AugmentSelectMenu.SelectAugment()
+        //EmptyStock() is called in FillStock()
+    }
+
+    public IEnumerator FillStock(List<AugmentScript> augmentsInStock, int totalAugments = 3)
+    {
+        for(int i=0; i<totalAugments; i++)
+        {
+            AugmentScript currAugment = GetAugmentFromPool();
+            
+            augmentsInStock.Add(currAugment); //AugmentSelectMenu //TODO:
+            
+            yield return new WaitForSecondsRealtime(.01f);
+            StockShop(currAugment); //Pool list //TODO: this should work
+        }
+        yield return new WaitForSecondsRealtime(.01f);
+        EmptyStock();
     }
 
     public void StockShop(AugmentScript augment, bool sellingDuplicates = true)
     {
-        //Move augment from unownedPool into shopListedAugments
+        //Move augment from unownedPool into shopListed
         //This prevents duplicates
-        if(sellingDuplicates) SwapAugmentList(augment, GetAugmentList(augment), shopListedAugments);
-        else SwapAugmentList(augment, ownedAugments, shopListedAugments);
+        if(sellingDuplicates) SwapAugmentList(augment, GetAugmentList(augment), listedAugmentsTEMP);
+        else SwapAugmentList(augment, ownedAugments, listedAugmentsTEMP);
     }
 
     private List<AugmentScript> GetAugmentList(AugmentScript augment)
@@ -104,15 +132,21 @@ public class AugmentPool : MonoBehaviour
         AugmentScript augment;
         int currTier = RandomAugmentTier();
         augment = augmentPoolHelpers[currTier].GetRandomAugment();
+        //Only randomize if not a duplicate
         RandomizeAugmentStats(augment);
+
         return augment;
     }
 
     public void RandomizeAugmentStats(AugmentScript augment)
     {
+        //Check if Augment is already listed
+        if(CheckIfListed(augment)) return;
+
         //Can be called from other scripts if the Player wants to reroll the Level/stats
         int randLevel = RandomAugmentLevel();
         augment.UpdateLevel(randLevel); //Updates stats to Level
+        // augment.UpdateLevel(5); //Updates stats to Level //TODO: DEBUGGING
     }
 
     private int RandomAugmentTier()
@@ -155,16 +189,33 @@ public class AugmentPool : MonoBehaviour
 
     public IEnumerator EmptyStockCO()
     {
-        while(shopListedAugments.Count > 0)
+        //Returns Augments to their original lists, and removes from shopListedAugments
+        while(listedAugmentsTEMP.Count > 0)
         {
             //Move from shopListed to unowned
-            AugmentScript currAugment = shopListedAugments[0];
+            AugmentScript currAugment = listedAugmentsTEMP[0];
             int augmentTier = currAugment.Tier;
-            SwapAugmentList(shopListedAugments[0], shopListedAugments, GetAugmentList(currAugment));
+            SwapAugmentList(listedAugmentsTEMP[0], listedAugmentsTEMP, GetAugmentList(currAugment));
             yield return new WaitForSecondsRealtime(.01f); //Realtime since game is paused
         }
         UpdatePoolSizes();
         yield return new WaitForSecondsRealtime(.1f);
+    }
+
+    public IEnumerator EmptyStockCO(List<AugmentScript> augmentsInStock)
+    {
+        for(int i=0; i<augmentsInStock.Count; i++)
+        {
+            currentListedAugments.Remove(augmentsInStock[i]);
+            yield return new WaitForSecondsRealtime(.01f); //Realtime since game is paused
+        }
+        UpdatePoolSizes();
+        yield return new WaitForSecondsRealtime(.1f);
+    }
+
+    public bool CheckIfListed(AugmentScript augment)
+    {
+        return currentListedAugments.Contains(augment);
     }
 
     public AugmentScript GetNewDuplicateAugment()
@@ -178,7 +229,7 @@ public class AugmentPool : MonoBehaviour
 
         RandomizeAugmentStats(duplicateAugment);
         
-        SwapAugmentList(duplicateAugment, ownedAugments, shopListedAugments);
+        SwapAugmentList(duplicateAugment, ownedAugments, listedAugmentsTEMP);
         
         UpdatePoolSizes();
         return duplicateAugment;

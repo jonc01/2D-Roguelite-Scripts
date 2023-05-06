@@ -26,6 +26,7 @@ public class AugmentSelectMenu : MonoBehaviour
 
     [Header("Augment Slots")]
     [SerializeField] AugmentDisplay[] menuSlots;
+    [SerializeField] private int[] augmentLevels;
     [SerializeField] public List<AugmentScript> augmentsInStock;
 
     [Header("=== Shop ===")]
@@ -41,6 +42,7 @@ public class AugmentSelectMenu : MonoBehaviour
         augmentSelected = false;
         initialStockDone = false;
         totalAugments = menuSlots.Length;
+        augmentLevels = new int[totalAugments];
         prices = new int[totalAugments];
         refreshingStock = false;
         allowInput = true;
@@ -51,18 +53,22 @@ public class AugmentSelectMenu : MonoBehaviour
     void OnEnable()
     {
         allowInput = true;
-        InitialStock();
+
+        if(!initialStockDone) InitialStock();
+        else UpdateDisplay();
+
         GameManager.Instance.Pause.PauseTimeOnly();
 
         //If refresh isn't allowed, disable the button, otherwise update the displayed Refresh Cost text
         if(!refreshAllowed) refreshButtonText.transform.parent.gameObject.SetActive(false);
         else if(refreshButtonText != null) refreshButtonText.text = refreshCost.ToString();
+
+        // if(augmentsInStock.Count == 3) UpdateDisplay(); //TODO:
     }
 
     void OnDisable()
     {
         GameManager.Instance.Pause.Resume();
-        // pool.EmptyStock();
     }
 
     private void InitialStock()
@@ -94,23 +100,23 @@ public class AugmentSelectMenu : MonoBehaviour
             menuSlots[i].ToggleAugmentDisplay(false);
         }
 
-        //Check if pool is filled before calling EmptyStockCO
-        if(pool.shopListedAugments.Count > 0) yield return pool.EmptyStockCO();
+        //Check if pool is filled before calling EmptyStockCO to remove augmentsInStock only
+        if(pool.listedAugmentsTEMP.Count > 0) yield return pool.EmptyStockCO();
+        yield return pool.EmptyStockCO(augmentsInStock);
 
         augmentsInStock.Clear();
 
+        yield return pool.FillStock(augmentsInStock);
+
         for(int i=0; i<totalAugments; i++)
         {
-            AugmentScript currAugment = pool.GetAugmentFromPool();
-            augmentsInStock.Add(currAugment); //Local list
-            yield return new WaitForSecondsRealtime(.01f);
-            pool.StockShop(currAugment); //Pool list
+            // augmentLevels[i] = currAugSlot.augmentScript.AugmentLevel;
+            augmentLevels[i] = augmentsInStock[i].AugmentLevel; //TODO: test, 
             if(isShop) prices[i] = GetPrice(augmentsInStock[i]);
         }
 
         yield return new WaitForSecondsRealtime(.1f);
-
-        pool.EmptyStock();
+        
         UpdateDisplay();
 
         for(int i=0; i<totalAugments; i++)
@@ -126,14 +132,13 @@ public class AugmentSelectMenu : MonoBehaviour
     {
         if(!allowInput) return;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
+        int chosenIndex = augmentsInStock.IndexOf(augment);
         pool.ChooseAugment(augment);
-        //Add the selected Augment into the Player's inventory
-        augmentInventory.AddAugment(augment);
 
         //Disable input for selecting Augments
         for(int i=0; i<totalAugments; i++) menuSlots[i].allowInput = false;
 
-        UpdateDisplay(); //Updates price colors if player buys something
+        // UpdateDisplay(true); //Updates price colors if player buys something //*Only need this if allowing multiple purchases
 
         //Disable inputs to close the Menu after one Augment was selected
         allowInput = false;
@@ -149,8 +154,9 @@ public class AugmentSelectMenu : MonoBehaviour
         transform.parent.gameObject.SetActive(false);
     }
 
-    void UpdateDisplay()
+    void UpdateDisplay(bool purchased = false)
     {
+        //only using 'purchased' if allowing multiple purchases
         for(int i=0; i<menuSlots.Length; i++)
         {
             var currAugSlot = menuSlots[i].GetComponent<AugmentDisplay>();
@@ -172,13 +178,44 @@ public class AugmentSelectMenu : MonoBehaviour
             {
                 currAugSlot.TogglePrice(false);
             }
+
+            AugmentScript currOwnedAugment = currAugSlot.augmentScript;
+            bool duplicateListedOwned = IsOwnedAndListed(currOwnedAugment);
+            
+            if(duplicateListedOwned)
+            {
+                if(IsMaxLevel(currOwnedAugment))
+                {
+                    currAugSlot.allowInput = false;
+                }
+            }
             currAugSlot.RefreshInfo();
         }
     }
 
+    public bool IsOwnedAndListed(AugmentScript augment)
+    {
+        bool duplicateListing = pool.currentListedAugments.Contains(augment);
+
+        if(duplicateListing && IsOwned(augment)) return true;
+        else return false;
+    }
+
+    public bool IsOwned(AugmentScript augment)
+    {
+        bool alreadyOwned = pool.ownedAugments.Contains(augment);
+        return alreadyOwned;
+    }
+
+    public bool IsMaxLevel(AugmentScript augment)
+    {
+        if(augment.AugmentLevel >= augment.MaxLevel) return true;
+        else return false;
+    }
+
     private int GetPrice(AugmentScript augment)
     {
-        //TODO: None of these values are balanced, just placeholder
+        //TODO: None of these values are balanced, just placeholders
         int totalPrice = 0;
 
         switch(augment.Tier)

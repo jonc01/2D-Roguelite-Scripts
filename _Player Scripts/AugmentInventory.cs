@@ -90,6 +90,17 @@ public class AugmentInventory : MonoBehaviour
         combat.kbResist += modified_kbResist;
     }
 
+    private void ResetModifiedStats()
+    {
+        modified_MaxHP = 0;
+        modified_Defense = 0;
+        modified_MoveSpeed = 0;
+        modified_AttackDamage = 0;
+        modified_AttackSpeed = 0;
+        modified_KnockbackStrength = 0;
+        modified_kbResist = 0;
+    }
+
 #region Augments
     public void UpdateAugments()
     {
@@ -122,7 +133,9 @@ public class AugmentInventory : MonoBehaviour
     public void RemoveAugment(AugmentScript augment)
     {
         heldAugments.Remove(augment);
+        ResetModifiedStats();
         //TODO: need to return to pool
+        UpdateAugments();
     }
 
     private void ApplyAugmentStats(AugmentScript augment)

@@ -22,7 +22,7 @@ public class AugmentPoolHelper : MonoBehaviour
     {
         UpdateCount();
         AugmentScript augment;
-        int randIndex = Random.Range(0, totalAugments); //maxExclusive, but works for index
+        int randIndex = Random.Range(0, totalAugments); //maxExclusive, works for index
         augment = augmentsList[randIndex];
         return augment;
     }
