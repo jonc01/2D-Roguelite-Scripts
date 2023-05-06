@@ -133,16 +133,12 @@ public class AugmentSelectMenu : MonoBehaviour
         if(!allowInput) return;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
         int chosenIndex = augmentsInStock.IndexOf(augment);
-        // Debug.Log(augment + "'s INDEX: " + chosenIndex);
-        pool.ChooseAugment(augment);//, augmentLevels[chosenIndex]); //TODO: test
-        // Debug.Log(augment + "'s INDEX LEVEL: " + augmentLevels[chosenIndex]);
-        // pool.ChooseAugment(augment, augment.AugmentLevel); //TODO: test
-        //Storing and passing Level, because a duplicate of the Augment updates the Level
+        pool.ChooseAugment(augment);
 
         //Disable input for selecting Augments
         for(int i=0; i<totalAugments; i++) menuSlots[i].allowInput = false;
 
-        UpdateDisplay(true); //Updates price colors if player buys something //TODO: might not need this
+        // UpdateDisplay(true); //Updates price colors if player buys something //*Only need this if allowing multiple purchases
 
         //Disable inputs to close the Menu after one Augment was selected
         allowInput = false;
@@ -160,13 +156,13 @@ public class AugmentSelectMenu : MonoBehaviour
 
     void UpdateDisplay(bool purchased = false)
     {
+        //only using 'purchased' if allowing multiple purchases
         for(int i=0; i<menuSlots.Length; i++)
         {
             var currAugSlot = menuSlots[i].GetComponent<AugmentDisplay>();
 
             currAugSlot.alwaysDisplay = isShop;
             currAugSlot.augmentScript = augmentsInStock[i];
-            // augmentLevels[i] = currAugSlot.augmentScript.AugmentLevel; //TODO: call elsewhere
 
             if(isShop)
             {
@@ -183,28 +179,38 @@ public class AugmentSelectMenu : MonoBehaviour
                 currAugSlot.TogglePrice(false);
             }
 
+            AugmentScript currOwnedAugment = currAugSlot.augmentScript;
+            bool duplicateListedOwned = IsOwnedAndListed(currOwnedAugment);
             
-            //Check if already owned
-            bool isDuplicate = pool.currentListedAugments.Contains(currAugSlot.augmentScript);
-            if(isDuplicate)
+            if(duplicateListedOwned)
             {
-                Debug.Log(currAugSlot.augmentScript.name + " is a duplicate!");
-                //Display that the Augment is already "Owned"
-                    //Give option to randomize Level instead
-
-                //If Augment is owned, Update Augment Level to be +1
-                AugmentScript currOwnedAugment = currAugSlot.augmentScript;
-                int currOwnedLevel = currOwnedAugment.AugmentLevel;
-                if(currOwnedLevel >= 5)
+                if(IsMaxLevel(currOwnedAugment))
                 {
-                    //Toggle Overlay to display as "Max Level"
                     currAugSlot.allowInput = false;
-                    currAugSlot.ToggleOverlay(true, false);
                 }
             }
-            if(!purchased) currAugSlot.RefreshInfo(isDuplicate);
-            // currAugSlot.RefreshInfo();
+            currAugSlot.RefreshInfo();
         }
+    }
+
+    public bool IsOwnedAndListed(AugmentScript augment)
+    {
+        bool duplicateListing = pool.currentListedAugments.Contains(augment);
+
+        if(duplicateListing && IsOwned(augment)) return true;
+        else return false;
+    }
+
+    public bool IsOwned(AugmentScript augment)
+    {
+        bool alreadyOwned = pool.ownedAugments.Contains(augment);
+        return alreadyOwned;
+    }
+
+    public bool IsMaxLevel(AugmentScript augment)
+    {
+        if(augment.AugmentLevel >= augment.MaxLevel) return true;
+        else return false;
     }
 
     private int GetPrice(AugmentScript augment)

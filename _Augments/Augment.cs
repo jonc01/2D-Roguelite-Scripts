@@ -12,7 +12,12 @@ public class Augment : ScriptableObject
     public enum _Tier { Common, Rare, Epic, Legendary, Overcharged, Unstable };
     // public int Tier = 0; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
     public _Tier Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
-    public int MinLevel = 1; //TODO: might not use this system
+    // public int MaxLevel = 5; 
+
+    // public enum _MaxLevel { Level1 = 1, Level2 = 2, Level3 = 3, Level4 = 5, Level5 = 5};
+    // public _MaxLevel MaxLevel; //TODO: might not use this system //FIX: Level5 can't be selected
+    public int MaxLevel = 5; //TODO: might not use this system
+
     public Sprite AugmentIcon;
     public string Name;
     [Multiline(10)]

@@ -141,15 +141,12 @@ public class AugmentPool : MonoBehaviour
     public void RandomizeAugmentStats(AugmentScript augment)
     {
         //Check if Augment is already listed
-        if(CheckIfListed(augment))
-        {
-            Debug.Log("found duplicate, no random stats"); //TODO: works, remove when done
-            return;
-        }
+        if(CheckIfListed(augment)) return;
 
         //Can be called from other scripts if the Player wants to reroll the Level/stats
         int randLevel = RandomAugmentLevel();
         augment.UpdateLevel(randLevel); //Updates stats to Level
+        // augment.UpdateLevel(5); //Updates stats to Level //TODO: DEBUGGING
     }
 
     private int RandomAugmentTier()

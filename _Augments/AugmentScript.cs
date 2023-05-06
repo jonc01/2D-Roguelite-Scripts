@@ -12,6 +12,7 @@ public class AugmentScript : MonoBehaviour
     [Header("Stats from Scriptable Object")]
     public int Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
     public int AugmentLevel; //Randomized in AugmentSelectMenu, 1-5
+    public int MaxLevel = 5;
     public int BuffedStat;
     public float buffedAmount;
     public float buffedAmountPercent;
@@ -31,7 +32,7 @@ public class AugmentScript : MonoBehaviour
     {
         // if(Description == null) Description = GetComponentInChildren<TextMeshProUGUI>();
         if(augmentScrObj == null) return;
-        AugmentLevel = augmentScrObj.MinLevel; //Min level is determined by its tier;
+        MaxLevel = augmentScrObj.MaxLevel; //Max level is determined by its tier;
         GetAugmentVariables();
     }
 
