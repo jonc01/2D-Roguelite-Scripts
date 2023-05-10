@@ -62,8 +62,6 @@ public class AugmentSelectMenu : MonoBehaviour
         //If refresh isn't allowed, disable the button, otherwise update the displayed Refresh Cost text
         if(!refreshAllowed) refreshButtonText.transform.parent.gameObject.SetActive(false);
         else if(refreshButtonText != null) refreshButtonText.text = refreshCost.ToString();
-
-        // if(augmentsInStock.Count == 3) UpdateDisplay(); //TODO:
     }
 
     void OnDisable()
@@ -128,12 +126,20 @@ public class AugmentSelectMenu : MonoBehaviour
         refreshingStockOverlay.SetActive(false);
     }
 
-    public void SelectAugment(AugmentScript augment)
+    public void SelectAugment(AugmentScript augment, bool randomizeLevel)
     {
         if(!allowInput) return;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
         int chosenIndex = augmentsInStock.IndexOf(augment);
-        pool.ChooseAugment(augment);
+
+        //Get Random level if it is a duplicate Augment
+        if(randomizeLevel)
+        {
+            pool.RandomizeAugmentStats(augment, true);
+            // pool.ChooseAugment(augment, true);
+            pool.ChooseAugment(augment); //TODO: testing if function needs override
+        }
+        else pool.ChooseAugment(augment); //Randomize augment before adding
 
         //Disable input for selecting Augments
         for(int i=0; i<totalAugments; i++) menuSlots[i].allowInput = false;

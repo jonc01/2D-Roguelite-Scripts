@@ -114,6 +114,12 @@ public class AugmentInventory : MonoBehaviour
             ApplyAugmentStats(heldAugments[i]);
         }
 
+        //Update Augment slot displays
+        for(int i=0; i<heldAugments.Count; i++)
+        {
+            augmentInventoryDisplay.AugmentSlots[i].RefreshDisplayInfo();
+        }
+
         ModifyPlayerStats();
         
         //Update health
@@ -121,7 +127,22 @@ public class AugmentInventory : MonoBehaviour
         else combat.currentHP = tempPlayerHP;
 
         combat.HealPlayer(0, false);
+
+        // StartCoroutine(DelayUpdateStats(tempPlayerHP));
     }
+
+    // IEnumerator DelayUpdateStats(float tempPlayerHP)
+    // {
+    //     yield return new WaitForSecondsRealtime(.1f);
+
+    //     ModifyPlayerStats();
+        
+    //     //Update health
+    //     if(combat.currentHP < tempPlayerHP) combat.currentHP = combat.maxHP;
+    //     else combat.currentHP = tempPlayerHP;
+
+    //     combat.HealPlayer(0, false);
+    // }
 
     public void AddAugment(AugmentScript augment)
     {
@@ -134,7 +155,7 @@ public class AugmentInventory : MonoBehaviour
     {
         heldAugments.Remove(augment);
         ResetModifiedStats();
-        //TODO: need to return to pool
+        //TODO: need to return to pool //?
         UpdateAugments();
     }
 

@@ -35,9 +35,13 @@ public class AugmentDisplay : MonoBehaviour
     [SerializeField] public TextMeshProUGUI PriceDisplay;
     [SerializeField] public int Price;
     private Button button;
+    
+    [Header("Duplicate")]
+    [SerializeField] private bool randomizeLevel = false;
 
     void Start()
     {
+        randomizeLevel = false;
         if(augmentScript == null)
         {
             Debug.Log("No Augment Scriptable Object referenced!");
@@ -114,7 +118,7 @@ public class AugmentDisplay : MonoBehaviour
         }
 
         allowInput = false;
-        selectMenu.SelectAugment(augmentScript);
+        selectMenu.SelectAugment(augmentScript, randomizeLevel);
         ToggleOverlay(true);
     }
 
@@ -136,6 +140,7 @@ public class AugmentDisplay : MonoBehaviour
             {
                 DisplayLevel.text = "Lv ??";
                 if(ownedText != null) ownedText.SetActive(true);
+                randomizeLevel = true;
             }
             else
             {
@@ -146,6 +151,16 @@ public class AugmentDisplay : MonoBehaviour
         
         if(PriceDisplay != null) PriceDisplay.text = Price.ToString();
         GetBorderColor();
+    }
+
+    public void RefreshDisplayInfo()
+    {
+        if(augmentScript == null) return;
+
+        DisplayName.text = augmentScript.Name;
+        AugmentIcon_Image.sprite = augmentScript.Icon_Image;
+        DisplayDescription.text = augmentScript.Description;
+        DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
     }
 
     public void UpdateColor(bool playerCanAfford)
