@@ -97,28 +97,6 @@ public class AugmentPool : MonoBehaviour
         //EmptyStock() is called in FillStock()
     }
 
-    public void ChooseAugment(AugmentScript chosenAugment, bool randomLevel) //TODO: testing
-    {
-        //Check if chosenAugment is already owned, remove old and reset stats
-        // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
-        if(ownedAugments.Contains(chosenAugment))
-        {
-            Debug.Log("Augment is already owned");
-            augmentInventory.RemoveAugment(chosenAugment);
-            
-        }
-        
-        // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
-        RandomizeAugmentStats(chosenAugment);
-
-        // SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
-
-        augmentInventory.AddAugment(chosenAugment);
-        
-        //Augment was chosen, move the remaining listed augments back to unowned
-        //EmptyStock() is called in FillStock()
-    }
-
     public IEnumerator FillStock(List<AugmentScript> augmentsInStock, int totalAugments = 3)
     {
         for(int i=0; i<totalAugments; i++)
@@ -166,7 +144,6 @@ public class AugmentPool : MonoBehaviour
         // if(CheckIfListed(augment)) return;
         if(CheckIfListed(augment) && !skipListCheck) return;
 
-        Debug.Log("Randomizing stats");
         //Can be called from other scripts if the Player wants to reroll the Level/stats
         int randLevel = RandomAugmentLevel();
         augment.UpdateLevel(randLevel); //Updates stats to Level
@@ -195,6 +172,8 @@ public class AugmentPool : MonoBehaviour
     {
         int augmentLevel = 1; //1-5
         float rand = Random.Range(0f, 1.01f);
+
+        // Debug.Log("Random Level: " + rand);
         
         if(rand >= .50f) augmentLevel = 1; //- 50%
         else if(rand >= .20f) augmentLevel = 2; //- 30%

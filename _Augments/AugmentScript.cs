@@ -17,8 +17,8 @@ public class AugmentScript : MonoBehaviour
     public float buffedAmount;
     public float buffedAmountPercent;
     public int DebuffedStat;
-    public float debuffedAmount;
-    public float debuffedAmountPercent;
+    public float debuffedAmount; //TODO: might not use, just use a negative value for buffedAmount
+    public float debuffedAmountPercent; //TODO: might not use, just use a negative value for buffedAmount
     [Header("Icons")]
     [SerializeField] public Sprite Icon_Image;
 
@@ -26,6 +26,12 @@ public class AugmentScript : MonoBehaviour
     [SerializeField] public string Name;
     [Multiline(10)]
     [SerializeField] public string Description;
+
+    // Base amounts (before level stats)
+    [Header("Debugging")]
+    [SerializeField] private string baseDescription;
+    [SerializeField] private float baseBuffedAmount;
+    [SerializeField] private float baseBuffedAmountPercent;
 
 
     void Awake()
@@ -46,11 +52,14 @@ public class AugmentScript : MonoBehaviour
         if(augmentScrObj == null) { Debug.Log("No Augment Scriptable Object referenced!"); return; }
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
-        Description = augmentScrObj.Description;
+        baseDescription = augmentScrObj.Description;
         BuffedStat = (int)augmentScrObj.BuffedStat;
         buffedAmount = augmentScrObj.StatIncrease;
         Debug.Log("Augment Stats loaded");
+        baseBuffedAmount = buffedAmount;
+        // baseBuffedAmountPercent = 
         // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
+        UpdateDescription();
     }
 //
  
@@ -65,15 +74,30 @@ public class AugmentScript : MonoBehaviour
 #region Change Stats based on Level
     private void UpdateStatsToLevel()
     {
+        ResetStats();
+
         // if(AugmentLevel >= augmentScrObj.MaxUpgradeLevel) return;
         int scaledLevel = (AugmentLevel - 1);
         //Upgrade stats
         if(buffedAmount != 0) buffedAmount += scaledLevel;
-        if(buffedAmountPercent != 0f) buffedAmountPercent += scaledLevel * .02f;
+        if(buffedAmountPercent != 0f) { buffedAmountPercent += scaledLevel * .02f; Debug.Log("buffedAmountPercent not setup!");}
         if(debuffedAmount != 0) debuffedAmount -= scaledLevel;
         if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledLevel * .02f;
 
-        //TODO: update description
+        UpdateDescription();
+    }
+
+    private void UpdateDescription()
+    {
+        Description = buffedAmount.ToString() + " " + baseDescription;
+    }
+
+    private void ResetStats()
+    {
+        buffedAmount = baseBuffedAmount;
+        buffedAmountPercent = baseBuffedAmountPercent;
+        debuffedAmount = 0;
+        debuffedAmountPercent = 0;
     }
 
 #endregion
