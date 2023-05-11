@@ -87,9 +87,14 @@ public class AugmentScript : MonoBehaviour
         UpdateDescription();
     }
 
-    private void UpdateDescription()
+    public void UpdateDescription(bool random = false)
     {
-        Description = buffedAmount.ToString() + " " + baseDescription;
+        if(augmentScrObj == null) return;
+        if(random) Description =  "+? " + baseDescription;
+        else{
+            if(buffedAmount > 0) Description = "+" + buffedAmount.ToString() + " " + baseDescription;
+            else Description = "-" + buffedAmount.ToString() + " " + baseDescription;
+        }
     }
 
     private void ResetStats()

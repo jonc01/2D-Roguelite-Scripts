@@ -108,6 +108,7 @@ public class AugmentInventory : MonoBehaviour
         
         //Reset Player stats before re-applying stat boosts
         ResetPlayerStats(); //Might not be needed if RemoveAugmentStats isn't bugged
+        ResetModifiedStats();
 
         for(int i=0; i<heldAugments.Count; i++)
         {
@@ -157,6 +158,14 @@ public class AugmentInventory : MonoBehaviour
         RemoveAugmentStats(augment);
         ResetModifiedStats();
         
+        UpdateAugments();
+    }
+
+    public void DuplicateAugment(AugmentScript augment)
+    {
+        RemoveAugmentStats(augment);
+        // ResetModifiedStats();
+        // ApplyAugmentStats(augment);
         UpdateAugments();
     }
 

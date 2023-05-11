@@ -12,6 +12,7 @@ public class AugmentDisplay : MonoBehaviour
 
     [Space(10)]
     [Header("Display Toggles")]
+    [SerializeField] bool inInventory = false;
     [SerializeField] GameObject selectedOverlay;
     [SerializeField] private TextMeshProUGUI selectedOverlayText;
     [SerializeField] private GameObject ownedText;
@@ -136,15 +137,24 @@ public class AugmentDisplay : MonoBehaviour
             if(selectMenu.IsOwned(augmentScript)) duplicate = true;
             else duplicate = false;
 
+            //Check for Duplicate augments not at Max level
             if(duplicate && !selectMenu.IsMaxLevel(augmentScript))
             {
                 DisplayLevel.text = "Lv ??";
+                
+                if(!inInventory) augmentScript.UpdateDescription(true);
+                else augmentScript.UpdateDescription();
+
                 if(ownedText != null) ownedText.SetActive(true);
                 randomizeLevel = true;
             }
-            else
+            else //Augment is not a Duplicate, or is Max Level
             {
                 DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+                augmentScript.UpdateDescription();
+
+                if(ownedText != null) ownedText.SetActive(false);
+                randomizeLevel = false;
             }
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;

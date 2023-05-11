@@ -86,13 +86,14 @@ public class AugmentPool : MonoBehaviour
         // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
         if(ownedAugments.Contains(chosenAugment))
         {
-            augmentInventory.RemoveAugment(chosenAugment);
+            augmentInventory.DuplicateAugment(chosenAugment);
         }
-        // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
-        SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
-
-        augmentInventory.AddAugment(chosenAugment);
-        
+        else
+        {
+            // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
+            SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
+            augmentInventory.AddAugment(chosenAugment);
+        }
         //Augment was chosen, move the remaining listed augments back to unowned
         //EmptyStock() is called in FillStock()
     }
