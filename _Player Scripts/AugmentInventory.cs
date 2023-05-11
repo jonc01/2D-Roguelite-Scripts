@@ -107,11 +107,18 @@ public class AugmentInventory : MonoBehaviour
         float tempPlayerHP = combat.currentHP; //Store Player HP in case of max health being reduced
         
         //Reset Player stats before re-applying stat boosts
-        ResetPlayerStats();
+        ResetPlayerStats(); //Might not be needed if RemoveAugmentStats isn't bugged
+        ResetModifiedStats();
 
         for(int i=0; i<heldAugments.Count; i++)
         {
             ApplyAugmentStats(heldAugments[i]);
+        }
+
+        //Update Augment slot displays
+        for(int i=0; i<heldAugments.Count; i++)
+        {
+            augmentInventoryDisplay.AugmentSlots[i].RefreshDisplayInfo();
         }
 
         ModifyPlayerStats();
@@ -121,7 +128,22 @@ public class AugmentInventory : MonoBehaviour
         else combat.currentHP = tempPlayerHP;
 
         combat.HealPlayer(0, false);
+
+        // StartCoroutine(DelayUpdateStats(tempPlayerHP));
     }
+
+    // IEnumerator DelayUpdateStats(float tempPlayerHP)
+    // {
+    //     yield return new WaitForSecondsRealtime(.1f);
+
+    //     ModifyPlayerStats();
+        
+    //     //Update health
+    //     if(combat.currentHP < tempPlayerHP) combat.currentHP = combat.maxHP;
+    //     else combat.currentHP = tempPlayerHP;
+
+    //     combat.HealPlayer(0, false);
+    // }
 
     public void AddAugment(AugmentScript augment)
     {
@@ -133,15 +155,24 @@ public class AugmentInventory : MonoBehaviour
     public void RemoveAugment(AugmentScript augment)
     {
         heldAugments.Remove(augment);
+        RemoveAugmentStats(augment);
         ResetModifiedStats();
-        //TODO: need to return to pool
+        
+        UpdateAugments();
+    }
+
+    public void DuplicateAugment(AugmentScript augment)
+    {
+        RemoveAugmentStats(augment);
+        // ResetModifiedStats();
+        // ApplyAugmentStats(augment);
         UpdateAugments();
     }
 
     private void ApplyAugmentStats(AugmentScript augment)
     {
         int statIndex = (int)augment.BuffedStat; //TODO: check typecast
-        // int statIndex = augment.DebuffedStat;
+        // augment.DebuffedStat not needed, just set as negative value
 
         //TODO:
         // Either call the code from the augment directly, or do it here with switch cases?
@@ -152,6 +183,22 @@ public class AugmentInventory : MonoBehaviour
             case 2: modified_MoveSpeed += augment.buffedAmount; break;
             case 3: modified_AttackDamage += augment.buffedAmount; break;
             case 4: modified_AttackSpeed += augment.buffedAmount; break;
+            //case 5: crit chance?
+            default: break;
+        }
+    }
+
+    private void RemoveAugmentStats(AugmentScript augment)
+    {
+        int statIndex = (int)augment.BuffedStat;
+
+        switch(statIndex)
+        {
+            case 0: modified_MaxHP -= augment.buffedAmount; break;
+            case 1: modified_Defense -= augment.buffedAmount; break;
+            case 2: modified_MoveSpeed -= augment.buffedAmount; break;
+            case 3: modified_AttackDamage -= augment.buffedAmount; break;
+            case 4: modified_AttackSpeed -= augment.buffedAmount; break;
             //case 5: crit chance?
             default: break;
         }

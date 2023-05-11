@@ -12,6 +12,7 @@ public class AugmentDisplay : MonoBehaviour
 
     [Space(10)]
     [Header("Display Toggles")]
+    [SerializeField] bool inInventory = false;
     [SerializeField] GameObject selectedOverlay;
     [SerializeField] private TextMeshProUGUI selectedOverlayText;
     [SerializeField] private GameObject ownedText;
@@ -35,9 +36,13 @@ public class AugmentDisplay : MonoBehaviour
     [SerializeField] public TextMeshProUGUI PriceDisplay;
     [SerializeField] public int Price;
     private Button button;
+    
+    [Header("Duplicate")]
+    [SerializeField] private bool randomizeLevel = false;
 
     void Start()
     {
+        randomizeLevel = false;
         if(augmentScript == null)
         {
             Debug.Log("No Augment Scriptable Object referenced!");
@@ -114,7 +119,7 @@ public class AugmentDisplay : MonoBehaviour
         }
 
         allowInput = false;
-        selectMenu.SelectAugment(augmentScript);
+        selectMenu.SelectAugment(augmentScript, randomizeLevel);
         ToggleOverlay(true);
     }
 
@@ -132,20 +137,40 @@ public class AugmentDisplay : MonoBehaviour
             if(selectMenu.IsOwned(augmentScript)) duplicate = true;
             else duplicate = false;
 
+            //Check for Duplicate augments not at Max level
             if(duplicate && !selectMenu.IsMaxLevel(augmentScript))
             {
                 DisplayLevel.text = "Lv ??";
+                
+                if(!inInventory) augmentScript.UpdateDescription(true);
+                else augmentScript.UpdateDescription();
+
                 if(ownedText != null) ownedText.SetActive(true);
+                randomizeLevel = true;
             }
-            else
+            else //Augment is not a Duplicate, or is Max Level
             {
                 DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+                augmentScript.UpdateDescription();
+
+                if(ownedText != null) ownedText.SetActive(false);
+                randomizeLevel = false;
             }
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         
         if(PriceDisplay != null) PriceDisplay.text = Price.ToString();
         GetBorderColor();
+    }
+
+    public void RefreshDisplayInfo()
+    {
+        if(augmentScript == null) return;
+
+        DisplayName.text = augmentScript.Name;
+        AugmentIcon_Image.sprite = augmentScript.Icon_Image;
+        DisplayDescription.text = augmentScript.Description;
+        DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
     }
 
     public void UpdateColor(bool playerCanAfford)

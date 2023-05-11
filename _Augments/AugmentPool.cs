@@ -86,13 +86,14 @@ public class AugmentPool : MonoBehaviour
         // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
         if(ownedAugments.Contains(chosenAugment))
         {
-            augmentInventory.RemoveAugment(chosenAugment);
+            augmentInventory.DuplicateAugment(chosenAugment);
         }
-        // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
-        SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
-
-        augmentInventory.AddAugment(chosenAugment);
-        
+        else
+        {
+            // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
+            SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
+            augmentInventory.AddAugment(chosenAugment);
+        }
         //Augment was chosen, move the remaining listed augments back to unowned
         //EmptyStock() is called in FillStock()
     }
@@ -138,10 +139,11 @@ public class AugmentPool : MonoBehaviour
         return augment;
     }
 
-    public void RandomizeAugmentStats(AugmentScript augment)
+    public void RandomizeAugmentStats(AugmentScript augment, bool skipListCheck = false)
     {
-        //Check if Augment is already listed
-        if(CheckIfListed(augment)) return;
+        //Check if Augment is already listed, this prevents listed duplicates from updating levels
+        // if(CheckIfListed(augment)) return;
+        if(CheckIfListed(augment) && !skipListCheck) return;
 
         //Can be called from other scripts if the Player wants to reroll the Level/stats
         int randLevel = RandomAugmentLevel();
@@ -171,6 +173,8 @@ public class AugmentPool : MonoBehaviour
     {
         int augmentLevel = 1; //1-5
         float rand = Random.Range(0f, 1.01f);
+
+        // Debug.Log("Random Level: " + rand);
         
         if(rand >= .50f) augmentLevel = 1; //- 50%
         else if(rand >= .20f) augmentLevel = 2; //- 30%
