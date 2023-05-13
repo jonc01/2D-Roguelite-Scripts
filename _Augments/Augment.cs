@@ -14,6 +14,11 @@ public class Augment : ScriptableObject
     public _Tier Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
     // public int MaxLevel = 5; 
 
+    public enum _AugmentType { 
+        Normal, OnKill, OnDamageTaken, 
+        OnHit, OnRoomClear };
+    public _AugmentType AugmentType;
+
     // public enum _MaxLevel { Level1 = 1, Level2 = 2, Level3 = 3, Level4 = 5, Level5 = 5};
     // public _MaxLevel MaxLevel; //TODO: might not use this system //FIX: Level5 can't be selected
     public int MaxLevel = 5; //TODO: might not use this system
@@ -25,6 +30,7 @@ public class Augment : ScriptableObject
 
     [Header("= Buffed Stats =")]
     public float StatIncrease;
+    public float StatIncreasePerLevel;
     public enum _IncreaseType { Flat, Percent };
     public _IncreaseType IncreaseType;
     public enum _BuffedStat { 

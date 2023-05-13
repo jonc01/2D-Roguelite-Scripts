@@ -10,6 +10,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public Base_Character character;
     public Base_PlayerMovement movement;
     public AnimatorManager animator;
+    [SerializeField] private AugmentInventory augmentInventory;
     [SerializeField] private LayerMask enemyLayer;
     //[SerializeField] private Transform attackPoint;
     //[SerializeField] private float attackRange;
@@ -89,6 +90,7 @@ public class Base_PlayerCombat : MonoBehaviour
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
+        if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
 
         isAlive = true;
         isStunned = false;
@@ -260,9 +262,10 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 damageable.TakeDamage(damageDealt, true, knockbackStrength);
+                augmentInventory.OnHit();
                 HitStopAnim(attackAnimFull, groundAttack);
 
-                if (isAirAttacking) movement.Float(.3f);
+                if(isAirAttacking) movement.Float(.3f);
                 //ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
                 //hitStop.Stop(.1f); //Successful hit
             }
@@ -387,6 +390,8 @@ public class Base_PlayerCombat : MonoBehaviour
         {
             totalDamage = 1; //Damage can never be lower than 1
         }
+
+        augmentInventory.OnDamageTaken();
 
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
         InstantiateManager.Instance.HitEffects.ShowHitEffect(textPopupOffset.position);

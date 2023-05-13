@@ -565,6 +565,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         // InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+        GameManager.Instance.AugmentInventory.OnKill();
     }
 
     void ToggleHitbox()

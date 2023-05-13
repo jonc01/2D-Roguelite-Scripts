@@ -68,6 +68,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         GetComponent<CircleCollider2D>().enabled = false;
 
         isAlive = false;
+        GameManager.Instance.AugmentInventory.OnKill();
         ScreenShakeListener.Instance.Shake(2);
         //InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
 

@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     public Transform Player;
 
     public Base_PlayerMovement PlayerMovement;
-    private Base_PlayerCombat PlayerCombat;
+    public Base_PlayerCombat PlayerCombat;
     public Transform PlayerTargetOffset;
     public AugmentInventory AugmentInventory;
     public Inventory Inventory;

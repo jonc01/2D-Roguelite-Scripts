@@ -366,7 +366,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
-
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
@@ -408,6 +407,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
+        GameManager.Instance.AugmentInventory.OnKill();
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject
@@ -417,6 +417,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     protected virtual void DeleteObj()
     {
+        //TODO: make sure this is called in all Enemy scripts
         Destroy(gameObject);
     }
 }

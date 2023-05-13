@@ -5,11 +5,12 @@ using UnityEngine;
 public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
-    public bool trialRoom; //gets set at in RoomGenerator as Trial room is created
+    public bool trialRoom; //gets set in RoomGenerator as Trial room is created
 
     [Header("References")]
     public DoorManager DoorManager;
     [SerializeField] public EnemyStageManager stageManager;
+    [SerializeField] private AugmentInventory augmentInventory;
 
     void Start()
     {
@@ -19,6 +20,8 @@ public class RoomClear : MonoBehaviour
         //if (DoorManager == null) DoorManager = GameObject.FindGameObjectWithTag("DoorManager").GetComponent<DoorManager>();
             //This only gets the number of children under "Enemies", doesn't count children's children
             //In this case, we don't want to count the raycast transforms, healthbars, etc
+
+        augmentInventory = GameManager.Instance.AugmentInventory;
     }
 
     public void Cleared()
@@ -41,6 +44,7 @@ public class RoomClear : MonoBehaviour
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;
+        if(augmentInventory != null) augmentInventory.OnRoomClear();
     }
 
     public void CheckSpawn()
@@ -52,6 +56,7 @@ public class RoomClear : MonoBehaviour
 
     private void CheckSpawnDelay()
     {
+        if(stageManager == null) return;
         stageManager.SpawnEnemies();
     }
 }

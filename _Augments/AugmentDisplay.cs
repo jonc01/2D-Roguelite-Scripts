@@ -137,7 +137,10 @@ public class AugmentDisplay : MonoBehaviour
             if(selectMenu.IsOwned(augmentScript)) duplicate = true;
             else duplicate = false;
 
-            //Check for Duplicate augments not at Max level
+            bool overlayToggle = false; //TODO: or true?
+            bool maxLevel = false;
+
+            //Check for Duplicate augments not at Max level | no overlay
             if(duplicate && !selectMenu.IsMaxLevel(augmentScript))
             {
                 DisplayLevel.text = "Lv ??";
@@ -147,15 +150,21 @@ public class AugmentDisplay : MonoBehaviour
 
                 if(ownedText != null) ownedText.SetActive(true);
                 randomizeLevel = true;
+                overlayToggle = false;
+                maxLevel = true;
             }
-            else //Augment is not a Duplicate, or is Max Level
+            else //Augment is not a Duplicate, or is Max Level | no overlay
             {
                 DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
                 augmentScript.UpdateDescription();
 
+                maxLevel = selectMenu.IsMaxLevel(augmentScript);
                 if(ownedText != null) ownedText.SetActive(false);
                 randomizeLevel = false;
+                overlayToggle = false;
             }
+            //Overlay toggled if duplicate AND maxLevel
+            ToggleOverlay(overlayToggle, maxLevel); //maxLevel false | "Purchased" overlay
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         

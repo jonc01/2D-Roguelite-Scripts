@@ -5,7 +5,6 @@ using UnityEngine;
 public interface IDamageable
 {
     void TakeDamage(float damageTaken, bool knockback = false, float strength = 8);
-
 }
 
 public interface IInteractable
