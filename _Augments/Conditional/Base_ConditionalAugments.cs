@@ -13,12 +13,15 @@ public class Base_ConditionalAugments : MonoBehaviour
     [SerializeField] protected Base_PlayerCombat playerCombat;
     [Header("Debugging")]
     [SerializeField] protected float durationTimer;
+    [SerializeField] protected AugmentScript augmentScript;
+    [SerializeField] protected int currentLevel;
 
     protected virtual void Start()
     {
         playerCombat = GameManager.Instance.PlayerCombat;
         durationTimer = 0;
         active = false;
+        if(augmentScript == null) augmentScript = GetComponent<AugmentScript>();
     }
 
     public virtual void TriggerAugment()
@@ -30,5 +33,14 @@ public class Base_ConditionalAugments : MonoBehaviour
     protected virtual void Activate()
     {
         Debug.Log("Augment Activated");
+    }
+
+    public virtual void UpdateLevelStats()
+    {
+        //Call from AugmentScript
+        // if(!LevelChanged()) return; //only update if needed
+        if(augmentScript == null) return;
+        buffAmount = augmentScript.buffedAmount;
+        buffAmountPercent = augmentScript.buffedAmountPercent * .01f; //Convert to %
     }
 }

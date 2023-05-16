@@ -16,6 +16,7 @@ public class AugmentScript : MonoBehaviour
     public int AugmentLevel; //Randomized in AugmentSelectMenu, 1-5
     public int MaxLevel = 5;
     public int BuffedStat;
+    public int increaseType; //Flat, Percent
     public float buffedAmount;
     public float buffedAmountPercent;
     public float buffAmountPerLevel; // -----------------
@@ -58,23 +59,30 @@ public class AugmentScript : MonoBehaviour
         baseDescription = augmentScrObj.Description;
         AugmentType = (int)augmentScrObj.AugmentType;
         ConditionalAugmentScript = GetComponent<Base_ConditionalAugments>();
-        UpdateConditional();
+        increaseType = (int)augmentScrObj.IncreaseType;
         BuffedStat = (int)augmentScrObj.BuffedStat;
-        buffedAmount = augmentScrObj.StatIncrease;
+
+        if(increaseType == 0) buffedAmount = augmentScrObj.StatIncrease;
+        else buffedAmountPercent = augmentScrObj.StatIncrease;
+
         buffAmountPerLevel = augmentScrObj.StatIncreasePerLevel;
-        Debug.Log("Augment Stats loaded");
+
         baseBuffedAmount = buffedAmount;
+        baseBuffedAmountPercent = buffedAmountPercent;
         // baseBuffedAmountPercent = 
         // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
+        UpdateConditional();
         UpdateDescription();
+        Debug.Log("Augment Stats loaded");
     }
 //
     private void UpdateConditional()
     {
         //TODO: need to test update with UpdateStatsToLevel()
         if(ConditionalAugmentScript == null) return;
-        ConditionalAugmentScript.buffAmount = buffedAmount;
-        ConditionalAugmentScript.buffAmountPercent = buffedAmountPercent;
+        // ConditionalAugmentScript.buffAmount = buffedAmount;
+        // ConditionalAugmentScript.buffAmountPercent = buffedAmountPercent;
+        ConditionalAugmentScript.UpdateLevelStats();
     }
 
     public void UpdateLevel(int level)
@@ -90,13 +98,17 @@ public class AugmentScript : MonoBehaviour
         ResetStats();
 
         // if(AugmentLevel >= augmentScrObj.MaxUpgradeLevel) return;
-        float scaledStat = (AugmentLevel-1) * buffAmountPerLevel;
+        float scaledStat = (AugmentLevel-1) * buffAmountPerLevel; //Ex: Level 1: +0, Level 2: +1
 
         //Upgrade stats
-        if(buffedAmount != 0) buffedAmount += scaledStat;
-        if(buffedAmountPercent != 0f) { buffedAmountPercent += scaledStat * .02f; Debug.Log("buffedAmountPercent not setup!");}
+        if(increaseType == 0) buffedAmount += scaledStat;
+        else buffedAmountPercent = baseBuffedAmountPercent + scaledStat;
+
+        //TODO: not using yet, needs setup
+        //TODO: for augments that update multiple stats, might just use an array, loop through array here
+        //TODO: if using array^ just use buffedAmount, and use positive or negative values
         if(debuffedAmount != 0) debuffedAmount -= scaledStat;
-        if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledStat * .02f;
+        if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledStat * .01f;
 
         UpdateConditional();
         UpdateDescription();
@@ -105,10 +117,25 @@ public class AugmentScript : MonoBehaviour
     public void UpdateDescription(bool random = false)
     {
         if(augmentScrObj == null) return;
+
+        string divider;
+        float stat;
+        if(increaseType == 0)
+        {
+            stat = buffedAmount;
+            divider = " "; //It's this or another if()
+        }
+        else
+        {
+            stat = buffedAmountPercent;
+            divider = "";
+        }
+
+
         if(random) Description =  "+? " + baseDescription;
         else{
-            if(buffedAmount > 0) Description = "+" + buffedAmount.ToString() + " " + baseDescription;
-            else Description = "-" + buffedAmount.ToString() + " " + baseDescription;
+            if(stat > 0) Description = "+" + stat.ToString() + divider + baseDescription;
+            else Description = "-" + stat.ToString() + divider + baseDescription;
         }
     }
 

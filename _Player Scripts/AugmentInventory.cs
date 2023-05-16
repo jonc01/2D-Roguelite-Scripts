@@ -224,7 +224,7 @@ public class AugmentInventory : MonoBehaviour
     private void ApplyAugmentStats(AugmentScript augment)
     {
         if(augment.AugmentType != 0) return; //Only for Normal augments, not conditional
-        int statIndex = (int)augment.BuffedStat; //TODO: check typecast
+        int statIndex = (int)augment.BuffedStat;
         // augment.DebuffedStat not needed, just set as negative value
 
         //TODO:
