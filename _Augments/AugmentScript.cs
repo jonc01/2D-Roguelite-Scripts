@@ -16,6 +16,7 @@ public class AugmentScript : MonoBehaviour
     public int AugmentLevel; //Randomized in AugmentSelectMenu, 1-5
     public int MaxLevel = 5;
     public int BuffedStat;
+    public string[] BuffedStatName;
     public int increaseType; //Flat, Percent
     public float buffedAmount;
     public float buffedAmountPercent;
@@ -61,6 +62,7 @@ public class AugmentScript : MonoBehaviour
         ConditionalAugmentScript = GetComponent<Base_ConditionalAugments>();
         increaseType = (int)augmentScrObj.IncreaseType;
         BuffedStat = (int)augmentScrObj.BuffedStat;
+        BuffedStatName = augmentScrObj.BuffedStat.ToString().Split('_');
 
         if(increaseType == 0) buffedAmount = augmentScrObj.StatIncrease;
         else buffedAmountPercent = augmentScrObj.StatIncrease;
@@ -120,6 +122,13 @@ public class AugmentScript : MonoBehaviour
 
         string divider;
         float stat;
+        string statType = "";// = BuffedStatName;
+        //Separates Stat names if a space is needed
+        foreach (string statsName in BuffedStatName) {
+            statType += statsName.ToString();
+            statType += " ";
+        }
+
         if(increaseType == 0)
         {
             stat = buffedAmount;
@@ -128,15 +137,23 @@ public class AugmentScript : MonoBehaviour
         else
         {
             stat = buffedAmountPercent;
-            divider = "";
+            divider = "% ";
         }
+        
+        //Example:
+        // Increased Damage and Attack speed
+        // +5 Attack
+        // +10% Attack Speed
 
-
-        if(random) Description =  "+? " + baseDescription;
+        Description = baseDescription + "<br><br>";
+        if(random) Description =  "+? " + statType;
         else{
-            if(stat > 0) Description = "+" + stat.ToString() + divider + baseDescription;
-            else Description = "-" + stat.ToString() + divider + baseDescription;
+            if(stat > 0) Description += "+" + stat.ToString() + divider + statType;
+            else Description += "-" + stat.ToString() + divider + statType;
         }
+    
+        //
+
     }
 
     private void ResetStats()

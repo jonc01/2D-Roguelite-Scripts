@@ -5,10 +5,10 @@ using UnityEngine;
 public class Base_ConditionalAugments : MonoBehaviour
 {
     [Header("Setup")]
-    [SerializeField] public float procChance = 1.0f;
+    [SerializeField] public float procChance = 1.0f; //default 100%
     [SerializeField] public float duration;
     [SerializeField] protected bool active;
-    [SerializeField] public float buffAmount; //TODO: might need to update this to the AugmentScript values
+    [SerializeField] public float buffAmount; //TODO: need to update this to the AugmentScript values
     [SerializeField] public float buffAmountPercent;
     [SerializeField] protected Base_PlayerCombat playerCombat;
     [Header("Debugging")]

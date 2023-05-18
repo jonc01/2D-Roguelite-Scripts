@@ -34,9 +34,9 @@ public class Augment : ScriptableObject
     public enum _IncreaseType { Flat, Percent };
     public _IncreaseType IncreaseType;
     public enum _BuffedStat { 
-        Health, Defense, MoveSpeed, 
-        AttackDamage, AttackSpeed, 
-        CritChance, CritMultiplier };
+        Health, Defense, Move_Speed, 
+        Attack, Attack_Speed, 
+        Crit_Chance, Crit_Multiplier };
     public _BuffedStat BuffedStat;
     //TODO: figure out how to buff the specified player stat//needs testing, might work
     
