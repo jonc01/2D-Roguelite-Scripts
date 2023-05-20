@@ -10,7 +10,7 @@ public class RoomClear : MonoBehaviour
     [Header("References")]
     public DoorManager DoorManager;
     [SerializeField] public EnemyStageManager stageManager;
-    [SerializeField] private AugmentInventory augmentInventory;
+    [SerializeField] private RewardController augmentReward;
 
     void Start()
     {
@@ -21,12 +21,14 @@ public class RoomClear : MonoBehaviour
             //This only gets the number of children under "Enemies", doesn't count children's children
             //In this case, we don't want to count the raycast transforms, healthbars, etc
 
-        augmentInventory = GameManager.Instance.AugmentInventory;
+        augmentReward = GetComponent<RewardController>();
+        if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
     }
 
     public void Cleared()
     {
         //TimeManager.Instance.DoFreezeTime(.15f, .05f);
+        Debug.Log("Room Cleared");
         StartCoroutine(DelayClear());
         //if this breaks, update enemyCount with enemyCount = EnemyList.transform.childCount
     }
@@ -40,11 +42,17 @@ public class RoomClear : MonoBehaviour
     IEnumerator DelayClear()
     {
         yield return new WaitForSeconds(1f);
+        if(stageManager == null) augmentReward.ToggleRewardSelect(false);
+        else
+        {
+            if(!stageManager.neutralRoom && augmentReward != null) augmentReward.ToggleRewardSelect(true);
+            else if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
+        }
+        yield return new WaitForSeconds(.5f);
         DoorManager.OpenAllDoors(true);
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;
-        if(augmentInventory != null) augmentInventory.OnRoomClear();
     }
 
     public void CheckSpawn()

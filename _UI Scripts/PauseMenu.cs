@@ -23,8 +23,17 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if(Input.GetKeyDown(KeyCode.Escape))
         {
+            //Only allow Esc if the AugmentSelect isn't open and pauseMenu isn't open
+            if(!GameManager.Instance.inputAllowed)
+            {
+                if(!pauseMenuUI.activeSelf)
+                {
+                    // if(!GameManager.Instance.shopOpen) return;
+                    if(GameManager.Instance.rewardOpen) return;
+                }
+            }
             if (GameIsPaused)
             {
                 Resume();

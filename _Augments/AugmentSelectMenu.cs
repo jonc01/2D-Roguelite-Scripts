@@ -47,7 +47,8 @@ public class AugmentSelectMenu : MonoBehaviour
         refreshingStock = false;
         allowInput = true;
         if(shopController == null) shopController = transform.parent.GetComponentInParent<ShopController>();
-        if(pool == null) pool = shopController.augmentPool;
+        if(shopController != null && pool == null) pool = shopController.augmentPool;
+        if(pool == null) pool = GameManager.Instance.AugmentPool;
     }
 
     void OnEnable()
@@ -57,6 +58,7 @@ public class AugmentSelectMenu : MonoBehaviour
         if(!initialStockDone) InitialStock();
         else UpdateDisplay();
 
+        GameManager.Instance.shopOpen = true;
         GameManager.Instance.Pause.PauseTimeOnly();
 
         //If refresh isn't allowed, disable the button, otherwise update the displayed Refresh Cost text
@@ -66,6 +68,7 @@ public class AugmentSelectMenu : MonoBehaviour
 
     void OnDisable()
     {
+        GameManager.Instance.shopOpen = false;
         GameManager.Instance.Pause.Resume();
     }
 
@@ -131,6 +134,8 @@ public class AugmentSelectMenu : MonoBehaviour
         if(!allowInput) return;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
         int chosenIndex = augmentsInStock.IndexOf(augment);
+
+        if(pool == null) pool = GameManager.Instance.AugmentPool;
 
         //Get Random level if it is a duplicate Augment
         if(randomizeLevel) pool.RandomizeAugmentStats(augment, true);
