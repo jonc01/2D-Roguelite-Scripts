@@ -150,7 +150,9 @@ public class AugmentSelectMenu : MonoBehaviour
         //Disable inputs to close the Menu after one Augment was selected
         allowInput = false;
         augmentSelected = true;
-        shopController.oneTimePurchaseDone = true;
+
+        if(shopController != null)
+            shopController.oneTimePurchaseDone = true;
 
         StartCoroutine(DisableSelectMenu(.5f));
     }

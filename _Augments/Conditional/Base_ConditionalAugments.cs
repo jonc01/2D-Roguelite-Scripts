@@ -32,7 +32,7 @@ public class Base_ConditionalAugments : MonoBehaviour
 
     protected virtual void Activate()
     {
-        Debug.Log("Augment Activated");
+        Debug.Log(name + " Augment Activated");
     }
 
     public virtual void UpdateLevelStats()

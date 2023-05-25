@@ -145,7 +145,7 @@ public class AugmentScript : MonoBehaviour
         // +5 Attack
         // +10% Attack Speed
 
-        Description = baseDescription + "<br><br>";
+        Description = baseDescription + "<br>---<br>"; //New line, divider for stat display
         if(random) Description =  "+? " + statType;
         else{
             if(stat > 0) Description += "+" + stat.ToString() + divider + statType;

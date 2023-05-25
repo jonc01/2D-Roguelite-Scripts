@@ -29,8 +29,7 @@ public class RewardController : MonoBehaviour
 
 
         
-
-
+        
 
         //TODO: player shouldn't be able to press Esc during this menu
         // Esc input should do nothingl, but game should be paused during this (handled in AugmentSelectMenu)

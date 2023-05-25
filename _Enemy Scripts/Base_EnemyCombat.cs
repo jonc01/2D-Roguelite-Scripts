@@ -56,6 +56,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
     public float attackRange;
+    public bool allowFlipBeforeAttack = false;
     [SerializeField] public float knockbackStrength = 0; //4 is moderate
     [Space(10)]
     float timeSinceAttack;
@@ -68,11 +69,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] public bool isSpawning;
     public bool isStunned;
     public bool isKnockedback;
+    public bool isLunging;
     public bool isAttacking;
-    public bool playerToRight;
+    public bool playerToRight; //Updated somewhere //TODO:
     public float kbResist = 0;
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
+    Coroutine LungeCO;
     protected Coroutine AttackingCO;
     private bool initialEnable;
 
@@ -102,6 +105,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isAlive = true;
         isStunned = false;
         isKnockedback = false;
+        isLunging = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
@@ -233,13 +237,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         animator.PlayAttackAnim(fullAttackAnimTime);
 
         yield return new WaitForSeconds(startAttackDelay);
-        FacePlayer(); //Flip to faceplayer before attacking
+        if(allowFlipBeforeAttack) FacePlayer(); //Flip to faceplayer before attacking
         
         yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
         CheckHit();
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
-        isAttacking = false;
         yield return new WaitForSeconds(attackEndDelay);
+        isAttacking = false;
         movement.canMove = true;
         movement.ToggleFlip(true);
     }
@@ -261,7 +265,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
                 player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage);
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
+
+
+                // player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(transform.position.x, knockbackStrength);
                 //knockback
                 //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
@@ -292,11 +299,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isStunned = false;
     }
 
-    public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .1f)
+    public virtual void GetKnockback(bool kbToRight, float strength = 8, float delay = .1f)
     {
         KnockbackNullCheckCO();
 
-        if (strength <= 0 ) return;
+        if (strength <= 0) return;
         if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
         if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
 
@@ -305,21 +312,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isKnockedback = true;
         movement.ToggleFlip(false);
 
-        float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        // float temp = kbDir == true ? 1 : -1; //get knocked back in opposite direction of player
+        
+        float temp;
+        if(kbToRight) temp = 1;
+        else temp = -1;
 
-        KnockbackCO = StartCoroutine(KnockbackReset(delay));
-    }
-
-    public virtual void Lunge(bool lungeToRight, float strength = 8, float delay = .1f)
-    {
-        KnockbackNullCheckCO();
-
-        isKnockedback = true;
-        movement.ToggleFlip(false);
-
-        float temp = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
@@ -333,7 +331,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         movement.canMove = false;
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         movement.canMove = true;
+
         movement.ToggleFlip(true);
+        
         isKnockedback = false;
     }
 
@@ -341,6 +341,52 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         if (KnockbackCO == null) return;
         StopCoroutine(KnockbackCO);
+        
+        if(isAttacking) return;
+
+        movement.canMove = true;
+        movement.ToggleFlip(true);
+        isKnockedback = false;
+    }
+
+    public virtual void Lunge(bool lungeToRight, float strength = 8, float delay = .1f)
+    {
+        Debug.Log("1 - Lunge start");
+        LungeCheckCO();
+        Debug.Log("2 - Lunge start");
+
+        isLunging = true;
+        movement.ToggleFlip(false);
+
+        float temp = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
+        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        Debug.Log("3 - Lunge should be started");
+
+        LungeCO = StartCoroutine(LungeReset(delay));
+    }
+
+    IEnumerator LungeReset(float delay, float recoveryDelay = .1f)
+    {
+        yield return new WaitForSeconds(delay);
+        movement.rb.velocity = Vector3.zero;
+        movement.canMove = false;
+        yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
+        movement.canMove = true;
+
+        movement.ToggleFlip(true);
+        
+        isLunging = false;
+    }
+
+    void LungeCheckCO()
+    {
+        if (LungeCO == null) return;
+        StopCoroutine(LungeCO);
+        
+        if(isAttacking) return;
+
         movement.canMove = true;
         movement.ToggleFlip(true);
         isKnockedback = false;
@@ -356,7 +402,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         animator.StopAttackAnimCO();
     }
 
-    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
+    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
 
@@ -370,7 +416,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
 
-        if (knockback) GetKnockback(playerToRight, strength);
+
+        if(knockback)
+        {
+            bool kbToRight;
+            kbToRight = xPos < transform.position.x;
+
+            if (xPos != 0) GetKnockback(kbToRight, strength);
+        }
 
         //Display Damage number
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    void TakeDamage(float damageTaken, bool knockback = false, float strength = 8);
+    void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0);
 }
 
 public interface IInteractable

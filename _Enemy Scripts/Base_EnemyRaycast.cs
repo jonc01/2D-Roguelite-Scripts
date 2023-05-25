@@ -139,6 +139,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         // Updates 'playerToRight' bool: where the player is in relation to enemy
         if (playerDetectFront)  playerToRight = movement.isFacingRight;
         else if (playerDetectBack)  playerToRight = !movement.isFacingRight;
+        //! don't use this for knockback, won't behave correctly if the player is midair or the enemy can't update
 
         //if (playerDetectFront)
             // if (movement.isFacingRight) // E-> P
