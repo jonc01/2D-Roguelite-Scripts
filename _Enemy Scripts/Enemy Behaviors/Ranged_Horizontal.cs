@@ -35,6 +35,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
         movement.ToggleFlip(false);
         movement.canMove = false;
         combat.isAttacking = true;
+        combat.knockbackImmune = true;
 
         combat.animator.PlayManualAnim(0, fullAnimTime);
 
@@ -49,6 +50,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
 
         yield return new WaitForSeconds(animEndingTime);
         combat.isAttacking = false;
+        combat.knockbackImmune = false;
         movement.canMove = true;
         movement.ToggleFlip(true);
 

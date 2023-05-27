@@ -73,6 +73,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public bool isAttacking;
     public bool playerToRight; //Updated somewhere //TODO:
     public float kbResist = 0;
+    public bool knockbackImmune = false;
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
     Coroutine LungeCO;
@@ -106,6 +107,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isStunned = false;
         isKnockedback = false;
         isLunging = false;
+        knockbackImmune = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
@@ -231,6 +233,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         //Allow flip for a little longer
         isAttacking = true;
+        knockbackImmune = true;
+
+        //TODO:
+        //  - - - - - - KnockbackReset();
+        // KnockbackNullCheckCO();
+
         movement.canMove = false;
         movement.ToggleFlip(false);
         
@@ -242,8 +250,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
         CheckHit();
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
-        yield return new WaitForSeconds(attackEndDelay);
+        knockbackImmune = false;
         isAttacking = false;
+        yield return new WaitForSeconds(attackEndDelay);
         movement.canMove = true;
         movement.ToggleFlip(true);
     }
@@ -304,8 +313,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         KnockbackNullCheckCO();
 
         if (strength <= 0) return;
-        if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
-        if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
+        // if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
+        // if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
+        if(knockbackImmune) return;
 
         if (kbResist > 0) strength -= kbResist;
 
@@ -342,7 +352,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (KnockbackCO == null) return;
         StopCoroutine(KnockbackCO);
         
-        if(isAttacking) return;
+        // if(isAttacking) return; //TODO: might be issue, just remove
 
         movement.canMove = true;
         movement.ToggleFlip(true);
@@ -351,27 +361,52 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void Lunge(bool lungeToRight, float strength = 8, float delay = .1f)
     {
-        Debug.Log("1 - Lunge start");
-        LungeCheckCO();
-        Debug.Log("2 - Lunge start");
+        KnockbackNullCheckCO();
 
-        isLunging = true;
+        isKnockedback = true;
         movement.ToggleFlip(false);
 
         float temp = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
-        Debug.Log("3 - Lunge should be started");
+        KnockbackCO = StartCoroutine(KnockbackReset(delay));
 
-        LungeCO = StartCoroutine(LungeReset(delay));
+
+        // Debug.Log("1 - Lunge start");
+        // LungeNullCheckCO();
+        // // GetKnockback(lungeToRight, strength, delay);
+
+        // // KnockbackNullCheckCO();
+        // Debug.Log("2 - Lunge start");
+
+        // isLunging = true;
+        // movement.ToggleFlip(false);
+
+        // //TODO: lungeRight might be wrong
+        // // float temp = lungeToRight != true ? -1 : 1; //lunge forwards
+
+        // float temp;  //TODO: TESTING, should work? try opposite directions
+        // if(lungeToRight) temp = 1; //TODO: this might be swapped
+        // else temp = -1;
+
+        // Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        // // movement.rb.velocity = (direction*strength);
+
+        // Debug.Log("3 - Lunge should be started");
+
+        // // KnockbackCO = StartCoroutine(KnockbackReset(delay));
+        // LungeCO = StartCoroutine(LungeReset(delay));
     }
 
     IEnumerator LungeReset(float delay, float recoveryDelay = .1f)
     {
+        Debug.Log("4 - LungeResetting");
         yield return new WaitForSeconds(delay);
         movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
+        Debug.Log("5 - Stopping Lunge");
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         movement.canMove = true;
 
@@ -380,16 +415,16 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isLunging = false;
     }
 
-    void LungeCheckCO()
+    void LungeNullCheckCO()
     {
         if (LungeCO == null) return;
         StopCoroutine(LungeCO);
         
-        if(isAttacking) return;
+        // if(isAttacking) return; //TODO: same with knockback, test
 
         movement.canMove = true;
         movement.ToggleFlip(true);
-        isKnockedback = false;
+        isLunging = false;
     }
 
     void StopAttack(bool toggleFlip = false)
