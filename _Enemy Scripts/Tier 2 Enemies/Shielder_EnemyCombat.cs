@@ -32,7 +32,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, .2f);
+
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(transform.position.x, .2f);
             }
         }
     }
@@ -48,16 +49,18 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
-    public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
+    public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
-        if (movement.isFacingRight == playerToRight)
+        if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
         {
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
             InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+            // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO
             CheckCounterHit();
         }
-        else base.TakeDamage(damageTaken, knockback, strength);
+        // else base.TakeDamage(damageTaken, knockback, strength, xPos);
+        else base.TakeDamage(damageTaken, false);
     }
 
     protected override void Die()
@@ -68,6 +71,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         GetComponent<CircleCollider2D>().enabled = false;
 
         isAlive = false;
+        GameManager.Instance.AugmentInventory.OnKill();
         ScreenShakeListener.Instance.Shake(2);
         //InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
 

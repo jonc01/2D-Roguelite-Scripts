@@ -11,11 +11,16 @@ public class AugmentScript : MonoBehaviour
 
     [Header("Stats from Scriptable Object")]
     public int Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
+    public int AugmentType;
+    public Base_ConditionalAugments ConditionalAugmentScript;
     public int AugmentLevel; //Randomized in AugmentSelectMenu, 1-5
     public int MaxLevel = 5;
     public int BuffedStat;
+    public string[] BuffedStatName;
+    public int increaseType; //Flat, Percent
     public float buffedAmount;
     public float buffedAmountPercent;
+    public float buffAmountPerLevel; // -----------------
     public int DebuffedStat;
     public float debuffedAmount; //TODO: might not use, just use a negative value for buffedAmount
     public float debuffedAmountPercent; //TODO: might not use, just use a negative value for buffedAmount
@@ -53,16 +58,34 @@ public class AugmentScript : MonoBehaviour
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
         baseDescription = augmentScrObj.Description;
+        AugmentType = (int)augmentScrObj.AugmentType;
+        ConditionalAugmentScript = GetComponent<Base_ConditionalAugments>();
+        increaseType = (int)augmentScrObj.IncreaseType;
         BuffedStat = (int)augmentScrObj.BuffedStat;
-        buffedAmount = augmentScrObj.StatIncrease;
-        Debug.Log("Augment Stats loaded");
+        BuffedStatName = augmentScrObj.BuffedStat.ToString().Split('_');
+
+        if(increaseType == 0) buffedAmount = augmentScrObj.StatIncrease;
+        else buffedAmountPercent = augmentScrObj.StatIncrease;
+
+        buffAmountPerLevel = augmentScrObj.StatIncreasePerLevel;
+
         baseBuffedAmount = buffedAmount;
+        baseBuffedAmountPercent = buffedAmountPercent;
         // baseBuffedAmountPercent = 
         // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
+        UpdateConditional();
         UpdateDescription();
+        Debug.Log("Augment Stats loaded");
     }
 //
- 
+    private void UpdateConditional()
+    {
+        //TODO: need to test update with UpdateStatsToLevel()
+        if(ConditionalAugmentScript == null) return;
+        // ConditionalAugmentScript.buffAmount = buffedAmount;
+        // ConditionalAugmentScript.buffAmountPercent = buffedAmountPercent;
+        ConditionalAugmentScript.UpdateLevelStats();
+    }
 
     public void UpdateLevel(int level)
     {
@@ -77,24 +100,60 @@ public class AugmentScript : MonoBehaviour
         ResetStats();
 
         // if(AugmentLevel >= augmentScrObj.MaxUpgradeLevel) return;
-        int scaledLevel = (AugmentLevel - 1);
-        //Upgrade stats
-        if(buffedAmount != 0) buffedAmount += scaledLevel;
-        if(buffedAmountPercent != 0f) { buffedAmountPercent += scaledLevel * .02f; Debug.Log("buffedAmountPercent not setup!");}
-        if(debuffedAmount != 0) debuffedAmount -= scaledLevel;
-        if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledLevel * .02f;
+        float scaledStat = (AugmentLevel-1) * buffAmountPerLevel; //Ex: Level 1: +0, Level 2: +1
 
+        //Upgrade stats
+        if(increaseType == 0) buffedAmount += scaledStat;
+        else buffedAmountPercent = baseBuffedAmountPercent + scaledStat;
+
+        //TODO: not using yet, needs setup
+        //TODO: for augments that update multiple stats, might just use an array, loop through array here
+        //TODO: if using array^ just use buffedAmount, and use positive or negative values
+        if(debuffedAmount != 0) debuffedAmount -= scaledStat;
+        if(debuffedAmountPercent != 0f) debuffedAmountPercent += scaledStat * .01f;
+
+        UpdateConditional();
         UpdateDescription();
     }
 
     public void UpdateDescription(bool random = false)
     {
         if(augmentScrObj == null) return;
-        if(random) Description =  "+? " + baseDescription;
-        else{
-            if(buffedAmount > 0) Description = "+" + buffedAmount.ToString() + " " + baseDescription;
-            else Description = "-" + buffedAmount.ToString() + " " + baseDescription;
+
+        string divider;
+        float stat;
+        string statType = "";// = BuffedStatName;
+        //Separates Stat names if a space is needed
+        foreach (string statsName in BuffedStatName) {
+            statType += statsName.ToString();
+            statType += " ";
         }
+
+        if(increaseType == 0)
+        {
+            stat = buffedAmount;
+            divider = " "; //It's this or another if()
+        }
+        else
+        {
+            stat = buffedAmountPercent;
+            divider = "% ";
+        }
+        
+        //Example:
+        // Increased Damage and Attack speed
+        // +5 Attack
+        // +10% Attack Speed
+
+        Description = baseDescription + "<br>---<br>"; //New line, divider for stat display
+        if(random) Description =  "+? " + statType;
+        else{
+            if(stat > 0) Description += "+" + stat.ToString() + divider + statType;
+            else Description += "-" + stat.ToString() + divider + statType;
+        }
+    
+        //
+
     }
 
     private void ResetStats()

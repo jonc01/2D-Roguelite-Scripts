@@ -39,6 +39,12 @@ public class AugmentInventory : MonoBehaviour
     [Header("Augments")]
     [SerializeField] private List<AugmentScript> heldAugments;
 
+    [Header("Conditional Augments")]
+    [SerializeField] private List<Base_ConditionalAugments> onKillAugments;
+    [SerializeField] private List<Base_ConditionalAugments> onHitAugments;
+    [SerializeField] private List<Base_ConditionalAugments> onDamageTakenAugments;
+    [SerializeField] private List<Base_ConditionalAugments> onRoomClearAugments;
+
     void Awake()
     {
         heldAugments = new List<AugmentScript>();
@@ -48,7 +54,66 @@ public class AugmentInventory : MonoBehaviour
         GetBasePlayerStats();
     }
 
+#region Conditional Augments
+    public void OnKill()
+    {
+        //Currently being called in Base_EnemyCombat
+        Debug.Log("OnKill");
+        if(onKillAugments.Count <= 0) return;
+        for(int i=0; i<onKillAugments.Count; i++)
+        {
+            onKillAugments[i].TriggerAugment();
+        }
+    }
 
+    public void OnDamageTaken()
+    {
+        Debug.Log("OnDamageTaken");
+        if(onDamageTakenAugments.Count <= 0) return;
+        for(int i=0; i<onDamageTakenAugments.Count; i++)
+        {
+            onDamageTakenAugments[i].TriggerAugment();
+        }
+    }
+
+    public void OnHit()
+    {
+        Debug.Log("OnHit");
+        if(onHitAugments.Count <= 0) return;
+        for(int i=0; i<onHitAugments.Count; i++)
+        {
+            onHitAugments[i].TriggerAugment();
+        }
+    }
+
+    public void OnRoomClear()
+    {
+        Debug.Log("OnRoomClear");
+        if(onRoomClearAugments.Count <= 0) return;
+        for(int i=0; i<onRoomClearAugments.Count; i++)
+        {
+            onRoomClearAugments[i].TriggerAugment();
+        }
+    }
+    //
+    public void AddConditionalAugment(AugmentScript augment)
+    {
+        int index = augment.AugmentType;
+        Base_ConditionalAugments conditionalAugment = augment.ConditionalAugmentScript;
+        if(conditionalAugment == null) return;
+        switch(index)
+        {
+            case 0: break; //Normal
+            case 1: onKillAugments.Add(conditionalAugment); break; //OnKill
+            case 2: onDamageTakenAugments.Add(conditionalAugment); break; //OnDamageTaken
+            case 3: onHitAugments.Add(conditionalAugment); break; //OnHit
+            case 4: onRoomClearAugments.Add(conditionalAugment); break; //OnRoomClear
+            default: break;
+        }
+    }
+#endregion
+
+#region Stat Managers
     public void GetBasePlayerStats()
     {
         if(combat == null) return;
@@ -85,7 +150,7 @@ public class AugmentInventory : MonoBehaviour
         combat.defense += modified_Defense;
         movement.moveSpeed += modified_MoveSpeed;
         combat.attackDamage += modified_AttackDamage;
-        combat.attackSpeed += modified_AttackSpeed;
+        combat.attackSpeed += modified_AttackSpeed; //lower is faster, stats are already subtracted
         combat.knockbackStrength += modified_KnockbackStrength;
         combat.kbResist += modified_kbResist;
     }
@@ -100,6 +165,7 @@ public class AugmentInventory : MonoBehaviour
         modified_KnockbackStrength = 0;
         modified_kbResist = 0;
     }
+#endregion
 
 #region Augments
     public void UpdateAugments()
@@ -128,22 +194,8 @@ public class AugmentInventory : MonoBehaviour
         else combat.currentHP = tempPlayerHP;
 
         combat.HealPlayer(0, false);
-
-        // StartCoroutine(DelayUpdateStats(tempPlayerHP));
     }
 
-    // IEnumerator DelayUpdateStats(float tempPlayerHP)
-    // {
-    //     yield return new WaitForSecondsRealtime(.1f);
-
-    //     ModifyPlayerStats();
-        
-    //     //Update health
-    //     if(combat.currentHP < tempPlayerHP) combat.currentHP = combat.maxHP;
-    //     else combat.currentHP = tempPlayerHP;
-
-    //     combat.HealPlayer(0, false);
-    // }
 
     public void AddAugment(AugmentScript augment)
     {
@@ -171,7 +223,8 @@ public class AugmentInventory : MonoBehaviour
 
     private void ApplyAugmentStats(AugmentScript augment)
     {
-        int statIndex = (int)augment.BuffedStat; //TODO: check typecast
+        if(augment.AugmentType != 0) return; //Only for Normal augments, not conditional
+        int statIndex = (int)augment.BuffedStat;
         // augment.DebuffedStat not needed, just set as negative value
 
         //TODO:
@@ -182,7 +235,7 @@ public class AugmentInventory : MonoBehaviour
             case 1: modified_Defense += augment.buffedAmount; break;
             case 2: modified_MoveSpeed += augment.buffedAmount; break;
             case 3: modified_AttackDamage += augment.buffedAmount; break;
-            case 4: modified_AttackSpeed += augment.buffedAmount; break;
+            case 4: modified_AttackSpeed -= augment.buffedAmount; break;
             //case 5: crit chance?
             default: break;
         }
@@ -190,6 +243,7 @@ public class AugmentInventory : MonoBehaviour
 
     private void RemoveAugmentStats(AugmentScript augment)
     {
+        if(augment.AugmentType != 0) return; //Only for Normal augments, not conditional
         int statIndex = (int)augment.BuffedStat;
 
         switch(statIndex)
@@ -198,7 +252,7 @@ public class AugmentInventory : MonoBehaviour
             case 1: modified_Defense -= augment.buffedAmount; break;
             case 2: modified_MoveSpeed -= augment.buffedAmount; break;
             case 3: modified_AttackDamage -= augment.buffedAmount; break;
-            case 4: modified_AttackSpeed -= augment.buffedAmount; break;
+            case 4: modified_AttackSpeed += augment.buffedAmount; break;
             //case 5: crit chance?
             default: break;
         }

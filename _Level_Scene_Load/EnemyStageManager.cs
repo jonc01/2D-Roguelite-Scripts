@@ -6,6 +6,7 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
+    public bool neutralRoom;
     [SerializeField] Transform enemyParentObj;
     [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] private int totalEnemyCount; //used to store the original number
@@ -32,7 +33,9 @@ public class EnemyStageManager : MonoBehaviour
             RoomClear temp = GetComponentInParent<RoomClear>();
             temp.roomCleared = true;
             roomManager.Cleared();
+            neutralRoom = true;
         }
+        else neutralRoom = false;
 
         currentWave = 0;
 

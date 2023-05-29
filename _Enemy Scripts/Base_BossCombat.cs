@@ -275,7 +275,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
             {
                 var playerObj = player.GetComponent<Base_PlayerCombat>();
                 playerObj.TakeDamage(attackDamage[currAttackIndex]);
-                if (knockback) playerObj.GetKnockback(!playerToRight, knockbackStrength);
+                if (knockback) playerObj.GetKnockback(transform.position.x, knockbackStrength);
+                // if (knockback) playerObj.GetKnockback(!playerToRight, knockbackStrength);
                 if (knockup) playerObj.GetKnockup(knockupStrength);
                 //if (AttackFarBehavior != null) AttackFarBehavior.playerHit = true;
             }
@@ -390,7 +391,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 #endregion
 
 #region TakeDamage, HitFlash, Die
-    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8)
+    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
 

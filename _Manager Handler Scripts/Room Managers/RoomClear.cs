@@ -5,11 +5,12 @@ using UnityEngine;
 public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
-    public bool trialRoom; //gets set at in RoomGenerator as Trial room is created
+    public bool trialRoom; //gets set in RoomGenerator as Trial room is created
 
     [Header("References")]
     public DoorManager DoorManager;
     [SerializeField] public EnemyStageManager stageManager;
+    [SerializeField] private RewardController augmentReward;
 
     void Start()
     {
@@ -19,11 +20,15 @@ public class RoomClear : MonoBehaviour
         //if (DoorManager == null) DoorManager = GameObject.FindGameObjectWithTag("DoorManager").GetComponent<DoorManager>();
             //This only gets the number of children under "Enemies", doesn't count children's children
             //In this case, we don't want to count the raycast transforms, healthbars, etc
+
+        augmentReward = GetComponent<RewardController>();
+        if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
     }
 
     public void Cleared()
     {
         //TimeManager.Instance.DoFreezeTime(.15f, .05f);
+        Debug.Log("Room Cleared");
         StartCoroutine(DelayClear());
         //if this breaks, update enemyCount with enemyCount = EnemyList.transform.childCount
     }
@@ -37,6 +42,13 @@ public class RoomClear : MonoBehaviour
     IEnumerator DelayClear()
     {
         yield return new WaitForSeconds(1f);
+        if(stageManager == null) augmentReward.ToggleRewardSelect(false);
+        else
+        {
+            if(!stageManager.neutralRoom && augmentReward != null) augmentReward.ToggleRewardSelect(true);
+            else if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
+        }
+        yield return new WaitForSeconds(.5f);
         DoorManager.OpenAllDoors(true);
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
@@ -52,6 +64,7 @@ public class RoomClear : MonoBehaviour
 
     private void CheckSpawnDelay()
     {
+        if(stageManager == null) return;
         stageManager.SpawnEnemies();
     }
 }

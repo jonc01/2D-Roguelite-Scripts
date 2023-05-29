@@ -10,6 +10,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public Base_Character character;
     public Base_PlayerMovement movement;
     public AnimatorManager animator;
+    [SerializeField] private AugmentInventory augmentInventory;
     [SerializeField] private LayerMask enemyLayer;
     //[SerializeField] private Transform attackPoint;
     //[SerializeField] private float attackRange;
@@ -89,6 +90,7 @@ public class Base_PlayerCombat : MonoBehaviour
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
+        if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
 
         isAlive = true;
         isStunned = false;
@@ -259,10 +261,11 @@ public class Base_PlayerCombat : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damageDealt, true, knockbackStrength);
+                damageable.TakeDamage(damageDealt, true, knockbackStrength, transform.position.x);
+                augmentInventory.OnHit();
                 HitStopAnim(attackAnimFull, groundAttack);
 
-                if (isAirAttacking) movement.Float(.3f);
+                if(isAirAttacking) movement.Float(.3f);
                 //ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
                 //hitStop.Stop(.1f); //Successful hit
             }
@@ -288,7 +291,8 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
-    public void GetKnockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
+    // public void GetKnockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(float enemyXPos, float strength = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         KnockbackNullCheckCO();
@@ -297,17 +301,50 @@ public class Base_PlayerCombat : MonoBehaviour
         if (strength <= 0) return;
 
         isKnockedback = true;
-        KnockbackCO = StartCoroutine(Knockback(enemyToRight, strength, recoveryDelay));
+
+        bool kbToRight;
+        kbToRight = enemyXPos < transform.position.x;
+        // if(enemyXPos < transform.position.x) kbToRight = false;
+
+        KnockbackCO = StartCoroutine(Knockback(kbToRight, strength, recoveryDelay));
         // float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         // Vector2 direction = new Vector2(temp, .3f);
         // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
     }
 
-    IEnumerator Knockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
+    {
+        if (!isAlive || dashImmune) return;
+        KnockbackNullCheckCO();
+
+        if (kbResist > 0) strength -= kbResist;
+        if (strength <= 0) return;
+
+        isKnockedback = true;
+
+        KnockbackCO = StartCoroutine(KnockbackManual(kbToRight, strength, recoveryDelay));
+    }
+
+    IEnumerator Knockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
     {
         movement.StopVelocityX();
         yield return new WaitForSeconds(.02f); //need delay for physics to update
-        float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        // float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        float temp;
+        if(kbToRight) temp = 1;
+        else temp = -1;
+
+        Vector2 direction = new Vector2(temp, .3f);
+        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+
+        KnockbackResetCO = StartCoroutine(KnockbackReset(recoveryDelay));
+    }
+
+    IEnumerator KnockbackManual(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
+    {
+        movement.StopVelocityX();
+        yield return new WaitForSeconds(.02f); //need delay for physics to update
+        float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
@@ -387,6 +424,8 @@ public class Base_PlayerCombat : MonoBehaviour
         {
             totalDamage = 1; //Damage can never be lower than 1
         }
+
+        augmentInventory.OnDamageTaken();
 
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
         InstantiateManager.Instance.HitEffects.ShowHitEffect(textPopupOffset.position);

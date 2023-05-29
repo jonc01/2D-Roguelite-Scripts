@@ -7,11 +7,13 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     public bool inputAllowed;
+    public bool shopOpen;
+    public bool rewardOpen;
     public PauseMenu Pause;
     public Transform Player;
 
     public Base_PlayerMovement PlayerMovement;
-    private Base_PlayerCombat PlayerCombat;
+    public Base_PlayerCombat PlayerCombat;
     public Transform PlayerTargetOffset;
     public AugmentInventory AugmentInventory;
     public Inventory Inventory;
@@ -29,6 +31,8 @@ public class GameManager : MonoBehaviour
         PlayerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
         if (Inventory == null) Inventory = GetComponent<Inventory>();
 
+        shopOpen = false;
+        rewardOpen = false;
         inputAllowed = true;
     }
 

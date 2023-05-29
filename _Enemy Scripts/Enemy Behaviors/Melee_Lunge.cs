@@ -36,7 +36,8 @@ public class Melee_Lunge : Base_CombatBehavior
 
     IEnumerator LungeCO()
     {
-        knockbackImmune = true;
+        // knockbackImmune = true;
+        combat.knockbackImmune = true;
         playerHit = false;
         canLunge = false;
         movement.ToggleFlip(false);
@@ -52,7 +53,8 @@ public class Melee_Lunge : Base_CombatBehavior
         combat.Lunge(movement.isFacingRight, 8f, .2f);
 
         yield return new WaitForSeconds(animEndingTime);
-        knockbackImmune = false;
+        // knockbackImmune = false;
+        combat.knockbackImmune = false;
         allowCollision = false;
         yield return new WaitForSeconds(attackSpeed);
         canLunge = true;
@@ -69,7 +71,9 @@ public class Melee_Lunge : Base_CombatBehavior
             {
                 playerHit = true;
                 player.GetComponent<Base_PlayerCombat>().TakeDamage(combat.attackDamage);
-                player.GetComponent<Base_PlayerCombat>().GetKnockback(!combat.playerToRight, combat.knockbackStrength);
+                //TODO: pass xPos to hit the Player and get < or > to get knockback direction
+                // player.GetComponent<Base_PlayerCombat>().GetKnockback(!combat.playerToRight, combat.knockbackStrength);
+                player.GetComponent<Base_PlayerCombat>().GetKnockback(transform.position.x, combat.knockbackStrength);
             }
         }
     }

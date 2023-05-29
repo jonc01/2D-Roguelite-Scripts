@@ -21,6 +21,7 @@ public class WallGenerator : MonoBehaviour
 
     [Header("--- Components (*Setup) ---")]
     [Header("0 - Horizontal, 1 - Vertical")]
+    [SerializeField] int totalDoorVariants = 1; //Manually set for testing
     [SerializeField] GameObject[] Walls; //0: Top/Bot, 1: Left/Right
     [SerializeField] GameObject[] VerticalDoors; //0: Top/Bot, 1: Left/Right
     [SerializeField] GameObject[] HorizontalDoors; //0: Top/Bot, 1: Left/Right
@@ -228,7 +229,7 @@ public class WallGenerator : MonoBehaviour
 
     void GenerateDoor(Vector3 newPos, bool isVertical, bool bossDoor = false)
     {
-        int index = Random.Range(0, 3); //Change 3 to size var if making more variations
+        int index = Random.Range(0, totalDoorVariants); //Change 3 to size var if making more variations
 
         if(bossDoor)
         {
