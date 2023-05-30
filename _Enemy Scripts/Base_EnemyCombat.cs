@@ -5,6 +5,7 @@ using UnityEngine;
 public class Base_EnemyCombat : MonoBehaviour, IDamageable
 {
     [Header("Attack Behavior Setup")]
+    [SerializeField] protected GameObject indicator;
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
     [SerializeField] public Base_CombatBehavior AttackFarBehavior;
     public bool canAttackFar;
@@ -131,6 +132,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
         #endif
 
+        if(indicator != null) indicator.SetActive(false);
+
         isAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
@@ -162,7 +165,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isSpawning = true; //This prevents the enemy from attacking and taking damage
         healthBar.gameObject.SetActive(false);
         if(bottomOffset != null)
-            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 1, spawnFXScale);
+            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 0, spawnFXScale);
         //Toggle SR off
         sr.enabled = false;
         yield return new WaitForSeconds(0.1667f); //TODO: appear delay
@@ -233,11 +236,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         //Allow flip for a little longer
         isAttacking = true;
-        knockbackImmune = true;
-
-        //TODO:
-        //  - - - - - - KnockbackReset();
-        // KnockbackNullCheckCO();
+        // knockbackImmune = true;
 
         movement.canMove = false;
         movement.ToggleFlip(false);
@@ -245,6 +244,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         animator.PlayAttackAnim(fullAttackAnimTime);
 
         yield return new WaitForSeconds(startAttackDelay);
+        knockbackImmune = true;
         if(allowFlipBeforeAttack) FacePlayer(); //Flip to faceplayer before attacking
         
         yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
@@ -318,18 +318,20 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if(knockbackImmune) return;
 
         if (kbResist > 0) strength -= kbResist;
+        if (strength <= 0) return; //Full resist, no knockback effect
 
         isKnockedback = true;
         movement.ToggleFlip(false);
 
         // float temp = kbDir == true ? 1 : -1; //get knocked back in opposite direction of player
         
-        float temp;
-        if(kbToRight) temp = 1;
-        else temp = -1;
+        float kbDir;
+        if(kbToRight) kbDir = 1;
+        else kbDir = -1;
 
-        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        // Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        movement.rb.velocity = new Vector2(kbDir * strength, movement.rb.velocity.y); //more consistent with hits
 
         KnockbackCO = StartCoroutine(KnockbackReset(delay));
     }
@@ -340,11 +342,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
-        movement.canMove = true;
-
-        movement.ToggleFlip(true);
-        
         isKnockedback = false;
+
+        if(!isAttacking) {
+            movement.ToggleFlip(true); //if Attacking coroutine is running, don't reset
+            movement.canMove = true;
+        }
     }
 
     void KnockbackNullCheckCO()
@@ -366,38 +369,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isKnockedback = true;
         movement.ToggleFlip(false);
 
-        float temp = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
-        Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        float lungeDir = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
+        // Vector2 direction = new Vector2(lungeDir, movement.rb.velocity.y);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);]
+        movement.rb.velocity = new Vector2(lungeDir * strength, movement.rb.velocity.y);
 
         KnockbackCO = StartCoroutine(KnockbackReset(delay));
-
-
-        // Debug.Log("1 - Lunge start");
-        // LungeNullCheckCO();
-        // // GetKnockback(lungeToRight, strength, delay);
-
-        // // KnockbackNullCheckCO();
-        // Debug.Log("2 - Lunge start");
-
-        // isLunging = true;
-        // movement.ToggleFlip(false);
-
-        // //TODO: lungeRight might be wrong
-        // // float temp = lungeToRight != true ? -1 : 1; //lunge forwards
-
-        // float temp;  //TODO: TESTING, should work? try opposite directions
-        // if(lungeToRight) temp = 1; //TODO: this might be swapped
-        // else temp = -1;
-
-        // Vector2 direction = new Vector2(temp, movement.rb.velocity.y);
-        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
-        // // movement.rb.velocity = (direction*strength);
-
-        // Debug.Log("3 - Lunge should be started");
-
-        // // KnockbackCO = StartCoroutine(KnockbackReset(delay));
-        // LungeCO = StartCoroutine(LungeReset(delay));
     }
 
     IEnumerator LungeReset(float delay, float recoveryDelay = .1f)
@@ -468,6 +445,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             isAlive = false;
             Die();
         }
+    }
+
+    public virtual void PlayIndicator()
+    {
+        if(indicator == null) return;
+        indicator.SetActive(true);
     }
 
     void HitFlash(float resetDelay = .1f)

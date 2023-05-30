@@ -28,9 +28,9 @@ public class PooledObjHandler : MonoBehaviour
     public void PlayAttachedAnim(Vector3 pos, float scale = 2.5f)
     {
         GameObject effect = IndicatorPool.GetObject();
+        // effect.transform.SetParent(parentObj);
         effect.transform.position = pos;
         //Setting parent and scale
-        //effect.transform.parent = parent;
         effect.transform.localScale = new Vector3(scale, scale, 1);
 
         effect.SetActive(true);

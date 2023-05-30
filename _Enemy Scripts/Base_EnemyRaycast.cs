@@ -63,6 +63,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         if (debugging) DebugDrawRaycast();
 
         isGrounded = IsGrounded();
+        // movement.canFlip = isGrounded;
         
         //Not grounded, allow CheckPlatform() to get platform ID once
         if (isGrounded) if(updatePlatform) CheckPlatform();

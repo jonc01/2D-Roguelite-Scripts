@@ -14,7 +14,7 @@ public class Base_EnemyMovement : MonoBehaviour
     [Header("State Variables")]
     //public bool isGrounded; //Use raycast.IsGrounded() instead
     public bool canMove = true;
-    [SerializeField] bool canFlip;
+    [SerializeField] public bool canFlip;
     public bool isFacingRight = true;
     // bool isLunging;
 

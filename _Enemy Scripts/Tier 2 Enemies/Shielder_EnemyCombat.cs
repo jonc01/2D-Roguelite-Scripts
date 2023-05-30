@@ -59,8 +59,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
             // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO
             CheckCounterHit();
         }
-        // else base.TakeDamage(damageTaken, knockback, strength, xPos);
-        else base.TakeDamage(damageTaken, false);
+        else base.TakeDamage(damageTaken, knockback, strength, xPos);
     }
 
     protected override void Die()

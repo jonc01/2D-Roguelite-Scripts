@@ -318,7 +318,7 @@ public class Base_PlayerCombat : MonoBehaviour
         KnockbackNullCheckCO();
 
         if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
+        if (strength <= 0) return; //Full knockback resist
 
         isKnockedback = true;
 
@@ -330,12 +330,13 @@ public class Base_PlayerCombat : MonoBehaviour
         movement.StopVelocityX();
         yield return new WaitForSeconds(.02f); //need delay for physics to update
         // float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        float temp;
-        if(kbToRight) temp = 1;
-        else temp = -1;
+        float kbDir;
+        if(kbToRight) kbDir = 1;
+        else kbDir = -1;
 
-        Vector2 direction = new Vector2(temp, .3f);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        // Vector2 direction = new Vector2(temp, .3f);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        movement.rb.velocity = new Vector2(kbDir * strength, movement.rb.velocity.y);
 
         KnockbackResetCO = StartCoroutine(KnockbackReset(recoveryDelay));
     }
