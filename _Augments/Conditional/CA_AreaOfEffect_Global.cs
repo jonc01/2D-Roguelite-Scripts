@@ -2,17 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CA_AreaOfEffect_Global : MonoBehaviour
+public class CA_AreaOfEffect_Global : Base_ConditionalAugments
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] public float damage;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] Transform attackPoint; //Set to enemy location
+    [SerializeField] private float hitboxWidth;
+    [SerializeField] private float hitBoxHeight;
+    [SerializeField] private float knockbackStrength = 4f;
+    [SerializeField] private bool showGizmos = false;
+
+    protected override void Start()
     {
-        
+        base.Start();
+        attackPoint = GameManager.Instance.PlayerTargetOffset;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Activate()
     {
-        
+        //Only affects enemies within hitbox range
+        Collider2D[] hitEnemies = 
+            Physics2D.OverlapBoxAll(attackPoint.position,
+            new Vector2(hitboxWidth, hitBoxHeight), 0, enemyLayer);
+
+        //if (damageMultiplier > 1) knockbackStrength = 6; //TODO: set variable defintion in Inspector
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            IDamageable damageable = enemy.GetComponent<IDamageable>();
+            if(damageable != null)
+            {
+                damageable.TakeDamage(damage, true, knockbackStrength);
+                ScreenShakeListener.Instance.Shake(2);
+            }
+        }
+    
     }
 }
