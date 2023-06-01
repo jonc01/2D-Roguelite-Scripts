@@ -53,6 +53,8 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     {
         if (!isAlive || isSpawning) return;
         if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
+        if ((transform.position.x < xPos && movement.isFacingRight) 
+        || (transform.position.x > xPos && !movement.isFacingRight))
         {
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
             InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
@@ -60,6 +62,12 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
             CheckCounterHit();
         }
         else base.TakeDamage(damageTaken, knockback, strength, xPos);
+    }
+
+    public override void TakeDamageStatus(float damageTaken)
+    {
+        //Ignore Block
+        base.TakeDamage(damageTaken);
     }
 
     protected override void Die()

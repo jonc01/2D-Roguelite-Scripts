@@ -262,7 +262,8 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 damageable.TakeDamage(damageDealt, true, knockbackStrength, transform.position.x);
-                augmentInventory.OnHit();
+                Transform enemyPos = damageable.GetPosition();
+                augmentInventory.OnHit(enemyPos);
                 HitStopAnim(attackAnimFull, groundAttack);
 
                 if(isAirAttacking) movement.Float(.3f);

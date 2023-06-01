@@ -418,6 +418,16 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         }
     }
 
+    public virtual void TakeDamageStatus(float damageTaken)
+    {
+        TakeDamage(damageTaken);
+    }
+
+    public virtual Transform GetPosition()
+    {
+        return hitEffectsOffset;
+    }
+
     protected void HitFlash(float resetDelay = .1f)
     {
         sr.material = mWhiteFlash;

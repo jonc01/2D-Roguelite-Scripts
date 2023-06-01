@@ -447,6 +447,17 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
     }
 
+    public virtual void TakeDamageStatus(float damageTaken)
+    {
+        
+        TakeDamage(damageTaken, false);
+    }
+
+    public virtual Transform GetPosition()
+    {
+        return hitEffectsOffset;
+    }
+
     public virtual void PlayIndicator()
     {
         if(indicator == null) return;

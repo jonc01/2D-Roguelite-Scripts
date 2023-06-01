@@ -86,6 +86,16 @@ public class AugmentInventory : MonoBehaviour
         }
     }
 
+    public void OnHit(Transform objectHitPos)
+    {
+        Debug.Log("OnHit position");
+        if(onHitAugments.Count <= 0) return;
+        for(int i=0; i<onHitAugments.Count; i++)
+        {
+            onHitAugments[i].TriggerAugment(objectHitPos);
+        }
+    }
+
     public void OnRoomClear()
     {
         Debug.Log("OnRoomClear");

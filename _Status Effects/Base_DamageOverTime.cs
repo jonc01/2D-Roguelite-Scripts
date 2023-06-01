@@ -9,13 +9,13 @@ public class Base_DamageOverTime : MonoBehaviour
     [SerializeField] public float damagePerTick;
     [SerializeField] float duration;
 
-    [Header("Status - Debugging")]
+    [Header("Status - Debugging -")]
     public bool isActive;
     [SerializeField] float overallTimer;
     private float tickTimer;
 
     [Header("Target Object")]
-    [SerializeField] Base_EnemyCombat enemyCombat;
+    [SerializeField] protected IDamageable enemyCombat;
     [SerializeField] Base_PlayerCombat playerCombat;
 
 
@@ -41,7 +41,7 @@ public class Base_DamageOverTime : MonoBehaviour
         overallTimer = 0;
         endingStatus = false;
 
-        enemyCombat = GetComponentInParent<Base_EnemyCombat>();
+        enemyCombat = GetComponentInParent<IDamageable>();
         playerCombat = GetComponentInParent<Base_PlayerCombat>();
     }
 
@@ -73,8 +73,9 @@ public class Base_DamageOverTime : MonoBehaviour
 
     void DealDamage()
     {
-        if(enemyCombat != null) enemyCombat.TakeDamage(damagePerTick);
+        if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick);
         if(playerCombat != null) playerCombat.TakeDamage(damagePerTick);
+        if(enemyCombat == null && playerCombat == null) isActive = false;
     }
 
     IEnumerator EndStatus(float endDelay = 1)

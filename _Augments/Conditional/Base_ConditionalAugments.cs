@@ -35,6 +35,19 @@ public class Base_ConditionalAugments : MonoBehaviour
         Debug.Log(name + " Augment Activated");
     }
 
+//
+
+    public virtual void TriggerAugment(Transform objectHitPos)
+    {
+        float rand = Random.Range(0f, 1.0f);
+	    if(rand < procChance) Activate(objectHitPos);
+    }
+
+    protected virtual void Activate(Transform objectHitPos)
+    {
+
+    }
+
     public virtual void UpdateLevelStats()
     {
         //Call from AugmentScript
