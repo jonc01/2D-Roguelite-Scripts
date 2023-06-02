@@ -273,7 +273,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         {
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
-                player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage);
+                player.GetComponent<Base_PlayerCombat>().TakeDamage(attackDamage, transform.position.x);
 
 
                 // player.GetComponent<Base_PlayerCombat>().GetKnockback(!playerToRight, knockbackStrength);
@@ -449,7 +449,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void TakeDamageStatus(float damageTaken)
     {
-        
+
         TakeDamage(damageTaken, false);
     }
 

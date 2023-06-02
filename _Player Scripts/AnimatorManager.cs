@@ -171,6 +171,15 @@ public class AnimatorManager : MonoBehaviour
         AttackCO = StartCoroutine(AttackState(animTime));
     }
 
+    public void PlayBlockAnim(float animTime, bool successfulParry = false)
+    {
+        if (AttackCO != null) StopCoroutine(AttackCO);
+        attacking = true;
+
+        anim.Play(Block);
+        AttackCO = StartCoroutine(AttackState(animTime));
+    }
+
     IEnumerator AttackState(float duration) //Timer
     {
         yield return new WaitForSeconds(duration);

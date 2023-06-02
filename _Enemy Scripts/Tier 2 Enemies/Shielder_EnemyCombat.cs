@@ -52,7 +52,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
-        if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
+        // if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
         if ((transform.position.x < xPos && movement.isFacingRight) 
         || (transform.position.x > xPos && !movement.isFacingRight))
         {

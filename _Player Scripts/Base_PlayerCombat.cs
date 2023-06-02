@@ -44,6 +44,13 @@ public class Base_PlayerCombat : MonoBehaviour
     public float[] airAttackFullAnimTimes;
     public float[] airAttackDamageMultipliers;
 
+    [Header("Block Animator Setup")]
+    public float blockFullAnimTime;
+    public float blockDelayAnimTime;
+    public float blockDelay;
+    public float blockDuration;
+    private float blockDelayAndDuration;
+
     [Space(10)]
 
     //Controls
@@ -67,10 +74,13 @@ public class Base_PlayerCombat : MonoBehaviour
     public int currentAttack;
     public int currentAirAttack;
     float timeSinceAttack;
-    float timeSinceAirAttack;
+    // float timeSinceAirAttack;
+    float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
+    [SerializeField] bool isParrying;
 
+    public float blockAttackSpeed;
     bool dashImmune;
 
     //Bools
@@ -80,6 +90,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     //Coroutines - Stored to allow interrupts
     Coroutine AttackingCO;
+    Coroutine BlockingCO;
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
     Coroutine KnockupCO;
@@ -112,10 +123,13 @@ public class Base_PlayerCombat : MonoBehaviour
 
         isAttacking = false;
         isAirAttacking = false;
+        isParrying = false;
         currentAttack = 0;
         currentAirAttack = 0;
         currAttackIndex = 0;
         dashImmune = false;
+
+        blockDelayAndDuration = blockDelay+blockDuration;
 
         UpdateUI();
     }
@@ -125,7 +139,8 @@ public class Base_PlayerCombat : MonoBehaviour
         if (!allowInput) return;
         if (!isAlive) return;
         timeSinceAttack += Time.deltaTime;
-        timeSinceAirAttack += Time.deltaTime;
+        // timeSinceAirAttack += Time.deltaTime;
+        timeSinceBlock += Time.deltaTime;
         if (isStunned) return;
 
         if (Input.GetKeyDown(KeyCode.Y)) //TODO: temp testing
@@ -158,7 +173,8 @@ public class Base_PlayerCombat : MonoBehaviour
 
     private void AirAttackMoveCheck()
     {
-        if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
+        // if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
+        if (timeSinceAttack <= .2f)//attackSpeed - .1f)
         {
             movement.ToggleAirMove(false);
         }
@@ -190,20 +206,22 @@ public class Base_PlayerCombat : MonoBehaviour
     public void Attack2()
     {
         if (!isAlive) return;
-        if (timeSinceAirAttack > attackSpeed && !movement.isDashing)// && !isAttacking && !isAirAttacking) //allowInput
+        if (timeSinceAttack > attackSpeed && !movement.isDashing)// && !isAttacking && !isAirAttacking) //allowInput
         {
             currentAirAttack++;
 
             if (currentAirAttack > totalNumAirAttacks) currentAirAttack = 1;
 
-            if (timeSinceAirAttack > 2.0f) currentAttack = 1;
+            if (timeSinceAttack > 2.0f) currentAttack = 1;
+            // if (timeSinceAirAttack > 2.0f) currentAttack = 1;
 
             //Air attacks
             currAttackIndex = currentAirAttack + 2; //[3-4]
             AttackingCO = StartCoroutine(AirAttacking(currentAirAttack));
 
             //Reset timer
-            timeSinceAirAttack = 0.0f;
+            timeSinceAttack = 0.0f;
+            // timeSinceAirAttack = 0.0f;
         }
     }
 
@@ -273,6 +291,62 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
+    void ParryCounter()
+    {
+        Collider2D[] hitEnemies = 
+            Physics2D.OverlapBoxAll(attackPoints[0].position,
+            new Vector2(hitBoxLength[0], hitBoxHeight[0]), 0, enemyLayer);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            IDamageable damageable = enemy.GetComponent<IDamageable>();
+            if(damageable != null)
+            {
+                // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
+                damageable.TakeDamageStatus(10);
+                Transform enemyPos = damageable.GetPosition();
+                augmentInventory.OnHit(enemyPos);
+
+                hitStop.Stop(.1f); //Successful hit //TODO: might remove
+            }
+        }
+    }
+
+    public void Block()
+    {
+        if (!isAlive) return;
+        if (timeSinceBlock < blockAttackSpeed) return;
+        if (timeSinceAttack > attackSpeed && !movement.isDashing)
+        {
+            //Coroutine
+            BlockingCO = StartCoroutine(Blocking());
+            
+            //Reset timer
+            timeSinceAttack = 0.0f;
+        }
+
+
+        bool successfulParry = false;
+        // isParrying
+        animator.PlayBlockAnim(blockFullAnimTime, successfulParry);
+        timeSinceAttack = 0;
+        timeSinceBlock = 0;
+    }
+
+    IEnumerator Blocking()
+    {
+        //float blockDelay;
+        //float blockDuration;
+
+        // blockAnimTime
+        yield return new WaitForSeconds(blockDelay); //0.0834f\
+        isParrying = true;
+        yield return new WaitForSeconds(blockDuration);
+        isParrying = false;
+        
+        yield return new WaitForSeconds(blockFullAnimTime - blockDelayAndDuration);
+    }
+
     void HitStopAnim(float attackAnimFull, bool ground)
     {
         //Interrupt current attack animation with alternate hitstop animation
@@ -296,6 +370,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public void GetKnockback(float enemyXPos, float strength = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
+        if(isParrying) return;
         KnockbackNullCheckCO();
 
         if (kbResist > 0) strength -= kbResist;
@@ -413,6 +488,25 @@ public class Base_PlayerCombat : MonoBehaviour
         isStunned = true;
         yield return new WaitForSeconds(duration);
         isStunned = false;
+    }
+
+    public void TakeDamage(float damageTaken, float enemyXPos)
+    {
+        if (!isAlive || dashImmune) return;
+        
+        bool damageFromRight = enemyXPos > transform.position.x;
+        if(damageFromRight == movement.isFacingRight)
+        {
+            if (isParrying)
+            {
+                ScreenShakeListener.Instance.Shake(1);
+                ParryCounter();
+                InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
+                return;
+            }
+        }
+
+        TakeDamage(damageTaken);
     }
 
     public void TakeDamage(float damageTaken)

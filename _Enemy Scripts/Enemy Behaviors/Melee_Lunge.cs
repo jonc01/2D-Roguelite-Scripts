@@ -72,7 +72,7 @@ public class Melee_Lunge : Base_CombatBehavior
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
                 playerHit = true;
-                player.GetComponent<Base_PlayerCombat>().TakeDamage(combat.attackDamage);
+                player.GetComponent<Base_PlayerCombat>().TakeDamage(combat.attackDamage, transform.position.x);
                 //TODO: pass xPos to hit the Player and get < or > to get knockback direction
                 // player.GetComponent<Base_PlayerCombat>().GetKnockback(!combat.playerToRight, combat.knockbackStrength);
                 player.GetComponent<Base_PlayerCombat>().GetKnockback(transform.position.x, combat.knockbackStrength);
