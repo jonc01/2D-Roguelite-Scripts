@@ -30,6 +30,9 @@ public class Base_PlayerCombat : MonoBehaviour
     //G1(.56, .294), G2/A1(.437, .149), G3(.318, .144), A2(.479, .208)
     [SerializeField] float[] hitBoxLength; //.95f, 1.35f, 1.75f, 1.35f, 1.52f
     [SerializeField] float[] hitBoxHeight; //.63f, 0.25f, 0.25f, 0.25f, 0.28f
+    [SerializeField] Transform parryPoint;
+    [SerializeField] float parryHitBoxLength; //.64f
+    [SerializeField] float parryHitboxHeight; //.61f    
 
     [Header("Ground Attack Animator Setup")]
     //array of attack anim time (ground)
@@ -294,8 +297,8 @@ public class Base_PlayerCombat : MonoBehaviour
     void ParryCounter()
     {
         Collider2D[] hitEnemies = 
-            Physics2D.OverlapBoxAll(attackPoints[0].position,
-            new Vector2(hitBoxLength[0], hitBoxHeight[0]), 0, enemyLayer);
+            Physics2D.OverlapBoxAll(parryPoint.position,
+            new Vector2(parryHitBoxLength, parryHitboxHeight), 0, enemyLayer);
 
         foreach (Collider2D enemy in hitEnemies)
         {
@@ -363,6 +366,8 @@ public class Base_PlayerCombat : MonoBehaviour
             Gizmos.DrawWireCube(attackPoints[currAttackIndex].position, 
                 new Vector3((hitBoxLength[currAttackIndex]),
                 hitBoxHeight[currAttackIndex], 0));
+            
+            Gizmos.DrawWireCube(parryPoint.position, new Vector3(parryHitBoxLength, parryHitboxHeight, 0));
         }
     }
 
@@ -495,6 +500,7 @@ public class Base_PlayerCombat : MonoBehaviour
         if (!isAlive || dashImmune) return;
         
         bool damageFromRight = enemyXPos > transform.position.x;
+        //Only allow parry if the Player is facing the enemy
         if(damageFromRight == movement.isFacingRight)
         {
             if (isParrying)
