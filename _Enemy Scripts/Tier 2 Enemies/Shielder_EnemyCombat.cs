@@ -52,15 +52,22 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
     public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
-        if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
+        // if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
+        if ((transform.position.x < xPos && movement.isFacingRight) 
+        || (transform.position.x > xPos && !movement.isFacingRight))
         {
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
             InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
             // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO
             CheckCounterHit();
         }
-        // else base.TakeDamage(damageTaken, knockback, strength, xPos);
-        else base.TakeDamage(damageTaken, false);
+        else base.TakeDamage(damageTaken, knockback, strength, xPos);
+    }
+
+    public override void TakeDamageStatus(float damageTaken)
+    {
+        //Ignore Block
+        base.TakeDamage(damageTaken);
     }
 
     protected override void Die()

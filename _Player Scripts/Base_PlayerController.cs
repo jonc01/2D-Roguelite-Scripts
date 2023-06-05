@@ -51,5 +51,13 @@ public class Base_PlayerController : MonoBehaviour
                 else combat.Attack2();
             }
         }
+
+        if(combat != null && combat.allowInput)
+        {
+            if(Input.GetButtonDown("Fire2"))
+            {
+                if(movement.IsGrounded()) combat.Block();
+            }
+        }
     }
 }

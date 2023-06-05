@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class IndicatorManager : MonoBehaviour
 {
+    //Not using, moved directly to enemy object to keep it attached
+
     [Header("References")]
     [SerializeField] PooledObjHandler[] Prefabs;
     //[SerializeField] private float[] indicatorAnimTime;

@@ -156,7 +156,7 @@ public class Boomerang : MonoBehaviour
         if (player != null)
         {
             timeSinceHit = 0;
-            player.TakeDamage(damage);
+            player.TakeDamage(damage, transform.position.x);
             if(hasKnockBack)
             {
                 bool knockbackToRight;

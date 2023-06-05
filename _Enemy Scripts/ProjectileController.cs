@@ -37,7 +37,7 @@ public class ProjectileController : MonoBehaviour
 
         //Check for player collision
         var target = collision.GetComponent<Base_PlayerCombat>();
-        if(target != null){ target.TakeDamage(damage); target.GetKnockback(transform.position.x, knockbackStrength); }
+        if(target != null){ target.TakeDamage(damage, transform.position.x); target.GetKnockback(transform.position.x, knockbackStrength); }
 
         //It projectile hits wall, still destroy
         DestroyProjectile();

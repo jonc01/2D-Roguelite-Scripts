@@ -5,7 +5,7 @@ using UnityEngine;
 public class Base_ConditionalAugments : MonoBehaviour
 {
     [Header("Setup")]
-    [SerializeField] public float procChance = 1.0f; //default 100%
+    [SerializeField] public float procChance = 1.0f; //default 100%, 0.0 - 1.0f
     [SerializeField] public float duration;
     [SerializeField] protected bool active;
     [SerializeField] public float buffAmount; //TODO: need to update this to the AugmentScript values
@@ -33,6 +33,19 @@ public class Base_ConditionalAugments : MonoBehaviour
     protected virtual void Activate()
     {
         Debug.Log(name + " Augment Activated");
+    }
+
+//
+
+    public virtual void TriggerAugment(Transform objectHitPos)
+    {
+        float rand = Random.Range(0f, 1.0f);
+	    if(rand < procChance) Activate(objectHitPos);
+    }
+
+    protected virtual void Activate(Transform objectHitPos)
+    {
+
     }
 
     public virtual void UpdateLevelStats()

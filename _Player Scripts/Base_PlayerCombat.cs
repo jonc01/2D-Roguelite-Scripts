@@ -30,6 +30,9 @@ public class Base_PlayerCombat : MonoBehaviour
     //G1(.56, .294), G2/A1(.437, .149), G3(.318, .144), A2(.479, .208)
     [SerializeField] float[] hitBoxLength; //.95f, 1.35f, 1.75f, 1.35f, 1.52f
     [SerializeField] float[] hitBoxHeight; //.63f, 0.25f, 0.25f, 0.25f, 0.28f
+    [SerializeField] Transform parryPoint;
+    [SerializeField] float parryHitBoxLength; //.64f
+    [SerializeField] float parryHitboxHeight; //.61f    
 
     [Header("Ground Attack Animator Setup")]
     //array of attack anim time (ground)
@@ -43,6 +46,13 @@ public class Base_PlayerCombat : MonoBehaviour
     public float[] airAttackDelayAnimTimes;
     public float[] airAttackFullAnimTimes;
     public float[] airAttackDamageMultipliers;
+
+    [Header("Block Animator Setup")]
+    public float blockFullAnimTime;
+    public float blockDelayAnimTime;
+    public float blockDelay;
+    public float blockDuration;
+    private float blockDelayAndDuration;
 
     [Space(10)]
 
@@ -67,10 +77,13 @@ public class Base_PlayerCombat : MonoBehaviour
     public int currentAttack;
     public int currentAirAttack;
     float timeSinceAttack;
-    float timeSinceAirAttack;
+    // float timeSinceAirAttack;
+    float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
+    [SerializeField] bool isParrying;
 
+    public float blockAttackSpeed;
     bool dashImmune;
 
     //Bools
@@ -80,6 +93,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
     //Coroutines - Stored to allow interrupts
     Coroutine AttackingCO;
+    Coroutine BlockingCO;
     Coroutine StunnedCO;
     Coroutine KnockbackCO;
     Coroutine KnockupCO;
@@ -112,10 +126,13 @@ public class Base_PlayerCombat : MonoBehaviour
 
         isAttacking = false;
         isAirAttacking = false;
+        isParrying = false;
         currentAttack = 0;
         currentAirAttack = 0;
         currAttackIndex = 0;
         dashImmune = false;
+
+        blockDelayAndDuration = blockDelay+blockDuration;
 
         UpdateUI();
     }
@@ -125,7 +142,8 @@ public class Base_PlayerCombat : MonoBehaviour
         if (!allowInput) return;
         if (!isAlive) return;
         timeSinceAttack += Time.deltaTime;
-        timeSinceAirAttack += Time.deltaTime;
+        // timeSinceAirAttack += Time.deltaTime;
+        timeSinceBlock += Time.deltaTime;
         if (isStunned) return;
 
         if (Input.GetKeyDown(KeyCode.Y)) //TODO: temp testing
@@ -158,7 +176,8 @@ public class Base_PlayerCombat : MonoBehaviour
 
     private void AirAttackMoveCheck()
     {
-        if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
+        // if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
+        if (timeSinceAttack <= .2f)//attackSpeed - .1f)
         {
             movement.ToggleAirMove(false);
         }
@@ -190,20 +209,22 @@ public class Base_PlayerCombat : MonoBehaviour
     public void Attack2()
     {
         if (!isAlive) return;
-        if (timeSinceAirAttack > attackSpeed && !movement.isDashing)// && !isAttacking && !isAirAttacking) //allowInput
+        if (timeSinceAttack > attackSpeed && !movement.isDashing)// && !isAttacking && !isAirAttacking) //allowInput
         {
             currentAirAttack++;
 
             if (currentAirAttack > totalNumAirAttacks) currentAirAttack = 1;
 
-            if (timeSinceAirAttack > 2.0f) currentAttack = 1;
+            if (timeSinceAttack > 2.0f) currentAttack = 1;
+            // if (timeSinceAirAttack > 2.0f) currentAttack = 1;
 
             //Air attacks
             currAttackIndex = currentAirAttack + 2; //[3-4]
             AttackingCO = StartCoroutine(AirAttacking(currentAirAttack));
 
             //Reset timer
-            timeSinceAirAttack = 0.0f;
+            timeSinceAttack = 0.0f;
+            // timeSinceAirAttack = 0.0f;
         }
     }
 
@@ -262,7 +283,8 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 damageable.TakeDamage(damageDealt, true, knockbackStrength, transform.position.x);
-                augmentInventory.OnHit();
+                Transform enemyPos = damageable.GetPosition();
+                augmentInventory.OnHit(enemyPos);
                 HitStopAnim(attackAnimFull, groundAttack);
 
                 if(isAirAttacking) movement.Float(.3f);
@@ -270,6 +292,63 @@ public class Base_PlayerCombat : MonoBehaviour
                 //hitStop.Stop(.1f); //Successful hit
             }
         }
+    }
+
+    void ParryCounter()
+    {
+        Collider2D[] hitEnemies = 
+            Physics2D.OverlapBoxAll(parryPoint.position,
+            new Vector2(parryHitBoxLength, parryHitboxHeight), 0, enemyLayer);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            IDamageable damageable = enemy.GetComponent<IDamageable>();
+            if(damageable != null)
+            {
+                // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
+                damageable.TakeDamageStatus(1);
+                Transform enemyPos = damageable.GetPosition();
+                // augmentInventory.OnHit(enemyPos);
+                augmentInventory.OnParry(enemyPos);
+
+                hitStop.Stop(.1f); //Successful hit //.083f is 1 frame
+            }
+        }
+    }
+
+    public void Block()
+    {
+        if (!isAlive) return;
+        if (timeSinceBlock < blockAttackSpeed) return;
+        if (timeSinceAttack > attackSpeed && !movement.isDashing)
+        {
+            //Coroutine
+            BlockingCO = StartCoroutine(Blocking());
+            
+            //Reset timer
+            timeSinceAttack = 0.0f;
+        }
+
+
+        bool successfulParry = false;
+        // isParrying
+        animator.PlayBlockAnim(blockFullAnimTime, successfulParry);
+        timeSinceAttack = 0;
+        timeSinceBlock = 0;
+    }
+
+    IEnumerator Blocking()
+    {
+        //float blockDelay;
+        //float blockDuration;
+
+        // blockAnimTime
+        yield return new WaitForSeconds(blockDelay); //0.0834f\
+        isParrying = true;
+        yield return new WaitForSeconds(blockDuration);
+        isParrying = false;
+        
+        yield return new WaitForSeconds(blockFullAnimTime - blockDelayAndDuration);
     }
 
     void HitStopAnim(float attackAnimFull, bool ground)
@@ -288,6 +367,8 @@ public class Base_PlayerCombat : MonoBehaviour
             Gizmos.DrawWireCube(attackPoints[currAttackIndex].position, 
                 new Vector3((hitBoxLength[currAttackIndex]),
                 hitBoxHeight[currAttackIndex], 0));
+            
+            Gizmos.DrawWireCube(parryPoint.position, new Vector3(parryHitBoxLength, parryHitboxHeight, 0));
         }
     }
 
@@ -295,6 +376,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public void GetKnockback(float enemyXPos, float strength = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
+        if(isParrying) return;
         KnockbackNullCheckCO();
 
         if (kbResist > 0) strength -= kbResist;
@@ -318,7 +400,7 @@ public class Base_PlayerCombat : MonoBehaviour
         KnockbackNullCheckCO();
 
         if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
+        if (strength <= 0) return; //Full knockback resist
 
         isKnockedback = true;
 
@@ -330,12 +412,13 @@ public class Base_PlayerCombat : MonoBehaviour
         movement.StopVelocityX();
         yield return new WaitForSeconds(.02f); //need delay for physics to update
         // float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-        float temp;
-        if(kbToRight) temp = 1;
-        else temp = -1;
+        float kbDir;
+        if(kbToRight) kbDir = 1;
+        else kbDir = -1;
 
-        Vector2 direction = new Vector2(temp, .3f);
-        movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        // Vector2 direction = new Vector2(temp, .3f);
+        // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
+        movement.rb.velocity = new Vector2(kbDir * strength, movement.rb.velocity.y);
 
         KnockbackResetCO = StartCoroutine(KnockbackReset(recoveryDelay));
     }
@@ -411,6 +494,26 @@ public class Base_PlayerCombat : MonoBehaviour
         isStunned = true;
         yield return new WaitForSeconds(duration);
         isStunned = false;
+    }
+
+    public void TakeDamage(float damageTaken, float enemyXPos)
+    {
+        if (!isAlive || dashImmune) return;
+        
+        bool damageFromRight = enemyXPos > transform.position.x;
+        //Only allow parry if the Player is facing the enemy
+        if(damageFromRight == movement.isFacingRight)
+        {
+            if (isParrying)
+            {
+                ScreenShakeListener.Instance.Shake(1);
+                ParryCounter();
+                InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
+                return;
+            }
+        }
+
+        TakeDamage(damageTaken);
     }
 
     public void TakeDamage(float damageTaken)

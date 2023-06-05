@@ -19,9 +19,10 @@ public class Base_EnemyController : MonoBehaviour
     [SerializeField] bool isIdling;
     [SerializeField] bool isPatrolling;
     [SerializeField] bool playerDetected;
-
+    [SerializeField] private bool checkLanding;
     Coroutine IdleCO;
     Coroutine PatrolCO;
+    Coroutine LandingCO;
 
     private void Awake()
     {
@@ -34,6 +35,7 @@ public class Base_EnemyController : MonoBehaviour
         bool startDir = (Random.value > 0.5f);
         // movement.MoveRight(startDir);
         StartIdle(.3f, false);
+        checkLanding = false;
     }
 
     protected virtual void Update()
@@ -51,7 +53,13 @@ public class Base_EnemyController : MonoBehaviour
             return;
         }
 
-        if (!raycast.isGrounded || combat.isSpawning) return;
+        // if (!raycast.isGrounded || combat.isSpawning) return;
+        if (!raycast.isGrounded || combat.isSpawning) { 
+            movement.canMove = false; 
+            checkLanding = true; 
+            return;
+        }
+        StartLanding();
 
         MoveCheck();
         LedgeWallCheck();
@@ -200,8 +208,26 @@ public class Base_EnemyController : MonoBehaviour
     void LedgeWallCheck()
     {
         if (combat.isAttacking) return;
+        if (!raycast.isGrounded) return;
         if (!raycast.ledgeDetect || raycast.wallDetect)
             if (movement.rb.velocity.y == 0)
                 FlipDir();
+    }
+
+    void StartLanding()
+    {
+        if(!checkLanding) return;
+        if(LandingCO != null) StopCoroutine(LandingCO);
+
+        //Disable canMove right after landing
+        checkLanding = false;
+        LandingCO = StartCoroutine(Landing());
+    }
+
+    IEnumerator Landing()
+    {
+        movement.canMove = false;
+        yield return new WaitForSeconds(.1f);
+        movement.canMove = true;
     }
 }
