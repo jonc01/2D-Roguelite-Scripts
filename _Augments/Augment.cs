@@ -16,7 +16,7 @@ public class Augment : ScriptableObject
 
     public enum _AugmentType { 
         Normal, OnKill, OnDamageTaken, 
-        OnHit, OnRoomClear };
+        OnHit, OnParry, OnRoomClear };
     public _AugmentType AugmentType;
 
     // public enum _MaxLevel { Level1 = 1, Level2 = 2, Level3 = 3, Level4 = 5, Level5 = 5};

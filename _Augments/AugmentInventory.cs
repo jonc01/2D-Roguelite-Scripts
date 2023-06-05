@@ -42,6 +42,7 @@ public class AugmentInventory : MonoBehaviour
     [Header("Conditional Augments")]
     [SerializeField] private List<Base_ConditionalAugments> onKillAugments;
     [SerializeField] private List<Base_ConditionalAugments> onHitAugments;
+    [SerializeField] private List<Base_ConditionalAugments> onParryAugments;
     [SerializeField] private List<Base_ConditionalAugments> onDamageTakenAugments;
     [SerializeField] private List<Base_ConditionalAugments> onRoomClearAugments;
 
@@ -96,6 +97,16 @@ public class AugmentInventory : MonoBehaviour
         }
     }
 
+    public void OnParry(Transform objectHitPos)
+    {
+        Debug.Log("On Parry");
+        if(onParryAugments.Count <= 0) return;
+        for(int i=0; i<onParryAugments.Count; i++)
+        {
+            onParryAugments[i].TriggerAugment(objectHitPos);
+        }
+    }
+
     public void OnRoomClear()
     {
         Debug.Log("OnRoomClear");
@@ -117,7 +128,8 @@ public class AugmentInventory : MonoBehaviour
             case 1: onKillAugments.Add(conditionalAugment); break; //OnKill
             case 2: onDamageTakenAugments.Add(conditionalAugment); break; //OnDamageTaken
             case 3: onHitAugments.Add(conditionalAugment); break; //OnHit
-            case 4: onRoomClearAugments.Add(conditionalAugment); break; //OnRoomClear
+            case 4: onParryAugments.Add(conditionalAugment); break; //OnParry
+            case 5: onRoomClearAugments.Add(conditionalAugment); break; //OnRoomClear
             default: break;
         }
     }
@@ -209,6 +221,11 @@ public class AugmentInventory : MonoBehaviour
 
     public void AddAugment(AugmentScript augment)
     {
+        if(heldAugments.Count == 10)
+        {
+            Debug.Log("Max number of augments");
+            return;
+        }
         heldAugments.Add(augment);
         if(augmentInventoryDisplay != null) augmentInventoryDisplay.AddAugmentToDisplay(heldAugments);
         UpdateAugments();

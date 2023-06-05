@@ -306,11 +306,12 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
-                damageable.TakeDamageStatus(10);
+                damageable.TakeDamageStatus(1);
                 Transform enemyPos = damageable.GetPosition();
-                augmentInventory.OnHit(enemyPos);
+                // augmentInventory.OnHit(enemyPos);
+                augmentInventory.OnParry(enemyPos);
 
-                hitStop.Stop(.1f); //Successful hit //TODO: might remove
+                hitStop.Stop(.1f); //Successful hit //.083f is 1 frame
             }
         }
     }
@@ -507,7 +508,7 @@ public class Base_PlayerCombat : MonoBehaviour
             {
                 ScreenShakeListener.Instance.Shake(1);
                 ParryCounter();
-                InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
+                InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
             }
         }
