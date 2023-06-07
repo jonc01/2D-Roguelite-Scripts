@@ -22,6 +22,7 @@ public class DEBUGGING_MODE : MonoBehaviour
 
     void Update()
     {
+        #if UNITY_EDITOR
         if(Input.GetKeyDown(KeyCode.BackQuote)) //tilde key
         {
             if(playerCombat == null) return;
@@ -36,6 +37,7 @@ public class DEBUGGING_MODE : MonoBehaviour
                 KillAroundPlayer();
             }
         }
+        #endif
     }
 
     void KillAroundPlayer()

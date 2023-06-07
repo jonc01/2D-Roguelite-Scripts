@@ -315,7 +315,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (strength <= 0) return;
         // if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
         // if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
-        if(knockbackImmune) return;
+        if (knockbackImmune) return;
 
         if (kbResist > 0) strength -= kbResist;
         if (strength <= 0) return; //Full resist, no knockback effect
@@ -341,6 +341,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(delay);
         movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
+        movement.ToggleFlip(false);
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         isKnockedback = false;
 
