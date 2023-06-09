@@ -102,7 +102,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         Invoke("DeleteObj", 1f); //Wait for fade out to finish
     }
 
-    // private void DeleteObj()
+    // private void DeleteObj() //Using base
     // {
     //     Destroy(gameObject);
     // }

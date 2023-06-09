@@ -259,6 +259,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     protected virtual void FacePlayer()
     {
+        if(!movement.canFlip) return; //remove if overriding
         //Player behind enemy
         if (enemyController.raycast.playerDetectBack)
         {
@@ -430,7 +431,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         healthBar.UpdateHealth(currentHP);
 
 
-        if(knockback)
+        if(knockback && !knockbackImmune)
         {
             bool kbToRight;
             kbToRight = xPos < transform.position.x;
@@ -450,7 +451,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void TakeDamageStatus(float damageTaken)
     {
-
         TakeDamage(damageTaken, false);
     }
 
