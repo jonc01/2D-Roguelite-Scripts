@@ -11,6 +11,11 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool canAttackFar;
     public bool canAttack;
 
+    [Header("== Attack Phases ==")]
+    [SerializeField] protected int[] Phase1AtkPool;
+    [SerializeField] protected int[] Phase2AtkPool;
+    [SerializeField] protected int[] Phase3AtkPool;
+
     [Header("=== References/Setup ===")]
     public LayerMask playerLayer;
     [SerializeField] protected Transform[] attackPoint;
@@ -65,6 +70,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [Space(10)]
     protected float timeSinceAttack;
     [SerializeField] public int currAttackIndex;
+    [SerializeField] protected int currAttack;
     //float critChance;
     //float critMultiplier;
 
@@ -148,6 +154,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isAttacking = false;
         canAttack = true;
         currAttackIndex = 0;
+        currAttack = 0;
         currentPhase = 0;
         changingPhase = false;
         //Must be in Start(), because of player scene loading.
@@ -230,6 +237,20 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     }
 
     #endregion
+
+    protected virtual void ShuffleAttackPools(int[] atkPoolArray)
+    {
+        for(int i = atkPoolArray.Length - 1; i > 0; i--)
+        {
+            //Random index
+            int randIndex = Random.Range(0, i + 1); 
+
+            //Swap values
+            int temp = atkPoolArray[i];
+            atkPoolArray[i] = atkPoolArray[randIndex];
+            atkPoolArray[randIndex] = temp;
+        }
+    }
 
     protected virtual IEnumerator Attacking()
     {

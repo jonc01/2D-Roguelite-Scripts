@@ -257,12 +257,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         movement.ToggleFlip(true);
     }
 
-    protected virtual void FacePlayer()
+    public virtual void FacePlayer()
     {
-        if(!movement.canFlip) return; //remove if overriding
+        // if(!movement.canFlip) return; //remove if overriding
         //Player behind enemy
         if (enemyController.raycast.playerDetectBack)
         {
+            Debug.Log("Should Flip to get player");
             movement.ManualFlip(!movement.isFacingRight);
         }
     }

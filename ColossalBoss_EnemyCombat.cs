@@ -7,10 +7,10 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     //float attackEndDelay = .5f;
     [Space(10)]
     //2D array with attack pools for each phase
-    [Header("= Colossal Boss =")]
-    [SerializeField] private int[] Phase1AtkPool;
-    [SerializeField] private int[] Phase2AtkPool;
-    [SerializeField] private int[] Phase3AtkPool;
+    // [Header("= Colossal Boss =")]
+    // [SerializeField] private int[] Phase1AtkPool;
+    // [SerializeField] private int[] Phase2AtkPool;
+    // [SerializeField] private int[] Phase3AtkPool;
 
     [Header("= Colossal Boss = : (0) RangeAttack")]
     [SerializeField] GameObject RangeAttackExplosionPrefab;
@@ -119,19 +119,43 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     {
         timeSinceAttack = 0;
         canAttack = false;
-        
-        int randIndex;
+
+        currAttack++;
+        // currAttackIndex++;
+        // currAttackIndex = currAttack - 1;
+
+        // int randIndex; //TODO: replacing with manual count ^
+
         //Get random attack index
         if(currentPhase == 0){
-            randIndex = Random.Range(0, Phase1AtkPool.Length);
-            currAttackIndex = Phase1AtkPool[randIndex];
-        }else if(currentPhase == 1){
-            randIndex = Random.Range(0, Phase2AtkPool.Length);
-            currAttackIndex = Phase2AtkPool[randIndex];
-        }else{
-            randIndex = Random.Range(0, Phase3AtkPool.Length);
-            currAttackIndex = Phase3AtkPool[randIndex];
+            // randIndex = Random.Range(0, Phase1AtkPool.Length);
+            // currAttackIndex = Phase1AtkPool[randIndex];
+            if(currAttack-1 >= Phase1AtkPool.Length)
+            {
+                //TODO: shuffle atkPool
+                ShuffleAttackPools(Phase1AtkPool);
+                currAttack = 1;
+            }
+            currAttackIndex = Phase1AtkPool[currAttack-1];
         }
+        else if(currentPhase == 1){
+            if(currAttack-1 >= Phase2AtkPool.Length)
+            {
+                ShuffleAttackPools(Phase2AtkPool);
+                currAttack = 1;
+            }
+            currAttackIndex = Phase2AtkPool[currAttack-1];
+        }
+        else{
+            if(currAttack-1 >= Phase3AtkPool.Length)
+            {
+                ShuffleAttackPools(Phase3AtkPool);
+                currAttack = 1;
+            }
+            currAttackIndex = Phase3AtkPool[currAttack-1];
+        }
+
+        // currAttackIndex = currAttack - 1;
 
         switch(currAttackIndex)
         {

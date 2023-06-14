@@ -415,6 +415,8 @@ public class Base_PlayerMovement : MonoBehaviour
     public void Move(bool moveRight)
     {
         //move at stats.moveSpeed;
+
+        //! - using horizontal from the Input in FixedUpdate
     }
     
     public void StartDash()

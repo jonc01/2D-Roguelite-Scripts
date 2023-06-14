@@ -77,7 +77,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public int currentAttack;
     public int currentAirAttack;
     float timeSinceAttack;
-    // float timeSinceAirAttack;
+    float timeSinceAirAttack; //only for move check, not attack speed
     float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
@@ -142,7 +142,7 @@ public class Base_PlayerCombat : MonoBehaviour
         if (!allowInput) return;
         if (!isAlive) return;
         timeSinceAttack += Time.deltaTime;
-        // timeSinceAirAttack += Time.deltaTime;
+        timeSinceAirAttack += Time.deltaTime; //only for move check, not attack speed
         timeSinceBlock += Time.deltaTime;
         if (isStunned) return;
 
@@ -166,6 +166,7 @@ public class Base_PlayerCombat : MonoBehaviour
     private void AttackMoveCheck()
     {
         //Delay after attacking to resume movement
+        if(!movement.isGrounded) return;
         float delay = attackSpeed + attackMoveDelay;
         if (timeSinceAttack <= delay) //air attacks not affected
         {
@@ -176,8 +177,8 @@ public class Base_PlayerCombat : MonoBehaviour
 
     private void AirAttackMoveCheck()
     {
-        // if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
-        if (timeSinceAttack <= .2f)//attackSpeed - .1f)
+        // if (timeSinceAttack <= .2f)//attackSpeed - .1f)
+        if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
         {
             movement.ToggleAirMove(false);
         }
@@ -224,7 +225,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
             //Reset timer
             timeSinceAttack = 0.0f;
-            // timeSinceAirAttack = 0.0f;
+            timeSinceAirAttack = 0.0f; //only for move check, not attack speed
         }
     }
 
@@ -311,7 +312,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
 
-                hitStop.Stop(.1f); //Successful hit //.083f is 1 frame
+                hitStop.Stop(.2f); //Successful hit //.083f is 1 frame
             }
         }
     }
