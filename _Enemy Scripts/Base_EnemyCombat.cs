@@ -257,11 +257,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         movement.ToggleFlip(true);
     }
 
-    protected virtual void FacePlayer()
+    public virtual void FacePlayer()
     {
+        // if(!movement.canFlip) return; //remove if overriding
         //Player behind enemy
         if (enemyController.raycast.playerDetectBack)
         {
+            Debug.Log("Should Flip to get player");
             movement.ManualFlip(!movement.isFacingRight);
         }
     }
@@ -315,7 +317,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (strength <= 0) return;
         // if(AttackFarBehavior != null) { if(AttackFarBehavior.knockbackImmune) return; }
         // if(AttackCloseBehavior != null) { if(AttackCloseBehavior.knockbackImmune) return; }
-        if(knockbackImmune) return;
+        if (knockbackImmune) return;
 
         if (kbResist > 0) strength -= kbResist;
         if (strength <= 0) return; //Full resist, no knockback effect
@@ -341,6 +343,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(delay);
         movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
+        movement.ToggleFlip(false);
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         isKnockedback = false;
 
@@ -429,7 +432,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         healthBar.UpdateHealth(currentHP);
 
 
-        if(knockback)
+        if(knockback && !knockbackImmune)
         {
             bool kbToRight;
             kbToRight = xPos < transform.position.x;
@@ -449,7 +452,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void TakeDamageStatus(float damageTaken)
     {
-
         TakeDamage(damageTaken, false);
     }
 

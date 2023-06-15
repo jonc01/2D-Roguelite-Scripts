@@ -7,6 +7,7 @@ public class Melee_Lunge : Base_CombatBehavior
     //If the player is within the range, lunge at player
 
     [Header("Lunge")]
+    [SerializeField] bool allowFlipBeforeAttack = false;
     [SerializeField] bool canLunge;
     [SerializeField] public bool isLunging;
     Coroutine LungingCO;
@@ -48,6 +49,9 @@ public class Melee_Lunge : Base_CombatBehavior
         combat.PlayIndicator();
         
         yield return new WaitForSeconds(animDelay); //Charge up portion of animation
+
+        if(allowFlipBeforeAttack) combat.FacePlayer();
+
         combat.knockbackImmune = true;
         allowCollision = true;
         combat.Lunge(movement.isFacingRight, 8f, .2f);

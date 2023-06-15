@@ -6,15 +6,20 @@ public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
     public bool trialRoom; //gets set in RoomGenerator as Trial room is created
+    public bool playerVisited;
 
     [Header("References")]
     public DoorManager DoorManager;
     [SerializeField] public EnemyStageManager stageManager;
     [SerializeField] private RewardController augmentReward;
+    [SerializeField] SpriteRenderer minimapIcon;
+    [SerializeField] Color minimapCleared;
+    [SerializeField] Color minimapNotCleared;
 
     void Start()
     {
         roomCleared = false;
+        playerVisited = false;
 
         if (DoorManager == null) DoorManager = GetComponent<DoorManager>();
         //if (DoorManager == null) DoorManager = GameObject.FindGameObjectWithTag("DoorManager").GetComponent<DoorManager>();
@@ -23,6 +28,25 @@ public class RoomClear : MonoBehaviour
 
         augmentReward = GetComponent<RewardController>();
         if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
+
+
+        ToggleMinimapCleared(false);
+        ToggleMinimapIcon(playerVisited);
+    }
+
+    public void ToggleMinimapIcon(bool toggle)
+    {
+        if(minimapIcon == null) return;
+
+        minimapIcon.gameObject.SetActive(toggle);
+    }
+
+    private void ToggleMinimapCleared(bool toggle)
+    {
+        if(minimapIcon == null) return;
+
+        if(toggle) minimapIcon.color = minimapCleared;
+        else minimapIcon.color = minimapNotCleared;
     }
 
     public void Cleared()
@@ -41,6 +65,7 @@ public class RoomClear : MonoBehaviour
 
     IEnumerator DelayClear()
     {
+        ToggleMinimapIcon(true);
         yield return new WaitForSeconds(1f);
         if(stageManager == null) augmentReward.ToggleRewardSelect(false);
         else
