@@ -178,7 +178,7 @@ public class Base_PlayerCombat : MonoBehaviour
     private void AirAttackMoveCheck()
     {
         // if (timeSinceAttack <= .2f)//attackSpeed - .1f)
-        if (timeSinceAirAttack <= .2f)//attackSpeed - .1f)
+        if (timeSinceAirAttack <= .2f) //Separate from ground attack to prevent velocity being set to 0
         {
             movement.ToggleAirMove(false);
         }
@@ -239,13 +239,13 @@ public class Base_PlayerCombat : MonoBehaviour
         float attackAnimEnd = attackAnimFull - attackDelay;
 
         animator.PlayAttackAnim(currentAttack, attackAnimFull);
-        //movement.ToggleCanMove(false); //Disable movement
+        //Movement is being toggled in Update when isAttacking is toggled
 
         yield return new WaitForSeconds(attackDelay);
         CheckAttack(groundAttackDamageMultipliers[currIndex], attackAnimFull);
 
         yield return new WaitForSeconds(attackAnimEnd); //attackAnimEnd
-        //movement.ToggleCanMove(true); //Enable movement
+        
         isAttacking = false;
     }
 

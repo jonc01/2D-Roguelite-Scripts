@@ -16,13 +16,14 @@ public class HitStop : MonoBehaviour
 
     public void Stop(float duration)
     {
-        Stop(duration, 0.0f);
+        Stop(duration, 0.5f);
     }
 
     IEnumerator Wait(float duration)
     {
         waiting = true;
-        yield return new WaitForSecondsRealtime(duration);
+        // yield return new WaitForSecondsRealtime(duration);
+        yield return new WaitForSeconds(duration);
         Time.timeScale = 1.0f;
         waiting = false;
     }
