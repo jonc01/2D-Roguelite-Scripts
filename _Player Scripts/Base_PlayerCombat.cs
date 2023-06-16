@@ -312,7 +312,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
 
-                hitStop.Stop(.2f); //Successful hit //.083f is 1 frame
+                hitStop.Stop(); //Successful hit //.083f is 1 frame
             }
         }
     }
@@ -507,7 +507,7 @@ public class Base_PlayerCombat : MonoBehaviour
         {
             if (isParrying)
             {
-                ScreenShakeListener.Instance.Shake(1);
+                ScreenShakeListener.Instance.Shake(2);
                 ParryCounter();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;

@@ -53,7 +53,7 @@ public class RoomGenerator : MonoBehaviour
 
     public void GenerateRooms()
     {
-        Debug.Log("Generating Rooms...");
+        // Debug.Log("Generating Rooms...");
         StartCoroutine(GenerateRoomsCO());
     }
 
@@ -117,7 +117,7 @@ public class RoomGenerator : MonoBehaviour
         roomGenRunning = false;
         roomGenDone = true;
 
-        Debug.Log("Rooms Generated");
+        // Debug.Log("Rooms Generated");
     }
 
     private void CreateRoom(GameObject roomObj, int roomIndex)

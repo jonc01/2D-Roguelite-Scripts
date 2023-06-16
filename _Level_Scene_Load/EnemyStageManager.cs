@@ -6,7 +6,9 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
+    public bool isStartingRoom = false; //Manually set this in room Prefab
     public bool neutralRoom;
+    public GameObject minimapIcon;
     [SerializeField] Transform enemyParentObj;
     [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] private int totalEnemyCount; //used to store the original number
@@ -20,10 +22,12 @@ public class EnemyStageManager : MonoBehaviour
     
     [Header("Wave Debugging")]
     [SerializeField] private int currWaveEnemyCount;
+    private DoorManager doorManager;
 
     void Start()
     {
         roomManager = GetComponentInParent<RoomClear>();
+        roomManager.stageManager = this;
         if (enemyParentObj == null) EnemySetup();
         else enemyCount = enemyParentObj.childCount;
         totalEnemyCount = enemyCount;
@@ -34,9 +38,9 @@ public class EnemyStageManager : MonoBehaviour
             temp.roomCleared = true;
             roomManager.Cleared();
             neutralRoom = true;
+            // temp.DoorManager.startingRoom = isStartingRoom;
         }
         else neutralRoom = false;
-
         currentWave = 0;
 
         if(multipleWaves)
@@ -49,6 +53,14 @@ public class EnemyStageManager : MonoBehaviour
             waveThreshold = new int[1];
             waveThreshold[0] = enemyCount;
         }
+
+        if(!isStartingRoom) ToggleMinimapIcon(false);
+    }
+
+    public void ToggleMinimapIcon(bool toggle)
+    {
+        if(minimapIcon == null) return;
+        minimapIcon.SetActive(toggle);
     }
 
     public void EnemySetup()

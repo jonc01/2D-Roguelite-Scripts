@@ -6,18 +6,29 @@ public class DoorManager : MonoBehaviour
 {
     //Controls doors in Stages
     [SerializeField] public List<DoorController> connectedDoors;
+    [SerializeField] public List<GameObject> minimapIcons;
     private bool checkForDoors;
     public RoomClear roomClear;
+    public bool startingRoom = false;
 
     void Start()
     {
+        // startingRoom = false; //Gets set from EnemyStageManager at start //TODO: doesn't work, because of timers
         connectedDoors = new List<DoorController>();
-        roomClear = GetComponent<RoomClear>(); //TODO: check if needed here
+        minimapIcons = new List<GameObject>();
+        roomClear = GetComponent<RoomClear>();
+
+        if(transform.position == new Vector3 (0,0,0)) startingRoom = true;
     }
 
     public void AddToList(DoorController door)
     {
         connectedDoors.Add(door);
+    }
+
+    public void AddIconToList(GameObject icon)
+    {
+        minimapIcons.Add(icon);
     }
 
     //Called from RoomManager
@@ -29,6 +40,25 @@ public class DoorManager : MonoBehaviour
         for (int i = 0; i < connectedDoors.Count; i++)
         {
             if(connectedDoors[i] != null) connectedDoors[i].ToggleDoor(toggle);
+        }
+    }
+
+    public void DelayedRevealDoor(float delay = .08f)
+    {
+        Invoke("RevealDoors", delay);
+    }
+
+    void DelayedHideDoor()
+    {
+        RevealDoors(false);
+    }
+
+    public void RevealDoors(bool toggle = true)
+    {
+        if(minimapIcons.Count == 0) return;
+        for (int i = 0; i < minimapIcons.Count; i++)
+        {
+            if(minimapIcons[i] != null) minimapIcons[i].SetActive(toggle);
         }
     }
 

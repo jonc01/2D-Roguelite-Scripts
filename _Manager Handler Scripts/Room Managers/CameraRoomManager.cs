@@ -11,6 +11,7 @@ public class CameraRoomManager : MonoBehaviour
     [SerializeField] public Transform CameraAnchor;
     [SerializeField] Vector3 originPosition;
     [SerializeField] bool playerIsHere;
+    [SerializeField] RoomClear roomClear;
     float yOffset;
     [SerializeField] DoorManager doorManager;
 
@@ -21,6 +22,7 @@ public class CameraRoomManager : MonoBehaviour
         yOffset = CameraAnchor.position.y; //This is the offset since camera starts at 0
         
         if(doorManager == null) doorManager = GetComponentInParent<DoorManager>();
+        if(roomClear == null) roomClear = GetComponentInParent<RoomClear>();
     }
 
     // void Update()
@@ -34,6 +36,7 @@ public class CameraRoomManager : MonoBehaviour
         {
             RelocateCamera();
             playerIsHere = true; //TODO: may have a use, currently debugging
+            roomClear.ToggleMinimapIcon(true);
             doorManager.UpdateDoorState(.05f); //Open/Close doors if room has been cleared
         }
     }

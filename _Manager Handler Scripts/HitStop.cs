@@ -14,9 +14,9 @@ public class HitStop : MonoBehaviour
         StartCoroutine(Wait(duration));
     }
 
-    public void Stop(float duration)
+    public void Stop(float duration = .02f)
     {
-        Stop(duration, 0.5f);
+        Stop(duration, 0.1f);
     }
 
     IEnumerator Wait(float duration)
