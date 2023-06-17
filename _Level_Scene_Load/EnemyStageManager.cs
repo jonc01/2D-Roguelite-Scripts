@@ -27,7 +27,7 @@ public class EnemyStageManager : MonoBehaviour
     void Start()
     {
         roomManager = GetComponentInParent<RoomClear>();
-        roomManager.stageManager = this;
+        if(roomManager != null) roomManager.stageManager = this;
         if (enemyParentObj == null) EnemySetup();
         else enemyCount = enemyParentObj.childCount;
         totalEnemyCount = enemyCount;

@@ -12,6 +12,7 @@ public class InstantiateManager : MonoBehaviour
     public VFXManager VFX;
     public TextPopupsHandler TextPopups;
     public HitEffectsHandler HitEffects;
+    public HitEffectsHandler ParryEffects;
     //public HitEffectsHandler OnKillEffects;
 
     public OrbManager XPOrbs;

@@ -48,7 +48,7 @@ public class MinimapIconHandler : MonoBehaviour
         {
             RaycastHit2D originFoundRight = Physics2D.Raycast(transform.position, Vector3.right, xDistance, originLayer);
             var doorManage = originFoundRight.collider.GetComponent<DoorManager>();
-            if(doorManage != null) 
+            if(doorManage != null)
             {
                 doorManage.AddIconToList(icon);
                 if(doorManage.startingRoom) connectedToStart = true;

@@ -491,7 +491,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
-        GameManager.Instance.AugmentInventory.OnKill();
+        GameManager.Instance.AugmentInventory.OnKill(transform);
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject

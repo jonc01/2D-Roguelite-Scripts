@@ -311,6 +311,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 Transform enemyPos = damageable.GetPosition();
                 // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
+                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
                 hitStop.Stop(); //Successful hit //.083f is 1 frame
             }

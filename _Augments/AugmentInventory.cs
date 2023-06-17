@@ -56,14 +56,14 @@ public class AugmentInventory : MonoBehaviour
     }
 
 #region Conditional Augments
-    public void OnKill()
+    public void OnKill(Transform enemyPosition)
     {
         //Currently being called in Base_EnemyCombat
         Debug.Log("OnKill");
         if(onKillAugments.Count <= 0) return;
         for(int i=0; i<onKillAugments.Count; i++)
         {
-            onKillAugments[i].TriggerAugment();
+            onKillAugments[i].TriggerAugment(enemyPosition);
         }
     }
 

@@ -12,8 +12,14 @@ public class ParticlePoolHelper : MonoBehaviour
         pool = transform.parent.GetComponent<ObjectPoolerList>();
     }
 
-    private void OnParticleSystemStopped()
+    // private void OnParticleSystemStopped() //! - not working 2022.3
+    // {
+    //     pool.ReturnObject(gameObject);
+    // }
+
+    void OnDisable()
     {
+        if(pool == null) return;
         pool.ReturnObject(gameObject);
     }
 }
