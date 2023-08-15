@@ -33,11 +33,11 @@ public class ProjectileController : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        animator.Play("Hit");
+        animator.Play("Hit_Alt");
 
         //Check for player collision
         var target = collision.GetComponent<Base_PlayerCombat>();
-        if(target != null){ target.TakeDamage(damage, transform.position.x); target.GetKnockback(transform.position.x, knockbackStrength); }
+        if(target != null){ target.TakeDamage(damage, transform.position.x, true, 2); target.GetKnockback(transform.position.x, knockbackStrength); }
 
         //It projectile hits wall, still destroy
         DestroyProjectile();
@@ -48,7 +48,7 @@ public class ProjectileController : MonoBehaviour
         //Stops projectile on hit or when expiring, then plays the hit animation
         projectileHit = true;
         collider.enabled = false;
-        animator.Play("Hit");
+        animator.Play("Hit_Alt");
         Invoke("DestroyObject", hitAnimTime);
     }
 

@@ -20,6 +20,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
     protected Base_EnemyController enemyController;
+    [Header("Audio References")]
+    [SerializeField] PlayAudioClips playAudioClips;
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
@@ -430,7 +432,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
-
+        if(playAudioClips != null) playAudioClips.PlayRandomClip();
 
         if(knockback && !knockbackImmune)
         {
@@ -482,7 +484,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         healthBar.gameObject.SetActive(false);
         if(AttackingCO != null) StopCoroutine(AttackingCO);
 
-        ScreenShakeListener.Instance.Shake(2);
+        ScreenShakeListener.Instance.Shake(3);
         movement.rb.simulated = false;
         GetComponent<CircleCollider2D>().enabled = false;
 

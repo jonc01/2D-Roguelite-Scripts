@@ -312,6 +312,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
                 InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
+                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
                 hitStop.Stop(); //Successful hit //.083f is 1 frame
             }
@@ -498,7 +499,7 @@ public class Base_PlayerCombat : MonoBehaviour
         isStunned = false;
     }
 
-    public void TakeDamage(float damageTaken, float enemyXPos)
+    public void TakeDamage(float damageTaken, float enemyXPos, bool screenshake = false, int shakeNum = 1)
     {
         if (!isAlive || dashImmune) return;
         
@@ -508,17 +509,18 @@ public class Base_PlayerCombat : MonoBehaviour
         {
             if (isParrying)
             {
-                ScreenShakeListener.Instance.Shake(2);
+                ScreenShakeListener.Instance.Shake(3);
                 ParryCounter();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
             }
         }
 
-        TakeDamage(damageTaken);
+        if(screenshake) ScreenShakeListener.Instance.Shake(shakeNum);
+        TakeDamage(damageTaken, screenshake);
     }
 
-    public void TakeDamage(float damageTaken)
+    public void TakeDamage(float damageTaken, bool screenshakeOR = false)
     {
         if (!isAlive || dashImmune) return;
 
@@ -539,11 +541,14 @@ public class Base_PlayerCombat : MonoBehaviour
         float damageToHealth = damageTaken/maxHP;
         int shakeNum;
 
-        if (damageToHealth >= .3f) shakeNum = 2;
-        else if (damageToHealth >= .15f) shakeNum = 1;
-        else shakeNum = 0;
+        if(!screenshakeOR)
+        {
+            if (damageToHealth >= .3f) shakeNum = 2;
+            else if (damageToHealth >= .15f) shakeNum = 1;
+            else shakeNum = 0;
 
-        ScreenShakeListener.Instance.Shake(shakeNum);
+            ScreenShakeListener.Instance.Shake(shakeNum);
+        }
         //
 
         currentHP -= totalDamage;
