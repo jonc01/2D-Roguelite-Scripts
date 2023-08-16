@@ -40,7 +40,6 @@ public class Base_AoE_Explosion : MonoBehaviour
             new Vector2(hitboxWidth, hitBoxHeight), 0, enemyLayer);
 
         //if (damageMultiplier > 1) knockbackStrength = 6; //TODO: set variable defintion in Inspector
-
         
 
         foreach (Collider2D enemy in hitEnemies)

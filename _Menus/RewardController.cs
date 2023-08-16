@@ -23,6 +23,12 @@ public class RewardController : MonoBehaviour
 
     public void ToggleRewardSelect(bool toggle)
     {
+        if(augmentSelectMenu == null)
+        {
+            Debug.Log(name + " has no AugmentSelect.");
+            return;
+        } 
+
         //Called on room clear, call again once Augment is selected
         GameManager.Instance.rewardOpen = toggle;
         augmentSelectMenu.SetActive(toggle);

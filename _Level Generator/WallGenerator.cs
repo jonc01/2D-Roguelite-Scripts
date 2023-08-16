@@ -30,7 +30,8 @@ public class WallGenerator : MonoBehaviour
     [SerializeField] GameObject VerticalBossDoor;
     [SerializeField] GameObject HorizontalBossDoor;
 
-    [Header("Raycasts")]
+    [Space(10)]
+    [Header("Raycasts DEBUG")]
     [SerializeField] bool wallFoundUp;
     [SerializeField] bool wallFoundLeft;
     [SerializeField] bool wallFoundDown;

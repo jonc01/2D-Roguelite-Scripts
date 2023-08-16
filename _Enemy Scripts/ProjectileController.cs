@@ -8,6 +8,7 @@ public class ProjectileController : MonoBehaviour
     public float damage = 5;
     public float knockbackStrength = 1;
     public float speed = 3;
+    public bool enemyProj = true;
     [SerializeField] private bool projectileHit;
     [SerializeField] private float hitAnimTime;
     [SerializeField] public bool playerToRight;
@@ -33,14 +34,39 @@ public class ProjectileController : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        animator.Play("Hit_Alt");
+        // animator.Play("Hit_Alt");
 
-        //Check for player collision
-        var target = collision.GetComponent<Base_PlayerCombat>();
-        if(target != null){ target.TakeDamage(damage, transform.position.x, true, 2); target.GetKnockback(transform.position.x, knockbackStrength); }
-
+        if(enemyProj)
+        {
+            //Check for player collision
+            var target = collision.GetComponent<Base_PlayerCombat>();
+            if(target != null)
+            {
+                //Player parried, flip direction
+                target.TakeDamage(damage, transform.position.x, true, 2);
+                if(target.isParrying)
+                {
+                    enemyProj = false;
+                    speed *= -1;
+                    return;
+                }
+                //Player hit
+                target.GetKnockback(transform.position.x, knockbackStrength);
+                DestroyProjectile();
+            }
+        }
+        else if(!enemyProj) //Projectile was deflected, switches target to Enemies
+        {
+            var target = collision.GetComponent<Base_EnemyCombat>();
+            if(target != null)
+            {
+                target.TakeDamageStatus(damage);
+                DestroyProjectile();
+                target.GetKnockback(!playerToRight, knockbackStrength);
+            }
+        }
         //It projectile hits wall, still destroy
-        DestroyProjectile();
+        else DestroyProjectile();
     }
 
     private void DestroyProjectile()

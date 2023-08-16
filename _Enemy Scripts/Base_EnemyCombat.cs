@@ -409,7 +409,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isLunging = false;
     }
 
-    void StopAttack(bool toggleFlip = false)
+    public void StopAttack(bool toggleFlip = false)
     {
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         isAttacking = false;

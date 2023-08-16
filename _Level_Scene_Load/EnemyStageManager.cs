@@ -6,14 +6,18 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    public bool isStartingRoom = false; //Manually set this in room Prefab
-    public bool neutralRoom;
     public GameObject minimapIcon;
     [SerializeField] Transform enemyParentObj;
     [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] private int totalEnemyCount; //used to store the original number
     public RoomClear roomManager;
     private int nextWaveCount;
+    [Space(20)]
+    [Header("= SETUP =")]
+    public bool isStartingRoom = false; //Manually set this in room Prefab
+    public bool neutralRoom;
+    public bool hasAugmentRewards = false;
+    [Space(20)]
     [Header("Multiple Waves Setup")]
     [SerializeField] public bool trialRoom = false;
     [SerializeField] bool multipleWaves = false;

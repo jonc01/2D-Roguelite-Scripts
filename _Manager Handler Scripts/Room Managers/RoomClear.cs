@@ -76,7 +76,7 @@ public class RoomClear : MonoBehaviour
         if(stageManager == null) augmentReward.ToggleRewardSelect(false);
         else
         {
-            if(!stageManager.neutralRoom && augmentReward != null) augmentReward.ToggleRewardSelect(true);
+            if(!stageManager.neutralRoom && stageManager.hasAugmentRewards && augmentReward != null) augmentReward.ToggleRewardSelect(true);
             else if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
         }
         yield return new WaitForSeconds(.5f);

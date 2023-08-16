@@ -81,7 +81,7 @@ public class Base_PlayerCombat : MonoBehaviour
     float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
-    [SerializeField] bool isParrying;
+    [SerializeField] public bool isParrying;
 
     public float blockAttackSpeed;
     bool dashImmune;
@@ -311,8 +311,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 Transform enemyPos = damageable.GetPosition();
                 // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
-                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
-                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
+                // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
                 hitStop.Stop(); //Successful hit //.083f is 1 frame
             }
@@ -510,6 +509,7 @@ public class Base_PlayerCombat : MonoBehaviour
             if (isParrying)
             {
                 ScreenShakeListener.Instance.Shake(3);
+                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
                 ParryCounter();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
