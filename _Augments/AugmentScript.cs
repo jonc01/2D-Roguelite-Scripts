@@ -154,7 +154,6 @@ public class AugmentScript : MonoBehaviour
         }
     
         //
-
     }
 
     private void ResetStats()

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Base_BossCombat : MonoBehaviour, IDamageable
 {
+    [SerializeField] bool DEBUGGING = false;
+    [SerializeField] bool DEBUGHP = false;
+    [Space(20)]
 
     [Header("=== Attack Behavior Setup ===")]
     [SerializeField] public Base_CombatBehavior AttackCloseBehavior;
@@ -29,7 +32,6 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     protected Base_BossController bossController;
 
     [Space(10)]
-    [SerializeField] public bool DEBUGMODE = false;
     [SerializeField] protected float spawnFXScale = 2.5f; //2.5f default 
     [Header("=== *Animation Times ===")]
     [SerializeField] protected float[] fullAttackAnimTime; //1f, 1.416667f
@@ -79,6 +81,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] public bool isAlive;
     [SerializeField] public bool playDeathAnim;
     [SerializeField] public bool isSpawning;
+    [SerializeField] public bool isSleeping;
     public bool isStunned;
     public bool isAttacking;
     public bool playerToRight;
@@ -144,7 +147,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         #if UNITY_EDITOR
         //TEMP
-        if (DEBUGMODE)
+        if (DEBUGHP)
         {
             maxHP *= 100;
             currentHP = maxHP;
@@ -166,6 +169,13 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
+        isSpawning = true;
+        isSleeping = true;
+        if(DEBUGGING) StartSpawn();
+    }
+
+    public virtual void StartSpawn() //Manual call on 
+    {
         StartCoroutine(SpawnCO(spawnDelay));
     }
 
@@ -194,6 +204,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         //Toggle SR off
         // sr.enabled = false;
         yield return new WaitForSeconds(delay);
+        isSleeping = false;
         animator.PlayManualAnim(4, 1f);
         yield return new WaitForSeconds(1f); //Wake animation
         // sr.enabled = true;

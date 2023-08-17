@@ -17,6 +17,7 @@ public class EnemyStageManager : MonoBehaviour
     public bool isStartingRoom = false; //Manually set this in room Prefab
     public bool neutralRoom;
     public bool hasAugmentRewards = false;
+    public bool bossRoom = false;
     [Space(20)]
     [Header("Multiple Waves Setup")]
     [SerializeField] public bool trialRoom = false;
@@ -90,6 +91,12 @@ public class EnemyStageManager : MonoBehaviour
                 // if(enemyObj.CompareTag("Enemy")) enemyObj.SetActive(false);
             }
         }
+
+        if(bossRoom)
+        {
+            var bossObj = enemyParentObj.GetChild(0);
+            bossObj.gameObject.SetActive(true);
+        } 
     }
 
 #region Spawning
@@ -120,7 +127,11 @@ public class EnemyStageManager : MonoBehaviour
         else numSpawns = enemyCount + 1;
 
         for(int i = 0; i < numSpawns; i++)
-                enemyParentObj.GetChild(i).gameObject.SetActive(true);
+            enemyParentObj.GetChild(i).gameObject.SetActive(true);
+        
+        //Boss is already enabled, manually starting spawn
+        if(bossRoom)
+            enemyParentObj.GetChild(0).GetComponent<Base_BossCombat>().StartSpawn();
     }
 
     private void SpawnWave()

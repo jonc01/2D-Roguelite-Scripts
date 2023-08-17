@@ -34,8 +34,6 @@ public class ProjectileController : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // animator.Play("Hit_Alt");
-
         if(enemyProj)
         {
             //Check for player collision
@@ -47,12 +45,15 @@ public class ProjectileController : MonoBehaviour
                 if(target.isParrying)
                 {
                     enemyProj = false;
+                    gameObject.layer = LayerMask.NameToLayer("ProjectilePlayer");
+
                     speed *= -1;
                     return;
                 }
                 //Player hit
                 target.GetKnockback(transform.position.x, knockbackStrength);
                 DestroyProjectile();
+                return;
             }
         }
         else if(!enemyProj) //Projectile was deflected, switches target to Enemies
@@ -66,11 +67,12 @@ public class ProjectileController : MonoBehaviour
             }
         }
         //It projectile hits wall, still destroy
-        else DestroyProjectile();
+        DestroyProjectile();
     }
 
     private void DestroyProjectile()
     {
+        Debug.Log("Destroyed projectile");
         //Stops projectile on hit or when expiring, then plays the hit animation
         projectileHit = true;
         collider.enabled = false;

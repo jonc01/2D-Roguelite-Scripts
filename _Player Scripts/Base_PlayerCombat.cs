@@ -309,7 +309,6 @@ public class Base_PlayerCombat : MonoBehaviour
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
                 damageable.TakeDamageStatus(1);
                 Transform enemyPos = damageable.GetPosition();
-                // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
                 // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
@@ -610,7 +609,7 @@ public class Base_PlayerCombat : MonoBehaviour
     void Die()
     {
         isAlive = false; //Triggers death anim in AnimatorManager
-        hitStop.Stop(.4f);
+        hitStop.Stop(1.2f);
 
         //Stop Coroutines
         //if (AttackingCO != null) StopCoroutine(AttackingCO);
