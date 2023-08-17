@@ -19,5 +19,9 @@ public class CA_AreaOfEffect_Global : Base_ConditionalAugments
         {
             Instantiate(explosionPrefab, objectHitPos.position, explosionPrefab.transform.rotation);
         }
+        else
+        {
+            Activate(); //
+        }
     }
 }

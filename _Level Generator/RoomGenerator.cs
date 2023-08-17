@@ -22,6 +22,7 @@ public class RoomGenerator : MonoBehaviour
     [Header("Generator Component Arrays")]
     [SerializeField] GameObject[] StartRooms;
     [SerializeField] GameObject[] Rooms; //Platforms and Room Collider
+    [SerializeField] GameObject[] RoomGuarantees;
     [SerializeField] GameObject[] Shops;
     [SerializeField] GameObject[] Trials;
 
@@ -53,7 +54,7 @@ public class RoomGenerator : MonoBehaviour
 
     public void GenerateRooms()
     {
-        Debug.Log("Generating Rooms...");
+        // Debug.Log("Generating Rooms...");
         StartCoroutine(GenerateRoomsCO());
     }
 
@@ -83,9 +84,17 @@ public class RoomGenerator : MonoBehaviour
         int totalShops = Random.Range(numShopsLower, numShopsUpper + 1); //int Random.Range is not max inclusive
         for (int i = 0; i < totalShops; i++)
         {
-            int randShop = Random.Range(0, totalShops); //Pick random shop from array of variations
             int randRoomIndex = Random.Range(0, availableIndexes.Count); //int no max inclusive, so this works for index values
-            CreateRoom(Shops[randShop], availableIndexes[randRoomIndex]);
+
+            //Add Guaranteed rooms first before adding random rooms
+            if(i < RoomGuarantees.Length)
+            {
+                CreateRoom(RoomGuarantees[i], availableIndexes[randRoomIndex]);
+            }
+            else{
+                int randShop = Random.Range(0, totalShops); //Pick random shop from array of variations
+                CreateRoom(Shops[randShop], availableIndexes[randRoomIndex]);
+            }
         }
 
         yield return new WaitForSecondsRealtime(.01f);
@@ -117,7 +126,7 @@ public class RoomGenerator : MonoBehaviour
         roomGenRunning = false;
         roomGenDone = true;
 
-        Debug.Log("Rooms Generated");
+        // Debug.Log("Rooms Generated");
     }
 
     private void CreateRoom(GameObject roomObj, int roomIndex)

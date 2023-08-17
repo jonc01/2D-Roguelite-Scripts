@@ -6,12 +6,19 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    public bool neutralRoom;
+    public GameObject minimapIcon;
     [SerializeField] Transform enemyParentObj;
     [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] private int totalEnemyCount; //used to store the original number
     public RoomClear roomManager;
     private int nextWaveCount;
+    [Space(20)]
+    [Header("= SETUP =")]
+    public bool isStartingRoom = false; //Manually set this in room Prefab
+    public bool neutralRoom;
+    public bool hasAugmentRewards = false;
+    public bool bossRoom = false;
+    [Space(20)]
     [Header("Multiple Waves Setup")]
     [SerializeField] public bool trialRoom = false;
     [SerializeField] bool multipleWaves = false;
@@ -20,10 +27,12 @@ public class EnemyStageManager : MonoBehaviour
     
     [Header("Wave Debugging")]
     [SerializeField] private int currWaveEnemyCount;
+    private DoorManager doorManager;
 
     void Start()
     {
         roomManager = GetComponentInParent<RoomClear>();
+        if(roomManager != null) roomManager.stageManager = this;
         if (enemyParentObj == null) EnemySetup();
         else enemyCount = enemyParentObj.childCount;
         totalEnemyCount = enemyCount;
@@ -34,9 +43,9 @@ public class EnemyStageManager : MonoBehaviour
             temp.roomCleared = true;
             roomManager.Cleared();
             neutralRoom = true;
+            // temp.DoorManager.startingRoom = isStartingRoom;
         }
         else neutralRoom = false;
-
         currentWave = 0;
 
         if(multipleWaves)
@@ -49,6 +58,14 @@ public class EnemyStageManager : MonoBehaviour
             waveThreshold = new int[1];
             waveThreshold[0] = enemyCount;
         }
+
+        if(!isStartingRoom) ToggleMinimapIcon(false);
+    }
+
+    public void ToggleMinimapIcon(bool toggle)
+    {
+        if(minimapIcon == null) return;
+        minimapIcon.SetActive(toggle);
     }
 
     public void EnemySetup()
@@ -74,6 +91,12 @@ public class EnemyStageManager : MonoBehaviour
                 // if(enemyObj.CompareTag("Enemy")) enemyObj.SetActive(false);
             }
         }
+
+        if(bossRoom)
+        {
+            var bossObj = enemyParentObj.GetChild(0);
+            bossObj.gameObject.SetActive(true);
+        } 
     }
 
 #region Spawning
@@ -104,7 +127,11 @@ public class EnemyStageManager : MonoBehaviour
         else numSpawns = enemyCount + 1;
 
         for(int i = 0; i < numSpawns; i++)
-                enemyParentObj.GetChild(i).gameObject.SetActive(true);
+            enemyParentObj.GetChild(i).gameObject.SetActive(true);
+        
+        //Boss is already enabled, manually starting spawn
+        if(bossRoom)
+            enemyParentObj.GetChild(0).GetComponent<Base_BossCombat>().StartSpawn();
     }
 
     private void SpawnWave()

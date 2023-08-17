@@ -45,7 +45,8 @@ public class Base_ConditionalAugments : MonoBehaviour
 
     protected virtual void Activate(Transform objectHitPos)
     {
-
+        //Placeholder for other scripts to override
+        Activate();
     }
 
     public virtual void UpdateLevelStats()

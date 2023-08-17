@@ -15,6 +15,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject settingsMenuObj;
     public GameObject gameSettings;
     public GameObject videoSettings;
+    public GameObject soundSettings;
 
     private void Start()
     {
@@ -113,10 +114,17 @@ public class PauseMenu : MonoBehaviour
         videoSettings.SetActive(true);
     }
 
+    public void SettingsToSoundSettings()
+    {
+        settingsMenuObj.SetActive(false);
+        soundSettings.SetActive(true);
+    }
+
     public void GameOrVideoSettingsToSettingsMenu()
     {
         settingsMenuObj.SetActive(true);
         videoSettings.SetActive(false);
+        soundSettings.SetActive(false);
         gameSettings.SetActive(false);
     }
 

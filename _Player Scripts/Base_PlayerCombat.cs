@@ -81,7 +81,7 @@ public class Base_PlayerCombat : MonoBehaviour
     float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
-    [SerializeField] bool isParrying;
+    [SerializeField] public bool isParrying;
 
     public float blockAttackSpeed;
     bool dashImmune;
@@ -309,10 +309,10 @@ public class Base_PlayerCombat : MonoBehaviour
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
                 damageable.TakeDamageStatus(1);
                 Transform enemyPos = damageable.GetPosition();
-                // augmentInventory.OnHit(enemyPos);
                 augmentInventory.OnParry(enemyPos);
+                // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
-                hitStop.Stop(.2f); //Successful hit //.083f is 1 frame
+                hitStop.Stop(); //Successful hit //.083f is 1 frame
             }
         }
     }
@@ -497,7 +497,7 @@ public class Base_PlayerCombat : MonoBehaviour
         isStunned = false;
     }
 
-    public void TakeDamage(float damageTaken, float enemyXPos)
+    public void TakeDamage(float damageTaken, float enemyXPos, bool screenshake = false, int shakeNum = 1)
     {
         if (!isAlive || dashImmune) return;
         
@@ -507,17 +507,19 @@ public class Base_PlayerCombat : MonoBehaviour
         {
             if (isParrying)
             {
-                ScreenShakeListener.Instance.Shake(1);
+                ScreenShakeListener.Instance.Shake(3);
+                InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
                 ParryCounter();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
             }
         }
 
-        TakeDamage(damageTaken);
+        if(screenshake) ScreenShakeListener.Instance.Shake(shakeNum);
+        TakeDamage(damageTaken, screenshake);
     }
 
-    public void TakeDamage(float damageTaken)
+    public void TakeDamage(float damageTaken, bool screenshakeOR = false)
     {
         if (!isAlive || dashImmune) return;
 
@@ -538,11 +540,14 @@ public class Base_PlayerCombat : MonoBehaviour
         float damageToHealth = damageTaken/maxHP;
         int shakeNum;
 
-        if (damageToHealth >= .3f) shakeNum = 2;
-        else if (damageToHealth >= .15f) shakeNum = 1;
-        else shakeNum = 0;
+        if(!screenshakeOR)
+        {
+            if (damageToHealth >= .3f) shakeNum = 2;
+            else if (damageToHealth >= .15f) shakeNum = 1;
+            else shakeNum = 0;
 
-        ScreenShakeListener.Instance.Shake(shakeNum);
+            ScreenShakeListener.Instance.Shake(shakeNum);
+        }
         //
 
         currentHP -= totalDamage;
@@ -604,7 +609,7 @@ public class Base_PlayerCombat : MonoBehaviour
     void Die()
     {
         isAlive = false; //Triggers death anim in AnimatorManager
-        hitStop.Stop(.4f);
+        hitStop.Stop(1.2f);
 
         //Stop Coroutines
         //if (AttackingCO != null) StopCoroutine(AttackingCO);

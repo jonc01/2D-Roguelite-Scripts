@@ -32,6 +32,7 @@ public class Base_BossAnimator : MonoBehaviour
     protected static readonly int Move = Animator.StringToHash("Move");
     protected static readonly int Attack = Animator.StringToHash("RangeAttack");
     protected static readonly int Death = Animator.StringToHash("Death");
+    protected static readonly int Sleep = Animator.StringToHash("Sleep");
     
     /*private static readonly int Idle = Animator.StringToHash("Idle");
     private static readonly int Move = Animator.StringToHash("Move");
@@ -130,6 +131,7 @@ public class Base_BossAnimator : MonoBehaviour
         if (Time.time < lockedTill) return currentState;
 
         if (combat.playDeathAnim) return Death;
+        if (combat.isSleeping) return Sleep;
         //if (movement.isJumping) return Jump;
 
         //if (movement.isGrounded)

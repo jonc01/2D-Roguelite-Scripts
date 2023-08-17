@@ -13,8 +13,8 @@ public class ScreenShakeListener : MonoBehaviour
 
     public static bool enableScreenshake = true;
 
-    [SerializeField] float[] presetsIntensity = { .2f, .25f };
-    [SerializeField] float[] presetsTime = { .15f, .2f }; //.15f - hits, .2f - death
+    [SerializeField] float[] presetsIntensity = { .2f, .3f, .5f, 1f, 1.2f };
+    [SerializeField] float[] presetsTime = { .15f, .15f, .2f, .2f, .2f }; //.15f - hits, .2f - death
 
     private float shakeTimer;
     private float startingShakeTimer;
@@ -30,6 +30,8 @@ public class ScreenShakeListener : MonoBehaviour
 
     public void Shake(int choice = 0)
     {
+        if(choice > presetsTime.Length) { Debug.Log("Out of range"); return; }
+
         CinemachineBasicMultiChannelPerlin cmBMCP = 
             CMvcam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
 

@@ -207,7 +207,12 @@ public class Base_EnemyController : MonoBehaviour
 
     void LedgeWallCheck()
     {
-        if (combat.isAttacking) return;
+        if (combat.isAttacking)
+        {
+            if (!raycast.isGrounded) //TODO: testing, no issues yet
+                if(movement.rb.velocity.y != 0) combat.StopAttack();
+            return;
+        } 
         if (!raycast.isGrounded) return;
         if (!raycast.ledgeDetect || raycast.wallDetect)
             if (movement.rb.velocity.y == 0)

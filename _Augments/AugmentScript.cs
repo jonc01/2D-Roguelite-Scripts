@@ -57,6 +57,7 @@ public class AugmentScript : MonoBehaviour
         if(augmentScrObj == null) { Debug.Log("No Augment Scriptable Object referenced!"); return; }
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
+
         baseDescription = augmentScrObj.Description;
         AugmentType = (int)augmentScrObj.AugmentType;
         ConditionalAugmentScript = GetComponent<Base_ConditionalAugments>();
@@ -149,11 +150,10 @@ public class AugmentScript : MonoBehaviour
         if(random) Description =  "+? " + statType;
         else{
             if(stat > 0) Description += "+" + stat.ToString() + divider + statType;
-            else Description += "-" + stat.ToString() + divider + statType;
+            else if(stat < 0) Description += "-" + stat.ToString() + divider + statType;
         }
     
         //
-
     }
 
     private void ResetStats()

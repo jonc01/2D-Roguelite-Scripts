@@ -21,7 +21,10 @@ public class LevelBuilder : MonoBehaviour
     //  a) Loop through RoomOrigins[], place rooms at random
     //    a.1) Place Start at [0], and Boss at last [RoomOrigins.Length]
     //    a.2) Make sure certain rooms are spawned as required (Start, Boss, Shops, Trials, etc)
+    [Header("= SETUP =")]
+    public int totalRooms;
 
+    [Space(10)]
     [Header("Builder Setup")]
     //Distances to move to place new room origin
     //Walls are placed at half of this distance
@@ -36,7 +39,6 @@ public class LevelBuilder : MonoBehaviour
 
     [Space(10)]
     [Header("Generator Components")]
-    public int totalRooms;
     [SerializeField] GameObject originObj; //This object builds rooms at its location
 
     [Space(10)]

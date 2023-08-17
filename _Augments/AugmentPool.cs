@@ -84,6 +84,8 @@ public class AugmentPool : MonoBehaviour
     {
         //Check if chosenAugment is already owned, remove old and reset stats
         // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
+        if(ownedAugments.Count >= 10) { Debug.Log("Reached 10 Augments"); return; }
+        
         if(ownedAugments.Contains(chosenAugment))
         {
             augmentInventory.DuplicateAugment(chosenAugment);

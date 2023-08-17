@@ -6,7 +6,6 @@ public class RoomClear : MonoBehaviour
 {
     public bool roomCleared; //for reference from Item Selection
     public bool trialRoom; //gets set in RoomGenerator as Trial room is created
-    public bool playerVisited;
 
     [Header("References")]
     public DoorManager DoorManager;
@@ -19,7 +18,6 @@ public class RoomClear : MonoBehaviour
     void Start()
     {
         roomCleared = false;
-        playerVisited = false;
 
         if (DoorManager == null) DoorManager = GetComponent<DoorManager>();
         //if (DoorManager == null) DoorManager = GameObject.FindGameObjectWithTag("DoorManager").GetComponent<DoorManager>();
@@ -29,9 +27,8 @@ public class RoomClear : MonoBehaviour
         augmentReward = GetComponent<RewardController>();
         if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
 
-
         ToggleMinimapCleared(false);
-        ToggleMinimapIcon(playerVisited);
+        ToggleMinimapIcon(false);
     }
 
     public void ToggleMinimapIcon(bool toggle)
@@ -39,6 +36,15 @@ public class RoomClear : MonoBehaviour
         if(minimapIcon == null) return;
 
         minimapIcon.gameObject.SetActive(toggle);
+
+        if(toggle)
+        {
+            DoorManager.RevealDoors(true);
+            if(stageManager != null) stageManager.ToggleMinimapIcon(true);
+        } 
+        
+
+        // DoorManager.DelayedRevealDoor();
     }
 
     private void ToggleMinimapCleared(bool toggle)
@@ -65,12 +71,12 @@ public class RoomClear : MonoBehaviour
 
     IEnumerator DelayClear()
     {
-        ToggleMinimapIcon(true);
+        ToggleMinimapCleared(true);
         yield return new WaitForSeconds(1f);
         if(stageManager == null) augmentReward.ToggleRewardSelect(false);
         else
         {
-            if(!stageManager.neutralRoom && augmentReward != null) augmentReward.ToggleRewardSelect(true);
+            if(!stageManager.neutralRoom && stageManager.hasAugmentRewards && augmentReward != null) augmentReward.ToggleRewardSelect(true);
             else if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
         }
         yield return new WaitForSeconds(.5f);
