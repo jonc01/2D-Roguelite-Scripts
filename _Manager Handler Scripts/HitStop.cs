@@ -11,6 +11,9 @@ public class HitStop : MonoBehaviour
     {
         if (waiting) return;
         Time.timeScale = timeScale;
+
+        duration *= timeScale; //scale duration to timeScale (replacing Realtime)
+
         StartCoroutine(Wait(duration));
     }
 
@@ -22,8 +25,10 @@ public class HitStop : MonoBehaviour
     IEnumerator Wait(float duration)
     {
         waiting = true;
-        yield return new WaitForSecondsRealtime(duration);
-        // yield return new WaitForSeconds(duration); //use realtime, timeScale is being changed
+
+        // yield return new WaitForSecondsRealtime(duration); //Using Realtime interferes with Pause
+        yield return new WaitForSeconds(duration);
+        
         Time.timeScale = 1.0f;
         waiting = false;
     }
