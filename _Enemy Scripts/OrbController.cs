@@ -39,7 +39,7 @@ public class OrbController : MonoBehaviour
         xV = Random.Range(xVelocityLower, xVelocityUpper);
         yV = Random.Range(yVelocityLower, yVelocityUpper);
 
-        player = GameManager.Instance.PlayerTargetOffset;
+        player = GameManager.Instance.playerTargetOffset;
         inventory = GameManager.Instance.Inventory;
         animator = GetComponent<Animator>();
         hitDone = false;

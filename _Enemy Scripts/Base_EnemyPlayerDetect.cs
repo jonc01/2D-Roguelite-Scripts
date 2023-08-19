@@ -59,12 +59,12 @@ public class Base_EnemyPlayerDetect : MonoBehaviour
         if (groundCheck == null) groundCheck = transform.Find("groundCheck").transform;
 
         updatePlatform = true;
-        if(player == null) player = GameManager.Instance.Player;
+        if(player == null) player = GameManager.Instance.playerTransform;
     }
 
     void OnEnable()
     {
-        if(player == null) player = GameManager.Instance.Player;
+        if(player == null) player = GameManager.Instance.playerTransform;
     }
 
     void Update()

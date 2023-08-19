@@ -53,6 +53,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float blockDelay;
     public float blockDuration;
     private float blockDelayAndDuration;
+    public bool parryDeflecting;
 
     [Space(10)]
 
@@ -127,6 +128,7 @@ public class Base_PlayerCombat : MonoBehaviour
         isAttacking = false;
         isAirAttacking = false;
         isParrying = false;
+        parryDeflecting = false;
         currentAttack = 0;
         currentAirAttack = 0;
         currAttackIndex = 0;
@@ -297,6 +299,9 @@ public class Base_PlayerCombat : MonoBehaviour
 
     void ParryCounter()
     {
+        parryDeflecting = true;
+        Invoke("ResetParrying", blockDuration);
+
         Collider2D[] hitEnemies = 
             Physics2D.OverlapBoxAll(parryPoint.position,
             new Vector2(parryHitBoxLength, parryHitboxHeight), 0, enemyLayer);
@@ -315,6 +320,11 @@ public class Base_PlayerCombat : MonoBehaviour
                 hitStop.Stop(); //Successful hit //.083f is 1 frame
             }
         }
+    }
+
+    void ResetParrying()
+    {
+        parryDeflecting = false;
     }
 
     public void Block()

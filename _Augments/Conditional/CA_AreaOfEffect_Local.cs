@@ -15,7 +15,7 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
     protected override void Start()
     {
         base.Start();
-        attackPoint = GameManager.Instance.PlayerTargetOffset;
+        attackPoint = GameManager.Instance.playerTargetOffset;
     }
 
     protected override void Activate()

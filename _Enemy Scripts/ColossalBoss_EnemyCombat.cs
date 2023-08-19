@@ -545,7 +545,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     private Vector3 GetPlayerPosX()
     {
         //Get Player position and cast explosion for Initial explosion
-        float playerX = GameManager.Instance.Player.position.x;
+        float playerX = GameManager.Instance.playerTransform.position.x;
         Vector3 castPos = new Vector3(playerX, initialGroundOffset.y, 0);
         return castPos;
     }

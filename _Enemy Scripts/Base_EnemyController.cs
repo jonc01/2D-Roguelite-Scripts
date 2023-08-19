@@ -9,7 +9,7 @@ public class Base_EnemyController : MonoBehaviour
     public Base_EnemyCombat combat;
     public bool isRangedAttack = false;
     [SerializeField] private float CODurationLower = .2f, CODurationUpper = .8f;
-    
+    [SerializeField] Transform playerTransform;
 
     [Header("=== Raycasts Reference ===")]
     [SerializeField] public Base_EnemyRaycast raycast;
@@ -24,14 +24,16 @@ public class Base_EnemyController : MonoBehaviour
     Coroutine PatrolCO;
     Coroutine LandingCO;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         if(movement == null) movement = GetComponent<Base_EnemyMovement>();
         if(combat == null) combat = GetComponent<Base_EnemyCombat>();
     }
 
-    private void Start()
+    protected virtual void Start()
     {
+        playerTransform = GameManager.Instance.playerTransform;
+
         bool startDir = (Random.value > 0.5f);
         // movement.MoveRight(startDir);
         StartIdle(.3f, false);
@@ -76,9 +78,11 @@ public class Base_EnemyController : MonoBehaviour
 
     void PlayerToRightCheck()
     {
+        combat.playerToRight = playerTransform.position.x > transform.position.x;
+
         //Only update if the player is actively being detected
-        if(raycast.playerDetectFront || raycast.playerDetectBack)
-            combat.playerToRight = raycast.playerToRight;
+        // if(raycast.playerDetectFront || raycast.playerDetectBack)
+        //     combat.playerToRight = raycast.playerToRight;
     }
 
     void AttackCheckClose()
