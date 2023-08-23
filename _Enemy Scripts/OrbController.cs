@@ -55,7 +55,7 @@ public class OrbController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!findPlayer) return;
+        if (!findPlayer || hitDone) return;
 
         orbSpeed *= 1.08f;
         var step = orbSpeed * Time.deltaTime;
@@ -86,11 +86,20 @@ public class OrbController : MonoBehaviour
     {
         //Check to make sure hits aren't registered multiple times on collision
         if (hitDone) return;
-        hitDone = true;
+        // hitDone = true;
+
+        Invoke("DisableVelocity", .25f);
+
         inventory.UpdateGold(1); //GiveXP
         animator.Play("PuffOfSmoke");
 
         Invoke("DestroyObject", 0.67f); //Delay to play animation
+    }
+
+    void DisableVelocity()
+    {
+        hitDone = true;
+        rb.velocity = Vector2.zero;
     }
 
     void DestroyObject()
