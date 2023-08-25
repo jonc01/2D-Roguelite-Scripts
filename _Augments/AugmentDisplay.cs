@@ -39,6 +39,7 @@ public class AugmentDisplay : MonoBehaviour
     
     [Header("Duplicate")]
     [SerializeField] private bool randomizeLevel = false;
+    [SerializeField] public bool upgradeShop = false;
 
     void Start()
     {
@@ -87,6 +88,7 @@ public class AugmentDisplay : MonoBehaviour
 
     IEnumerator RevealAugment()
     {
+        allowInput = false;
         // yield return new WaitForSecondsRealtime(.2f);
         //TODO: start animation here
         // yield return new WaitForSecondsRealtime(.2f); //Animation time
@@ -95,17 +97,38 @@ public class AugmentDisplay : MonoBehaviour
         allowInput = true;
         if(augmentScript != null && selectMenu != null)
         {
-            if(selectMenu.IsOwnedAndListed(augmentScript) && selectMenu.IsMaxLevel(augmentScript))
+            if(selectMenu.IsOwnedAndListed(augmentScript))
             {
-                //Overlay toggled if Augment is owned and listed, and is maxLevel
-                ToggleOverlay(true, true);
-                allowInput = false;
+                if(selectMenu.IsMaxLevel(augmentScript))
+                {
+                    //Block purchase if max level
+                    ToggleOverlay(true, true);
+                    allowInput = false;
+                }
+                else
+                {
+                    //Only allow duplicate purchase if Upgrade Shop
+                    allowInput = upgradeShop;
+                    if(upgradeShop){
+                        ToggleOverlay(false);
+                    }else{
+                        ToggleOverlay(true, true);
+                    }
+                }
             }
-            else
-            {
-                ToggleOverlay(false);
-                allowInput = true;
-            }
+            
+
+            // if(selectMenu.IsOwnedAndListed(augmentScript) && selectMenu.IsMaxLevel(augmentScript))
+            // {
+            //     //Overlay toggled if Augment is owned and listed, and is maxLevel
+            //     ToggleOverlay(true, true);
+            //     allowInput = false;
+            // }
+            // else
+            // {
+            //     ToggleOverlay(false);
+            //     allowInput = true;
+            // }
         }
     }
 

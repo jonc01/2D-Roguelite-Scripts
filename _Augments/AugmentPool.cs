@@ -51,6 +51,21 @@ public class AugmentPool : MonoBehaviour
         return newAugment;
     }
 
+    public AugmentScript GetOwnedAugment()
+    {
+        //Only used with upgradeShop
+        // AugmentScript augmentFromPool;
+        if(ownedAugments.Count < 3)
+        {
+            Debug.Log("Not enough owned augments!");
+            return null;
+        }
+
+        int randIdx = Random.Range(0, ownedAugments.Count);
+
+        return ownedAugments[randIdx];
+    }
+
     public AugmentScript GetAugmentFromPool()//List<AugmentScript> augmentList)
     {
         //Add augments at random index
@@ -101,16 +116,21 @@ public class AugmentPool : MonoBehaviour
         //EmptyStock() is called in FillStock()
     }
 
-    public IEnumerator FillStock(List<AugmentScript> augmentsInStock, int totalAugments = 3)
+    public IEnumerator FillStock(List<AugmentScript> augmentsInStock, bool upgradeShop = false, int totalAugments = 3)
     {
         for(int i=0; i<totalAugments; i++)
         {
-            AugmentScript currAugment = GetAugmentFromPool();
+            AugmentScript currAugment;
+
+            //Upgrade shop only pulls from ownedAugments pool
+            if(upgradeShop) currAugment = GetOwnedAugment();
+            else currAugment = GetAugmentFromPool();
             
             augmentsInStock.Add(currAugment); //AugmentSelectMenu //TODO:
             
             yield return new WaitForSecondsRealtime(.01f);
-            StockShop(currAugment); //Pool list //TODO: this should work
+
+            StockShop(currAugment); //Pool list
         }
         yield return new WaitForSecondsRealtime(.01f);
         EmptyStock();
@@ -119,9 +139,10 @@ public class AugmentPool : MonoBehaviour
     public void StockShop(AugmentScript augment, bool sellingDuplicates = true)
     {
         //Move augment from unownedPool into shopListed
-        //This prevents duplicates
+        //'sellingDuplicates' allow multiple shops to list the same unowned Augment
         if(sellingDuplicates) SwapAugmentList(augment, GetAugmentList(augment), listedAugmentsTEMP);
         else SwapAugmentList(augment, ownedAugments, listedAugmentsTEMP);
+        
     }
 
     private List<AugmentScript> GetAugmentList(AugmentScript augment)
@@ -157,29 +178,48 @@ public class AugmentPool : MonoBehaviour
     private int RandomAugmentTier()
     {
         int augmentTier; //1-5
-        float rand = Random.Range(0f, 1.01f); //additional 1% higher
-        
-        // if(rand >= .50f) augmentTier = 0; //Common - 50%
-        // else if(rand >= .20f) augmentTier = 1; //Rare - 30%
-        // else if(rand >= .04f) augmentTier = 2; //Epic - 16%
-        // else if(rand >= .01f) augmentTier = 3; //Legendary - 3%
-        // else{ //Overcharged or Unstable - 1%
-        //     rand = Random.Range(0f, 1.0f);
-        //     if(rand >= .5f) augmentTier = 4;
-        //     else augmentTier = 5;
+        // float rand = Random.Range(0f, 1.01f); //additional 1% higher
+
+        // float rand = Random.value;
+        float rand = Random.value;
+
+        ///////////////////// Testing drop rates ////////////////////////
+
+        // int t5Count=0, t4Count=0, t3Count=0, t2Count=0, t1Count=0;
+
+        // for(int i=0; i<100; i++)
+        // {
+        //     rand = Random.value;
+        //     if(rand <= .02f){
+        //     //Overcharged or Unstable - 1%
+        //     // rand = Random.Range(0f, 1.0f);
+        //         t5Count++;
+        //     } 
+        //     else if(rand <= .08f) { t4Count++; } //Legendary - 3%
+        //     else if(rand <= .25f) { t3Count++; }//Epic - 16%
+        //     else if(rand <= .55f) { t2Count++;}//Rare - 30%
+        //     else { t1Count++; }//Common - 50%
         // }
-        //
         
-        if(rand <= .01f){
-            //Overcharged or Unstable - 1%
-            rand = Random.Range(0f, 1.0f);
+        // Debug.Log("T1: " + t1Count);
+        // Debug.Log("T2: " + t2Count);
+        // Debug.Log("T3: " + t3Count);
+        // Debug.Log("T4: " + t4Count);
+        // Debug.Log("T5: " + t5Count);
+
+        /////////////////////////////////////////////////////////
+
+
+        if(rand <= .02f){ //Overcharged or Unstable - 2%
+            // rand = Random.Range(0f, 1.0f);
+            rand = Random.value;
             if(rand < .5f) augmentTier = 4; 
             else augmentTier = 5; 
         }
-        else if(rand <= .03f) augmentTier = 3; //Legendary - 3%
-        else if(rand <= .16f) augmentTier = 2; //Epic - 16%
-        else if(rand <= .3f) augmentTier = 1; //Rare - 30%
-        else augmentTier = 0; //Common - 50%
+        else if(rand <= .08f) augmentTier = 3; //Legendary - 6%
+        else if(rand <= .25f) augmentTier = 2; //Epic - 17%
+        else if(rand <= .55f) augmentTier = 1; //Rare - 30%
+        else augmentTier = 0; //Common - 45%
 
         return augmentTier;
     }
@@ -209,6 +249,7 @@ public class AugmentPool : MonoBehaviour
 
     public void EmptyStock()
     {
+        // if(listedAugmentsTEMP.Count == 0) return;
         StartCoroutine(EmptyStockCO());
     }
 

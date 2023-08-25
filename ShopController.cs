@@ -14,6 +14,11 @@ public class ShopController : MonoBehaviour
     private bool canTakeInput;
     public bool oneTimePurchaseDone;
 
+    [Space(20)]
+    [Header("= Upgrade Shop Only =")]
+    [SerializeField] bool upgradeShop = false;
+    [SerializeField] GameObject needMoreAugmentsMessage;
+
     void Start()
     {
         //augmentPool reference for cross-scene ref
@@ -22,6 +27,7 @@ public class ShopController : MonoBehaviour
         ToggleText(false);
         canTakeInput = false;
         OpenShop(false);
+        ToggleShopMessage(false);
     }
 
     void Update()
@@ -60,8 +66,26 @@ public class ShopController : MonoBehaviour
     {
         if(oneTimePurchaseDone && !DEBUGGING) return;
         if(!collider.CompareTag("Player")) return;
-        ToggleText(true);
-        canTakeInput = true;
+
+        if(upgradeShop) //Upgrade shop needs 3 augments
+        {
+            if(CheckPlayerInsufficientAugments())
+            {
+                ToggleText(false);
+                canTakeInput = false;
+                ToggleShopMessage(true);
+            }
+            else
+            {
+                ToggleText(true);
+                canTakeInput = true;
+                ToggleShopMessage(false);
+            }
+        }else{ //Normal Shop
+            ToggleText(true);
+            canTakeInput = true;
+            ToggleShopMessage(false);
+        }
     }
 
     void OnTriggerExit2D(Collider2D collider)
@@ -69,5 +93,18 @@ public class ShopController : MonoBehaviour
         if(!collider.CompareTag("Player")) return;
         ToggleText(false);
         canTakeInput = false;
+        ToggleShopMessage(false);
+    }
+
+    void ToggleShopMessage(bool toggle)
+    {
+        if(needMoreAugmentsMessage == null) return;
+        needMoreAugmentsMessage.SetActive(toggle);
+    }
+
+    bool CheckPlayerInsufficientAugments()
+    {
+        int totalOwnedAugments = augmentPool.ownedAugments.Count;
+        return totalOwnedAugments < 3;
     }
 }

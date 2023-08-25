@@ -31,7 +31,7 @@ public class Augment : ScriptableObject
     [Header("= Buffed Stats =")]
     public float StatIncrease;
     public float StatIncreasePerLevel;
-    public enum _IncreaseType { Flat, Percent };
+    public enum _IncreaseType { Flat, Percent, Misc };
     public _IncreaseType IncreaseType;
     public enum _BuffedStat { 
         Health, Defense, Move_Speed, 
@@ -49,6 +49,13 @@ public class Augment : ScriptableObject
         AttackDamage, AttackSpeed, 
         CritChance, CritMultiplier };
     public _DebuffedStat DebuffedStat;
+
+    // [Space(10)]
+    // [Header("== Conditional Augments (Only AugmentType != 0) ==")]
+    // public float conditionalBuffAmount;
+
+
+
 
     //Example:
         //FlatIncrease: 2

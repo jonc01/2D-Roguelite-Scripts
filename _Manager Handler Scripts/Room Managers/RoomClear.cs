@@ -41,8 +41,7 @@ public class RoomClear : MonoBehaviour
         {
             DoorManager.RevealDoors(true);
             if(stageManager != null) stageManager.ToggleMinimapIcon(true);
-        } 
-        
+        }
 
         // DoorManager.DelayedRevealDoor();
     }
@@ -59,6 +58,7 @@ public class RoomClear : MonoBehaviour
     {
         //TimeManager.Instance.DoFreezeTime(.15f, .05f);
         Debug.Log("Room Cleared");
+        GameManager.Instance.AugmentInventory.OnRoomClear();
         StartCoroutine(DelayClear());
         //if this breaks, update enemyCount with enemyCount = EnemyList.transform.childCount
     }
@@ -85,6 +85,8 @@ public class RoomClear : MonoBehaviour
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;
     }
+
+    
 
     public void CheckSpawn()
     {

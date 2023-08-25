@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class ColossalBoss_EnemyCombat : Base_BossCombat
@@ -424,7 +425,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     }
 
 //Attack[4]: 
-    IEnumerator ChargeUp(int iterations = 3)
+    IEnumerator ChargeUp(int iterations = 2)
     {
         isAttacking = true;
 
@@ -557,7 +558,30 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     }
 
 #endregion
+    protected override void HealthPhaseCheck()
+    {
 
+        //HP is at the last Phase, no need to update
+        if(currentPhase == healthPhase.Length-1) return;
+        
+        //Checking if health reaches the next phase threshold
+        float nextHealthThreshold = healthPhase[currentPhase+1];
+        if(currentHP <= nextHealthThreshold)
+        {
+            //Change to next Phase
+            if(changingPhase) return;
+            currentPhase++;
+            //If flying, drop to ground
+            if(canFly)
+            {
+                canFly = false;
+                movement.rb.gravityScale = originalScale;
+                movement.rb.drag = originalDrag;
+            } 
+            StartCoroutine(ChangePhase());
+        }
+        attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
+    }
 
     protected override void Die()
     {
@@ -603,5 +627,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         ScreenShakeListener.Instance.Shake(3);
         InstantiateManager.Instance.HitEffects.ShowKillEffect(offset);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(offset, totalXPOrbs);
+        InstantiateManager.Instance.HealOrbs.SpawnOrbs(offset, totalHealOrbs);
     }
 }

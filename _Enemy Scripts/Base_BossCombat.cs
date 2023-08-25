@@ -59,6 +59,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] protected float currentHP;
     [SerializeField] protected float defense = 0;
     [SerializeField] protected int totalXPOrbs = 20;
+    [SerializeField] protected int totalHealOrbs = 10;
     
     [Header("--- Attack ---")]
     [SerializeField] public float[] attackDamage;
@@ -371,7 +372,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     }
 
 #region Health Threshold and Phases
-    protected void HealthPhaseCheck() //Determine number of combo attacks and frequency
+    protected virtual void HealthPhaseCheck() //Determine number of combo attacks and frequency
     {
         //HP is at the last Phase, no need to update
         if(currentPhase == healthPhase.Length-1) return;
@@ -388,7 +389,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
     }
 
-    IEnumerator ChangePhase()
+    protected IEnumerator ChangePhase()
     {
         changingPhase = true;
         //Stop Attack and AttackEnd Coroutines
