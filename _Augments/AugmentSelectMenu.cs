@@ -71,6 +71,7 @@ public class AugmentSelectMenu : MonoBehaviour
     void OnDisable()
     {
         GameManager.Instance.shopOpen = false;
+        GameManager.Instance.rewardOpen = false;
         GameManager.Instance.Pause.Resume();
     }
 

@@ -11,7 +11,7 @@ public class ShopController : MonoBehaviour
     [SerializeField] GameObject inputPrompt;
     [SerializeField] GameObject shopWindow;
     public AugmentPool augmentPool;
-    private bool canTakeInput;
+    [SerializeField] private bool canTakeInput;
     public bool oneTimePurchaseDone;
 
     [Space(20)]

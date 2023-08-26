@@ -161,9 +161,14 @@ public class AugmentScript : MonoBehaviour
 
         if(augmentScrObj != null)
         {
-            string buffedDesc = stat.ToString() + divider;
-            Description = baseDescription.Replace('#'.ToString(), buffedDesc);
-
+            if(random)
+            {
+                string buffedDesc = "?" + divider;
+                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+            }else{
+                string buffedDesc = stat.ToString() + divider;
+                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+            }
             // string conditionalDesc = conditionalBuffedAmount.ToString();
             // Description = baseDescription.Replace('@'.ToString(), conditionalDesc);
         }

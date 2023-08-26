@@ -51,7 +51,7 @@ public class AugmentPool : MonoBehaviour
         return newAugment;
     }
 
-    public AugmentScript GetOwnedAugment()
+    public AugmentScript GetDuplicateAugment() //Duplicate
     {
         //Only used with upgradeShop
         // AugmentScript augmentFromPool;
@@ -62,6 +62,10 @@ public class AugmentPool : MonoBehaviour
         }
 
         int randIdx = Random.Range(0, ownedAugments.Count);
+        while(listedAugmentsTEMP.Contains(ownedAugments[randIdx]))
+        {
+            randIdx = Random.Range(0, ownedAugments.Count);
+        }
 
         return ownedAugments[randIdx];
     }
@@ -123,7 +127,7 @@ public class AugmentPool : MonoBehaviour
             AugmentScript currAugment;
 
             //Upgrade shop only pulls from ownedAugments pool
-            if(upgradeShop) currAugment = GetOwnedAugment();
+            if(upgradeShop) currAugment = GetDuplicateAugment();
             else currAugment = GetAugmentFromPool();
             
             augmentsInStock.Add(currAugment); //AugmentSelectMenu //TODO:
@@ -216,18 +220,19 @@ public class AugmentPool : MonoBehaviour
             if(rand < .5f) augmentTier = 4; 
             else augmentTier = 5; 
         }
-        else if(rand <= .08f) augmentTier = 3; //Legendary - 6%
-        else if(rand <= .25f) augmentTier = 2; //Epic - 17%
-        else if(rand <= .55f) augmentTier = 1; //Rare - 30%
-        else augmentTier = 0; //Common - 45%
+        else if(rand <= .06f) augmentTier = 3; //Legendary - 4%
+        else if(rand <= .20f) augmentTier = 2; //Epic - 14%
+        else if(rand <= .50f) augmentTier = 1; //Rare - 30%
+        else augmentTier = 0; //Common - 50%
 
         return augmentTier;
     }
 
     private int RandomAugmentLevel()
     {
-        int augmentLevel = 1; //1-5
-        float rand = Random.Range(0f, 1.0f);
+        int augmentLevel; //1-5
+        // float rand = Random.Range(0f, 1.0f);
+        float rand = Random.value;
 
         // Debug.Log("Random Level: " + rand);
         
@@ -237,11 +242,11 @@ public class AugmentPool : MonoBehaviour
         // else if(rand >= .01f) augmentLevel = 4; //- 3%
         // else augmentLevel = 5; //- 1%
         //
-        if(rand <= .01f) augmentLevel = 5; //- 1%
-        else if(rand <= .03f) augmentLevel = 4; //- 3%
-        else if(rand <= .16f) augmentLevel = 3; //- 16%
-        else if(rand <= .30f) augmentLevel = 2; //- 30%
-        else if(rand <= .5f) augmentLevel = 1; //- 50%
+        if(rand <= .02f) augmentLevel = 5; //- 2%
+        else if(rand <= .09f) augmentLevel = 4; //- 7%
+        else if(rand <= .25f) augmentLevel = 3; //- 16%
+        else if(rand <= .55f) augmentLevel = 2; //- 30%
+        else augmentLevel = 1; //- 50%
 
         return augmentLevel;
     }
