@@ -29,6 +29,12 @@ public class EnemyStageManager : MonoBehaviour
     [SerializeField] private int currWaveEnemyCount;
     private DoorManager doorManager;
 
+    [Space(10)]
+    [Header("- Clear Rewards -")]
+    [SerializeField] GameObject[] clearRewardPrefabs;
+    [SerializeField] int[] clearRewardsQuantity;
+    [SerializeField] Transform rewardSpawnPoint;
+
     void Start()
     {
         roomManager = GetComponentInParent<RoomClear>();
@@ -127,7 +133,9 @@ public class EnemyStageManager : MonoBehaviour
         else numSpawns = enemyCount + 1;
 
         for(int i = 0; i < numSpawns; i++)
+        {
             enemyParentObj.GetChild(i).gameObject.SetActive(true);
+        }
         
         //Boss is already enabled, manually starting spawn
         if(bossRoom)
@@ -176,6 +184,24 @@ public class EnemyStageManager : MonoBehaviour
     {
         if (enemyCount > 0) enemyCount--;
         CheckWaveCount();
-        if (enemyCount <= 0) roomManager.Cleared();
+        if (enemyCount <= 0)
+        {
+            roomManager.Cleared();
+            SpawnClearRewards();
+        }
+    }
+
+    private void SpawnClearRewards()
+    {
+        if(clearRewardPrefabs.Length == 0) return;
+        if(rewardSpawnPoint == null) rewardSpawnPoint = transform;
+
+        for(int i=0; i<clearRewardPrefabs.Length; i++)
+        {
+            for(int j=0; j<clearRewardsQuantity[i]; j++)
+            {
+                Instantiate(clearRewardPrefabs[i], rewardSpawnPoint.position, Quaternion.identity);
+            }
+        }
     }
 }

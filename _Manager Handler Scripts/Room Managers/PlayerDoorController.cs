@@ -22,7 +22,7 @@ public class PlayerDoorController : MonoBehaviour
         if(!doorController.isOpen) return;
         if(collision.CompareTag("Player"))
         {
-            GameManager.Instance.Player.position = teleportEndpoint.position;
+            GameManager.Instance.playerTransform.position = teleportEndpoint.position;
         }
     }
 }

@@ -12,6 +12,9 @@ public class CastExplosion : MonoBehaviour
     [SerializeField] private Animator animExplosion;
     [SerializeField] float explosionDuration = 0.583f;
     [SerializeField] int explosionHashedInt;
+    [Space(10)]
+    [SerializeField] float animDelay = 0;
+    [Space(10)]
 
     [Header("Adjustable Variables")]
     [SerializeField] int screenshakeIntensity = 1;
@@ -67,8 +70,10 @@ public class CastExplosion : MonoBehaviour
             yield return new WaitForSeconds(chargeDuration);
         }
 
-        CheckHit();
         animExplosion.Play(explosionHashedInt);//"Explosion");
+        yield return new WaitForSeconds(animDelay);
+        CheckHit();
+
         ScreenShakeListener.Instance.Shake(screenshakeIntensity);
         yield return new WaitForSeconds(explosionDuration);
         

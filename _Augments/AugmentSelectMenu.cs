@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Net.Http.Headers;
 
 public class AugmentSelectMenu : MonoBehaviour
 {
@@ -17,7 +18,8 @@ public class AugmentSelectMenu : MonoBehaviour
 
     [Header("SHOP or REWARD")]
     [SerializeField] public bool isShop = false;
-    [SerializeField] public bool duplicates = false;
+    // [SerializeField] public bool duplicates = false;
+    [SerializeField] public bool upgradeShop = false;
 
     [Header("Refresh Cost")]
     [SerializeField] public bool refreshAllowed = false;
@@ -69,6 +71,7 @@ public class AugmentSelectMenu : MonoBehaviour
     void OnDisable()
     {
         GameManager.Instance.shopOpen = false;
+        GameManager.Instance.rewardOpen = false;
         GameManager.Instance.Pause.Resume();
     }
 
@@ -107,7 +110,7 @@ public class AugmentSelectMenu : MonoBehaviour
 
         augmentsInStock.Clear();
 
-        yield return pool.FillStock(augmentsInStock);
+        yield return pool.FillStock(augmentsInStock, upgradeShop);
 
         for(int i=0; i<totalAugments; i++)
         {
@@ -171,6 +174,7 @@ public class AugmentSelectMenu : MonoBehaviour
             var currAugSlot = menuSlots[i].GetComponent<AugmentDisplay>();
 
             currAugSlot.alwaysDisplay = isShop;
+            currAugSlot.upgradeShop = upgradeShop; //Toggle duplicate purchases
             currAugSlot.augmentScript = augmentsInStock[i];
 
             if(isShop)

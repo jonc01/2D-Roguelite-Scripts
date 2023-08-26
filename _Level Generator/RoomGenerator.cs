@@ -92,7 +92,7 @@ public class RoomGenerator : MonoBehaviour
                 CreateRoom(RoomGuarantees[i], availableIndexes[randRoomIndex]);
             }
             else{
-                int randShop = Random.Range(0, totalShops); //Pick random shop from array of variations
+                int randShop = Random.Range(0, Shops.Length); //Pick random shop from array of variations
                 CreateRoom(Shops[randShop], availableIndexes[randRoomIndex]);
             }
         }

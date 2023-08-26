@@ -6,18 +6,24 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [Space(10)]
     public bool inputAllowed;
     public bool shopOpen;
     public bool rewardOpen;
     public PauseMenu Pause;
-    public Transform Player;
 
+    [Space(10)]
+    [Header("- Player References -")]
+    public Transform playerTransform;
     public Base_PlayerMovement PlayerMovement;
     public Base_PlayerCombat PlayerCombat;
-    public Transform PlayerTargetOffset;
+    public Transform playerTargetOffset;
+    public int PlayerCurrPlatform;
+
+    [Space(20)]
+    [Header("- Augments -")]
     public AugmentInventory AugmentInventory;
     public Inventory Inventory;
-    public int PlayerCurrPlatform;
     public AugmentPool AugmentPool;
 
     private void Awake()
@@ -25,10 +31,10 @@ public class GameManager : MonoBehaviour
         Instance = this;
 
         if (Pause == null) Pause = GameObject.Find("Menu UI Canvas").GetComponent<PauseMenu>();
-        Player = GameObject.FindGameObjectWithTag("Player").transform;
-        PlayerMovement = Player.GetComponent<Base_PlayerMovement>();
-        PlayerCombat = Player.GetComponent<Base_PlayerCombat>();
-        PlayerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        PlayerMovement = playerTransform.GetComponent<Base_PlayerMovement>();
+        PlayerCombat = playerTransform.GetComponent<Base_PlayerCombat>();
+        playerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
         if (Inventory == null) Inventory = GetComponent<Inventory>();
 
         shopOpen = false;
@@ -46,7 +52,7 @@ public class GameManager : MonoBehaviour
 
     public void MovePlayer(Vector3 newPos)
     {
-        Player.position = newPos;
+        playerTransform.position = newPos;
     }
 
     public void TogglePlayerInput(bool toggle)

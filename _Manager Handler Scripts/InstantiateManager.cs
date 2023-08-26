@@ -16,6 +16,7 @@ public class InstantiateManager : MonoBehaviour
     //public HitEffectsHandler OnKillEffects;
 
     public OrbManager XPOrbs;
+    public OrbManager HealOrbs;
 
     void Awake()
     {
@@ -26,7 +27,6 @@ public class InstantiateManager : MonoBehaviour
         if(TextPopups == null) TextPopups = GameObject.FindGameObjectWithTag("TextPopupsHandler").GetComponent<TextPopupsHandler>();
         if(HitEffects == null) HitEffects = GetComponentInChildren<HitEffectsHandler>();
         //if(OnKillEffects == null) OnKillEffects = GameObject.Find("OnKillEffects").GetComponent<HitEffectsHandler>();
-        if(XPOrbs == null) XPOrbs = GetComponentInChildren<OrbManager>();
+        // if(XPOrbs == null) XPOrbs = GetComponentInChildren<OrbManager>();
     }
-    
 }

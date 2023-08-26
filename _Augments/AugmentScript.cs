@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.TextCore.Text;
 
 public class AugmentScript : MonoBehaviour
 {
@@ -24,6 +25,11 @@ public class AugmentScript : MonoBehaviour
     public int DebuffedStat;
     public float debuffedAmount; //TODO: might not use, just use a negative value for buffedAmount
     public float debuffedAmountPercent; //TODO: might not use, just use a negative value for buffedAmount
+
+    // [Header("Conditional Stats")]
+    // public float conditionalBuffedAmount;
+    // public float conditionalBuffedAmountPercent;
+
     [Header("Icons")]
     [SerializeField] public Sprite Icon_Image;
 
@@ -58,6 +64,7 @@ public class AugmentScript : MonoBehaviour
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
 
+        //
         baseDescription = augmentScrObj.Description;
         AugmentType = (int)augmentScrObj.AugmentType;
         ConditionalAugmentScript = GetComponent<Base_ConditionalAugments>();
@@ -121,7 +128,7 @@ public class AugmentScript : MonoBehaviour
     {
         if(augmentScrObj == null) return;
 
-        string divider;
+        string divider = "";;
         float stat;
         string statType = "";// = BuffedStatName;
         //Separates Stat names if a space is needed
@@ -130,15 +137,21 @@ public class AugmentScript : MonoBehaviour
             statType += " ";
         }
 
-        if(increaseType == 0)
+        //Display if stat is a flat damage boost or percent
+        if(increaseType == 0) //[0] Flat
         {
             stat = buffedAmount;
-            divider = " "; //It's this or another if()
         }
-        else
+        else if(increaseType == 2) //[2] Conditional
+        {
+            //Note: this is used by augments that only have a conditional
+            stat = buffedAmount;
+            // stat = conditionalBuffedAmount;
+        }
+        else //[1] Percent
         {
             stat = buffedAmountPercent;
-            divider = "% ";
+            divider = "%";
         }
         
         //Example:
@@ -146,14 +159,19 @@ public class AugmentScript : MonoBehaviour
         // +5 Attack
         // +10% Attack Speed
 
-        Description = baseDescription + "<br>---<br>"; //New line, divider for stat display
-        if(random) Description =  "+? " + statType;
-        else{
-            if(stat > 0) Description += "+" + stat.ToString() + divider + statType;
-            else if(stat < 0) Description += "-" + stat.ToString() + divider + statType;
+        if(augmentScrObj != null)
+        {
+            if(random)
+            {
+                string buffedDesc = "?" + divider;
+                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+            }else{
+                string buffedDesc = stat.ToString() + divider;
+                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+            }
+            // string conditionalDesc = conditionalBuffedAmount.ToString();
+            // Description = baseDescription.Replace('@'.ToString(), conditionalDesc);
         }
-    
-        //
     }
 
     private void ResetStats()

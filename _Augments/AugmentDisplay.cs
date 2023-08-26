@@ -39,6 +39,7 @@ public class AugmentDisplay : MonoBehaviour
     
     [Header("Duplicate")]
     [SerializeField] private bool randomizeLevel = false;
+    [SerializeField] public bool upgradeShop = false;
 
     void Start()
     {
@@ -87,6 +88,7 @@ public class AugmentDisplay : MonoBehaviour
 
     IEnumerator RevealAugment()
     {
+        allowInput = false;
         // yield return new WaitForSecondsRealtime(.2f);
         //TODO: start animation here
         // yield return new WaitForSecondsRealtime(.2f); //Animation time
@@ -95,17 +97,38 @@ public class AugmentDisplay : MonoBehaviour
         allowInput = true;
         if(augmentScript != null && selectMenu != null)
         {
-            if(selectMenu.IsOwnedAndListed(augmentScript) && selectMenu.IsMaxLevel(augmentScript))
+            if(selectMenu.IsOwnedAndListed(augmentScript))
             {
-                //Overlay toggled if Augment is owned and listed, and is maxLevel
-                ToggleOverlay(true, true);
-                allowInput = false;
+                if(selectMenu.IsMaxLevel(augmentScript))
+                {
+                    //Block purchase if max level
+                    ToggleOverlay(true, true);
+                    allowInput = false;
+                }
+                else
+                {
+                    //Only allow duplicate purchase if Upgrade Shop
+                    allowInput = upgradeShop;
+                    if(upgradeShop){
+                        ToggleOverlay(false);
+                    }else{
+                        ToggleOverlay(true, false);
+                    }
+                }
             }
-            else
-            {
-                ToggleOverlay(false);
-                allowInput = true;
-            }
+            
+
+            // if(selectMenu.IsOwnedAndListed(augmentScript) && selectMenu.IsMaxLevel(augmentScript))
+            // {
+            //     //Overlay toggled if Augment is owned and listed, and is maxLevel
+            //     ToggleOverlay(true, true);
+            //     allowInput = false;
+            // }
+            // else
+            // {
+            //     ToggleOverlay(false);
+            //     allowInput = true;
+            // }
         }
     }
 
@@ -131,40 +154,65 @@ public class AugmentDisplay : MonoBehaviour
         AugmentIcon_Image.sprite = augmentScript.Icon_Image;
         DisplayDescription.text = augmentScript.Description;
 
-        bool duplicate;
+        bool isOwned;
         if(augmentScript != null && selectMenu != null)
         {
-            if(selectMenu.IsOwned(augmentScript)) duplicate = true;
-            else duplicate = false;
+            if(selectMenu.IsOwned(augmentScript)) isOwned = true;
+            else isOwned = false;
 
-            bool overlayToggle = false; //TODO: or true?
-            bool maxLevel = false;
+            bool toggleOverlay; //TODO: or true?
+            bool isMaxLevel;
 
-            //Check for Duplicate augments not at Max level | no overlay
-            if(duplicate && !selectMenu.IsMaxLevel(augmentScript))
-            {
-                DisplayLevel.text = "Lv ??";
-                
-                if(!inInventory) augmentScript.UpdateDescription(true);
-                else augmentScript.UpdateDescription();
-
-                if(ownedText != null) ownedText.SetActive(true);
-                randomizeLevel = true;
-                overlayToggle = false;
-                maxLevel = true;
-            }
-            else //Augment is not a Duplicate, or is Max Level | no overlay
-            {
-                DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
-                augmentScript.UpdateDescription();
-
-                maxLevel = selectMenu.IsMaxLevel(augmentScript);
-                if(ownedText != null) ownedText.SetActive(false);
-                randomizeLevel = false;
-                overlayToggle = false;
-            }
             //Overlay toggled if duplicate AND maxLevel
-            ToggleOverlay(overlayToggle, maxLevel); //maxLevel false | "Purchased" overlay
+
+            if(upgradeShop)
+            {
+                if(selectMenu.IsMaxLevel(augmentScript))
+                {
+                    augmentScript.UpdateDescription();
+                    randomizeLevel = false;
+                    toggleOverlay = true;
+                    isMaxLevel = true;
+                }
+                else
+                {
+                    DisplayLevel.text = "Lv ??";
+                    augmentScript.UpdateDescription(true);
+
+                    if(ownedText != null) ownedText.SetActive(true);
+                    randomizeLevel = true;
+                    toggleOverlay = false;
+                    isMaxLevel = false;
+                }
+            }
+            else
+            {
+                // DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+
+                if(selectMenu.IsMaxLevel(augmentScript)) //max Level no upgrade
+                {
+                    augmentScript.UpdateDescription();
+                    randomizeLevel = false;
+
+                    if(isOwned) toggleOverlay = true;
+                    else toggleOverlay = false;
+
+                    isMaxLevel = true;
+                }
+                else //Not Max Level, not in upgrade shop
+                {
+                    DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
+                    augmentScript.UpdateDescription();
+
+                    isMaxLevel = false;
+                    if(ownedText != null) ownedText.SetActive(false);
+                    randomizeLevel = false;
+                    toggleOverlay = false;
+                }
+            }
+
+
+            ToggleOverlay(toggleOverlay, isMaxLevel); //maxLevel false | "Purchased" overlay
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         

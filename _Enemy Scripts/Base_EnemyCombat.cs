@@ -12,6 +12,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     [Header("References/Setup")]
     public LayerMask playerLayer;
+    [SerializeField] Transform playerTransform;
     [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] public Transform hitEffectsOffset;
@@ -140,6 +141,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
+        playerTransform = GameManager.Instance.playerTransform;
     }
 
     protected virtual void OnEnable()

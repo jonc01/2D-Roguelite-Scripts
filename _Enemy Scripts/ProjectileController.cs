@@ -42,7 +42,7 @@ public class ProjectileController : MonoBehaviour
             {
                 //Player parried, flip direction
                 target.TakeDamage(damage, transform.position.x, true, 2);
-                if(target.isParrying)
+                if(target.parryDeflecting)
                 {
                     enemyProj = false;
                     gameObject.layer = LayerMask.NameToLayer("ProjectilePlayer");
@@ -72,7 +72,6 @@ public class ProjectileController : MonoBehaviour
 
     private void DestroyProjectile()
     {
-        Debug.Log("Destroyed projectile");
         //Stops projectile on hit or when expiring, then plays the hit animation
         projectileHit = true;
         collider.enabled = false;
