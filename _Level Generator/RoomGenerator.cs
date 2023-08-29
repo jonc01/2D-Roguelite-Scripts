@@ -30,7 +30,8 @@ public class RoomGenerator : MonoBehaviour
     [SerializeField] List<int> availableIndexes;
 
     [Header("Variables")]
-    //[SerializeField] bool shopAdded; //Shop Types: General, Attack Items, Defense Items, Healing Items
+    [SerializeField] List<int> shuffledRoomsIdx;
+    [SerializeField] List<int> generatedRoomsDEBUG;
 
     public bool roomGenRunning;
     public bool roomGenDone;
@@ -41,6 +42,11 @@ public class RoomGenerator : MonoBehaviour
         roomGenDone = false;
 
         availableIndexes = new List<int>();
+        shuffledRoomsIdx = new List<int>();
+
+        generatedRoomsDEBUG = new List<int>();
+
+        FillShuffleList();
         //shopAdded = false; //Example
     }
 
@@ -52,6 +58,7 @@ public class RoomGenerator : MonoBehaviour
         }
     }
 
+#region Room Generation
     public void GenerateRooms()
     {
         // Debug.Log("Generating Rooms...");
@@ -60,6 +67,8 @@ public class RoomGenerator : MonoBehaviour
 
     IEnumerator GenerateRoomsCO()
     {
+        generatedRoomsDEBUG.Clear();
+
         roomGenDone = false;
         roomGenRunning = true;
 
@@ -120,14 +129,18 @@ public class RoomGenerator : MonoBehaviour
             //int i = availableIndexes[0];
             //yield return new WaitForSecondsRealtime(.01f); //0.001
 
-            int rand = Random.Range(0, Rooms.Length);
-            CreateRoom(Rooms[rand], availableIndexes[0]);
+            // int randIdx = Random.Range(0, Rooms.Length); 
+
+            int randIdx = GetShuffledIdx();
+            CreateRoom(Rooms[randIdx], availableIndexes[0]);
         }
         roomGenRunning = false;
         roomGenDone = true;
 
+        SortGeneratedDEBUG();
         // Debug.Log("Rooms Generated");
     }
+#endregion
 
     private void CreateRoom(GameObject roomObj, int roomIndex)
     {
@@ -136,4 +149,40 @@ public class RoomGenerator : MonoBehaviour
         Instantiate(roomObj, currRoom.position, Quaternion.identity, currRoom);
         availableIndexes.Remove(roomIndex);
     }
+
+#region Shop Shuffle
+
+    void FillShuffleList()
+    {
+        shuffledRoomsIdx.Clear();
+        for(int i=0; i<Rooms.Length; i++)
+        {
+            shuffledRoomsIdx.Add(i);
+        }
+    }
+
+    private int GetShuffledIdx()
+    {
+        if(shuffledRoomsIdx.Count <= 0)
+        {
+            FillShuffleList();
+        }
+
+        //Get random shuffled index
+        int randShuffledIdx = Random.Range(0, shuffledRoomsIdx.Count);
+        //Store shuffled index value as Rooms idx
+        int roomIdx = shuffledRoomsIdx[randShuffledIdx];
+        //Remove from list to prevent duplicates until all rooms have been used
+        shuffledRoomsIdx.Remove(roomIdx);
+
+        generatedRoomsDEBUG.Add(roomIdx);
+        return roomIdx;
+    }
+
+    void SortGeneratedDEBUG()
+    {
+        generatedRoomsDEBUG.Sort();
+    }
+
+#endregion
 }
