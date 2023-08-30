@@ -10,6 +10,8 @@ public class IndicatorAnimator : MonoBehaviour
     [SerializeField] private int hashedAnimName;
     [SerializeField] float animationTime;
 
+    
+
     private void OnEnable()
     {
         if(hashedAnimName == 0) animator.Play(animationName);

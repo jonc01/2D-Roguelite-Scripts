@@ -7,8 +7,8 @@ public class Ranged_Horizontal : Base_CombatBehavior
     //If player is in range, fire a projectile
 
     [Header("Ranged Projectile")]
-    [SerializeField] GameObject projectile;
-    [SerializeField] Transform attackPoint;
+    [SerializeField] protected GameObject projectile;
+    [SerializeField] protected Transform attackPoint;
     //Set Projectile Damage and Speed from here, projectile prefab is set at instantiation
     [SerializeField] public float damage = 4;
     [SerializeField] public float speed = 3; //default 3

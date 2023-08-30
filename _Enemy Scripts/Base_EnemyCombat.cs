@@ -12,7 +12,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     [Header("References/Setup")]
     public LayerMask playerLayer;
-    [SerializeField] Transform playerTransform;
     [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] public Transform hitEffectsOffset;
@@ -34,6 +33,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Space(10)]
 
     [Header("Start() Reference Initialization")]
+    [SerializeField] Transform playerTransform;
     public Base_EnemyMovement movement;
     public Base_EnemyAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
