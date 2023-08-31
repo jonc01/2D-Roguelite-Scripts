@@ -14,7 +14,8 @@ public class Base_EnemyRaycast : MonoBehaviour
     protected Transform ledgeCheck,
         wallPlayerCheck,
         attackCheck,
-        groundCheck;
+        groundCheck,
+        backToWallCheck;
 
     [Space]
     [Header("=== Adjustable Variables ===")] //Raycast variables
@@ -43,7 +44,8 @@ public class Base_EnemyRaycast : MonoBehaviour
         playerInRangeFar,
         ledgeDetect,
         wallDetect,
-        isGrounded;
+        isGrounded,
+        backToWall;
 
     private void Awake()
     {
@@ -127,6 +129,11 @@ public class Base_EnemyRaycast : MonoBehaviour
     {
         ledgeDetect = Physics2D.Raycast(ledgeCheck.position, Vector2.down, ledgeCheckDistance, groundLayer);
         wallDetect = Physics2D.Raycast(wallPlayerCheck.position, transform.right, wallCheckDistance, groundLayer);
+
+        if(backToWallCheck != null)
+        {
+            backToWall = Physics2D.Raycast(wallPlayerCheck.position, transform.right, -wallCheckDistance, groundLayer);
+        }
     }
 
     void PlayerDetectCheck()

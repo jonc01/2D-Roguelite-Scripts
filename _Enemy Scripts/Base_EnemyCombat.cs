@@ -49,14 +49,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("=== STATS (char optional) ===")]
     [Header("--- Health ---")]
     public Base_Character character;
-    [SerializeField] float maxHP;
+    [SerializeField] float maxHP = 8;
     [SerializeField] float currentHP;
     [SerializeField] float defense = 0;
     [SerializeField] protected int totalXPOrbs = 3;
     
     [Header("--- Attack ---")]
     [SerializeField] public float attackDamage;
-    [SerializeField] float attackSpeed;
+    [SerializeField] float attackSpeed = .1f;
     [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
     public float attackRange;

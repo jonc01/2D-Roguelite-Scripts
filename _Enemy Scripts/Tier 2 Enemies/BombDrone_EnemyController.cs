@@ -5,7 +5,7 @@ using UnityEngine;
 public class BombDrone_EnemyController : Base_EnemyController
 {
     [Space(20)]
-    [Header("- Bomb Drone -")]
+    [Header("- Bomb Drone Override -")]
     [SerializeField] protected float attackRange = .3f;
     [SerializeField] public float damage = 4;
 

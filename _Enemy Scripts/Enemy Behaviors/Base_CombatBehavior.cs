@@ -11,7 +11,7 @@ public class Base_CombatBehavior : MonoBehaviour
 
     [Header("Animations")]
     [SerializeField] protected float fullAnimTime;
-    [SerializeField] protected float animDelay;
+    [SerializeField] protected float chargeUpAnimDelay;
 
     [Header("Debugging")]
     [SerializeField] protected float animEndingTime;
@@ -28,7 +28,7 @@ public class Base_CombatBehavior : MonoBehaviour
         if (movement == null) movement = GetComponent<Base_EnemyMovement>();
         playerHit = false;
         canAttack = true;
-        animEndingTime = fullAnimTime - animDelay;
+        animEndingTime = fullAnimTime - chargeUpAnimDelay;
         if(animEndingTime < 0) animEndingTime = (animEndingTime *= -1); //flip value if negative
     }
 

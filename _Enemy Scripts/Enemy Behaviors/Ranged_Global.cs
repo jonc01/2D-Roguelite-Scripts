@@ -35,7 +35,7 @@ public class Ranged_Global : Ranged_Horizontal
 
 
         combat.PlayIndicator(); //---------------------------
-        yield return new WaitForSeconds(animDelay); //Charge up portion of animation
+        yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up portion of animation
 
         combat.animator.PlayManualAnim(0, fullAnimTime);
 

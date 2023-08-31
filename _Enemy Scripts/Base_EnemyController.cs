@@ -85,13 +85,13 @@ public class Base_EnemyController : MonoBehaviour
         //     combat.playerToRight = raycast.playerToRight;
     }
 
-    protected void AttackCheckClose()
+    protected virtual void AttackCheckClose()
     {
         if (!PlatformCheck()) return;
         if (raycast.playerInRangeClose) combat.AttackClose();
     }
 
-    protected void AttackCheckFar()
+    protected virtual void AttackCheckFar()
     {
         if (!PlatformCheck() && !isRangedAttack) return;
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
