@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 public class ColossalBoss_EnemyCombat : Base_BossCombat
+// public class ColossalBoss_BossCombat : Base_BossCombat
 {
     //float attackEndDelay = .5f;
     [Space(10)]

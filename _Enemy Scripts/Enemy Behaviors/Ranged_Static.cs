@@ -1,25 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
-public class Ranged_Horizontal : Base_CombatBehavior
+public class Ranged_Static : Base_CombatBehavior
 {
-    //If player is in range, fire a projectile
-
-    [Header("Ranged Projectile")]
+    [Header("= Ranged Static =")]
     [SerializeField] protected GameObject projectile;
     [SerializeField] protected Transform attackPoint;
-    //Set Projectile Damage and Speed from here, projectile prefab is set at instantiation
     [SerializeField] public float damage = 4;
-    [SerializeField] public float speed = 3; //default 3
     [SerializeField] public bool canFire;
-
+    
 
     protected override void Start()
     {
         base.Start();
         canFire = true;
-        //damage = combat.attackDamage; //! Manually setting damage
     }
 
     public override void Attack()
@@ -30,31 +26,32 @@ public class Ranged_Horizontal : Base_CombatBehavior
 
     IEnumerator ShootCO()
     {
+        movement.ToggleFlip(false);
         canFire = false;
         canAttack = false;
-        movement.ToggleFlip(false);
         movement.canMove = false;
         combat.isAttacking = true;
         combat.knockbackImmune = true;
-
-        combat.animator.PlayManualAnim(0, fullAnimTime);
+        movement.rb.velocity = Vector3.zero;
 
         yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
+
+        combat.animator.PlayManualAnim(0, fullAnimTime);
 
         //Instantiate projectile, set variables from this script
         GameObject projectileObj = Instantiate(projectile, attackPoint.position, transform.rotation);
         ProjectileController script = projectileObj.GetComponent<ProjectileController>();
         script.damage = damage;
-        script.speed = speed;
         script.playerToRight = raycast.playerToRight; //Knockback direction
 
-        yield return new WaitForSeconds(animEndingTime);
-        combat.isAttacking = false;
+        yield return new WaitForSeconds(fullAnimTime - chargeUpAnimDelay);
         combat.knockbackImmune = false;
-        movement.canMove = true;
-        movement.ToggleFlip(true);
+        combat.isAttacking = false;
 
+        movement.canMove = true;
         yield return new WaitForSeconds(attackSpeed);
+        combat.altAttacking = false;
+        movement.ToggleFlip(true);
         canFire = true;
         canAttack = true;
     }

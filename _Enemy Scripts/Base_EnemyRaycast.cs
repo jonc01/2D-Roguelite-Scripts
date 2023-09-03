@@ -14,7 +14,9 @@ public class Base_EnemyRaycast : MonoBehaviour
     protected Transform ledgeCheck,
         wallPlayerCheck,
         attackCheck,
-        groundCheck;
+        groundCheck,
+        backToWallCheck,
+        backToLedgeCheck;
 
     [Space]
     [Header("=== Adjustable Variables ===")] //Raycast variables
@@ -34,7 +36,9 @@ public class Base_EnemyRaycast : MonoBehaviour
 
     [Space]
     [Header("=== Raycast Checks ===")]
+    [SerializeField] Transform playerTransform;
     public bool playerToRight;
+    public bool playerDetectedToRight;
     [SerializeField]
     public bool
         playerDetectFront,
@@ -43,7 +47,9 @@ public class Base_EnemyRaycast : MonoBehaviour
         playerInRangeFar,
         ledgeDetect,
         wallDetect,
-        isGrounded;
+        isGrounded,
+        backToWall,
+        backToLedge;
 
     private void Awake()
     {
@@ -54,7 +60,13 @@ public class Base_EnemyRaycast : MonoBehaviour
         if (attackCheck == null) attackCheck = transform.Find("attackCheck").transform;
         if (groundCheck == null) groundCheck = transform.Find("groundCheck").transform;
 
+
         updatePlatform = true;
+    }
+
+    protected void Start()
+    {
+        if(playerTransform == null) playerTransform = GameManager.Instance.playerTransform;
     }
 
     void Update()
@@ -73,6 +85,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         LedgeWallCheck();
         PlayerDetectCheck();
         UpdatePlayerToRight();
+        UpdatePlayerDetectedToRight();
     }
 
     // void FixedUpdate()
@@ -127,6 +140,17 @@ public class Base_EnemyRaycast : MonoBehaviour
     {
         ledgeDetect = Physics2D.Raycast(ledgeCheck.position, Vector2.down, ledgeCheckDistance, groundLayer);
         wallDetect = Physics2D.Raycast(wallPlayerCheck.position, transform.right, wallCheckDistance, groundLayer);
+
+        //Optional checks (not used for all Enemies)
+        if(backToWallCheck != null)
+        {
+            backToWall = Physics2D.Raycast(wallPlayerCheck.position, transform.right, -wallCheckDistance, groundLayer);
+        }
+
+        if(backToLedgeCheck != null)
+        {
+            backToLedge = Physics2D.Raycast(backToLedgeCheck.position, Vector2.down, ledgeCheckDistance, groundLayer);
+        }
     }
 
     void PlayerDetectCheck()
@@ -137,9 +161,14 @@ public class Base_EnemyRaycast : MonoBehaviour
 
     void UpdatePlayerToRight()
     {
-        // Updates 'playerToRight' bool: where the player is in relation to enemy
-        if (playerDetectFront)  playerToRight = movement.isFacingRight;
-        else if (playerDetectBack)  playerToRight = !movement.isFacingRight;
+        playerToRight = transform.position.x < playerTransform.position.x;
+    }
+
+    void UpdatePlayerDetectedToRight()
+    {
+        // Updates 'playerDetectedToRight' bool using raycasts
+        if (playerDetectFront)  playerDetectedToRight = movement.isFacingRight;
+        else if (playerDetectBack)  playerDetectedToRight = !movement.isFacingRight;
         //! don't use this for knockback, won't behave correctly if the player is midair or the enemy can't update
 
         //if (playerDetectFront)

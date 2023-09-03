@@ -75,7 +75,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         healthBar.gameObject.SetActive(false);
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         movement.rb.simulated = false;
-        GetComponent<CircleCollider2D>().enabled = false;
+        GetComponent<CapsuleCollider2D>().enabled = false;
 
         isAlive = false;
         GameManager.Instance.AugmentInventory.OnKill(transform);

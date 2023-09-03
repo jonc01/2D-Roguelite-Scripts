@@ -48,7 +48,7 @@ public class Melee_Lunge : Base_CombatBehavior
         combat.animator.PlayManualAnim(0, fullAnimTime);
         combat.PlayIndicator();
         
-        yield return new WaitForSeconds(animDelay); //Charge up portion of animation
+        yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up portion of animation
 
         if(allowFlipBeforeAttack) combat.FacePlayer();
 

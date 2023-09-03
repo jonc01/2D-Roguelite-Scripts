@@ -7,11 +7,12 @@ public class Base_CombatBehavior : MonoBehaviour
     //Enemy Classes call this function for different melee behavior.
     protected Base_EnemyCombat combat;
     protected Base_EnemyMovement movement;
+    protected Base_EnemyRaycast raycast;
     [SerializeField] protected float attackSpeed;
 
     [Header("Animations")]
     [SerializeField] protected float fullAnimTime;
-    [SerializeField] protected float animDelay;
+    [SerializeField] protected float chargeUpAnimDelay;
 
     [Header("Debugging")]
     [SerializeField] protected float animEndingTime;
@@ -28,12 +29,13 @@ public class Base_CombatBehavior : MonoBehaviour
         if (movement == null) movement = GetComponent<Base_EnemyMovement>();
         playerHit = false;
         canAttack = true;
-        animEndingTime = fullAnimTime - animDelay;
-        if(animEndingTime < 0) animEndingTime = (animEndingTime *= -1); //flip value if negative
+        animEndingTime = fullAnimTime - chargeUpAnimDelay;
+        if (animEndingTime < 0) animEndingTime = (animEndingTime *= -1); //flip value if negative
+        if (raycast == null) raycast = GetComponentInChildren<Base_EnemyRaycast>();
     }
 
     public virtual void Attack()
     {
-        //This is just here to get overridden
+        //Placeholder to get overridden
     }
 }

@@ -12,7 +12,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     [Header("References/Setup")]
     public LayerMask playerLayer;
-    [SerializeField] Transform playerTransform;
     [SerializeField] protected Transform attackPoint;
     [SerializeField] protected Transform textPopupOffset;
     [SerializeField] public Transform hitEffectsOffset;
@@ -34,6 +33,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Space(10)]
 
     [Header("Start() Reference Initialization")]
+    [SerializeField] Transform playerTransform;
     public Base_EnemyMovement movement;
     public Base_EnemyAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
@@ -49,14 +49,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("=== STATS (char optional) ===")]
     [Header("--- Health ---")]
     public Base_Character character;
-    [SerializeField] float maxHP;
+    [SerializeField] float maxHP = 8;
     [SerializeField] float currentHP;
     [SerializeField] float defense = 0;
     [SerializeField] protected int totalXPOrbs = 3;
     
     [Header("--- Attack ---")]
     [SerializeField] public float attackDamage;
-    [SerializeField] float attackSpeed;
+    [SerializeField] float attackSpeed = .1f;
     [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
     public float attackRange;
@@ -75,7 +75,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public bool isKnockedback;
     public bool isLunging;
     public bool isAttacking;
-    public bool playerToRight; //Updated somewhere //TODO:
+    // public bool playerToRight; //Updated somewhere //TODO:
+    public bool altAttacking;
     public float kbResist = 0;
     public bool knockbackImmune = false;
     Coroutine StunnedCO;
@@ -138,6 +139,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if(indicator != null) indicator.SetActive(false);
 
         isAttacking = false;
+        altAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -481,14 +483,19 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         sr.material = mDefault;
     }
 
+    public virtual void ToggleHealthbar(bool toggle)
+    {
+        healthBar.gameObject.SetActive(toggle);
+    }
+
     protected virtual void Die()
     {
-        healthBar.gameObject.SetActive(false);
+        ToggleHealthbar(false);
         if(AttackingCO != null) StopCoroutine(AttackingCO);
 
         ScreenShakeListener.Instance.Shake(3);
         movement.rb.simulated = false;
-        GetComponent<CircleCollider2D>().enabled = false;
+        GetComponent<CapsuleCollider2D>().enabled = false;
 
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);

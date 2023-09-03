@@ -18,7 +18,7 @@ public class ProjectileController : MonoBehaviour
 
     CircleCollider2D collider;
 
-    void Start()
+    protected virtual void Start()
     {
         if(animator == null) animator = GetComponent<Animator>();
         projectileHit = false;
@@ -26,13 +26,13 @@ public class ProjectileController : MonoBehaviour
         collider = GetComponent<CircleCollider2D>();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if(projectileHit) { DestroyProjectile(); return; }
         transform.position += transform.right * Time.deltaTime * speed;
     }
     
-    private void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if(enemyProj)
         {
@@ -70,7 +70,7 @@ public class ProjectileController : MonoBehaviour
         DestroyProjectile();
     }
 
-    private void DestroyProjectile()
+    protected virtual void DestroyProjectile()
     {
         //Stops projectile on hit or when expiring, then plays the hit animation
         projectileHit = true;

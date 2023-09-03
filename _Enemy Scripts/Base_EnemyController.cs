@@ -8,18 +8,18 @@ public class Base_EnemyController : MonoBehaviour
     public Base_EnemyMovement movement;
     public Base_EnemyCombat combat;
     public bool isRangedAttack = false;
-    [SerializeField] private float CODurationLower = .2f, CODurationUpper = .8f;
-    [SerializeField] Transform playerTransform;
+    [SerializeField] protected float CODurationLower = .2f, CODurationUpper = .8f;
+    [SerializeField] protected Transform playerTransform;
 
     [Header("=== Raycasts Reference ===")]
     [SerializeField] public Base_EnemyRaycast raycast;
-    [SerializeField] int currPlayerPlatform;
+    [SerializeField] protected int currPlayerPlatform;
 
     [Header("=== Debug Variables ===")]
-    [SerializeField] bool isIdling;
-    [SerializeField] bool isPatrolling;
-    [SerializeField] bool playerDetected;
-    [SerializeField] private bool checkLanding;
+    [SerializeField] protected bool isIdling;
+    [SerializeField] protected bool isPatrolling;
+    [SerializeField] protected bool playerDetected;
+    [SerializeField] protected bool checkLanding;
     Coroutine IdleCO;
     Coroutine PatrolCO;
     Coroutine LandingCO;
@@ -68,7 +68,7 @@ public class Base_EnemyController : MonoBehaviour
         ChasePlayer();
         AttackCheckClose();
         AttackCheckFar();
-        PlayerToRightCheck();
+        // PlayerToRightCheck();
     }
 
     protected virtual void FixedUpdate()
@@ -76,23 +76,25 @@ public class Base_EnemyController : MonoBehaviour
         PlatformCheck();
     }
 
-    void PlayerToRightCheck()
-    {
-        combat.playerToRight = playerTransform.position.x > transform.position.x;
+    // protected void PlayerToRightCheck()
+    // {
+    //     combat.playerToRight = playerTransform.position.x > transform.position.x;
 
-        //Only update if the player is actively being detected
-        // if(raycast.playerDetectFront || raycast.playerDetectBack)
-        //     combat.playerToRight = raycast.playerToRight;
-    }
+    //     //Only update if the player is actively being detected
+    //     // if(raycast.playerDetectFront || raycast.playerDetectBack)
+    //     //     combat.playerToRight = raycast.playerToRight;
+    // }
 
-    void AttackCheckClose()
+    protected virtual void AttackCheckClose()
     {
+        //Only attack the player if they're on the same platform
         if (!PlatformCheck()) return;
         if (raycast.playerInRangeClose) combat.AttackClose();
     }
 
-    void AttackCheckFar()
+    protected virtual void AttackCheckFar()
     {
+        //Ranged enemies can attack the player on separate platforms if in range
         if (!PlatformCheck() && !isRangedAttack) return;
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
     }
@@ -105,7 +107,7 @@ public class Base_EnemyController : MonoBehaviour
         else return false;
     }
 
-    void ChasePlayer()
+    protected void ChasePlayer()
     {
         if (raycast.currPlatform != currPlayerPlatform) return;
         if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
@@ -120,12 +122,12 @@ public class Base_EnemyController : MonoBehaviour
                 StopIdling();
                 movement.canMove = true;
             }
-            movement.MoveRight(raycast.playerToRight);
+            movement.MoveRight(raycast.playerDetectedToRight);
         }
         else playerDetected = false;
     }
 
-    void MoveCheck()
+    protected void MoveCheck()
     {
         if (playerDetected) return;
 
@@ -166,7 +168,7 @@ public class Base_EnemyController : MonoBehaviour
         isIdling = false;
     }
 
-    IEnumerator Idling(float duration, bool switchDir, bool knockbackHitB)
+    protected IEnumerator Idling(float duration, bool switchDir, bool knockbackHitB)
     {
         isIdling = true;
         movement.canMove = false;
@@ -203,13 +205,13 @@ public class Base_EnemyController : MonoBehaviour
         isPatrolling = false;
     }
 
-    void FlipDir()
+    protected void FlipDir()
     {
         bool dir = !movement.isFacingRight;
         movement.MoveRight(dir);
     }
 
-    void LedgeWallCheck()
+    protected void LedgeWallCheck()
     {
         if (combat.isAttacking)
         {
@@ -223,7 +225,7 @@ public class Base_EnemyController : MonoBehaviour
                 FlipDir();
     }
 
-    void StartLanding()
+    protected void StartLanding()
     {
         if(!checkLanding) return;
         if(LandingCO != null) StopCoroutine(LandingCO);

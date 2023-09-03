@@ -69,6 +69,13 @@ public class Base_EnemyMovement : MonoBehaviour
         Flip();
     }
 
+    public virtual void Lunge(bool lungeToRight, float strength = 4, float duration = .3f)
+    {
+        canMove = false;
+        //Reversed Knockback, moving towards player instead of backwards
+        combat.GetKnockback(!lungeToRight, strength, duration);
+    }
+
     // public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .5f)
     // {
     //     Debug.Log("Knockback called from Movement");
