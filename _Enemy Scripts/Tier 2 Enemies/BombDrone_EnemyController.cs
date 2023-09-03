@@ -38,7 +38,7 @@ public class BombDrone_EnemyController : Base_EnemyController
         // AttackCheckClose();
         // AttackCheckFar();
         AttackCheck();
-        PlayerToRightCheck();
+        // PlayerToRightCheck();
     }
     
     protected void AttackCheck()

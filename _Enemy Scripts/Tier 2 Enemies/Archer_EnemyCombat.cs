@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class Archer_EnemyCombat : Base_EnemyCombat
 {
-
+    
 }

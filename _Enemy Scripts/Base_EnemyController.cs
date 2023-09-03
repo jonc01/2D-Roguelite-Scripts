@@ -68,7 +68,7 @@ public class Base_EnemyController : MonoBehaviour
         ChasePlayer();
         AttackCheckClose();
         AttackCheckFar();
-        PlayerToRightCheck();
+        // PlayerToRightCheck();
     }
 
     protected virtual void FixedUpdate()
@@ -76,23 +76,25 @@ public class Base_EnemyController : MonoBehaviour
         PlatformCheck();
     }
 
-    protected void PlayerToRightCheck()
-    {
-        combat.playerToRight = playerTransform.position.x > transform.position.x;
+    // protected void PlayerToRightCheck()
+    // {
+    //     combat.playerToRight = playerTransform.position.x > transform.position.x;
 
-        //Only update if the player is actively being detected
-        // if(raycast.playerDetectFront || raycast.playerDetectBack)
-        //     combat.playerToRight = raycast.playerToRight;
-    }
+    //     //Only update if the player is actively being detected
+    //     // if(raycast.playerDetectFront || raycast.playerDetectBack)
+    //     //     combat.playerToRight = raycast.playerToRight;
+    // }
 
     protected virtual void AttackCheckClose()
     {
+        //Only attack the player if they're on the same platform
         if (!PlatformCheck()) return;
         if (raycast.playerInRangeClose) combat.AttackClose();
     }
 
     protected virtual void AttackCheckFar()
     {
+        //Ranged enemies can attack the player on separate platforms if in range
         if (!PlatformCheck() && !isRangedAttack) return;
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
     }
@@ -120,7 +122,7 @@ public class Base_EnemyController : MonoBehaviour
                 StopIdling();
                 movement.canMove = true;
             }
-            movement.MoveRight(raycast.playerToRight);
+            movement.MoveRight(raycast.playerDetectedToRight);
         }
         else playerDetected = false;
     }

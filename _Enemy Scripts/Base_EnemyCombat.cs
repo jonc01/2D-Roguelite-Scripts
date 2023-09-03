@@ -75,7 +75,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public bool isKnockedback;
     public bool isLunging;
     public bool isAttacking;
-    public bool playerToRight; //Updated somewhere //TODO:
+    // public bool playerToRight; //Updated somewhere //TODO:
+    public bool altAttacking;
     public float kbResist = 0;
     public bool knockbackImmune = false;
     Coroutine StunnedCO;
@@ -138,6 +139,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if(indicator != null) indicator.SetActive(false);
 
         isAttacking = false;
+        altAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
@@ -481,14 +483,19 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         sr.material = mDefault;
     }
 
+    public virtual void ToggleHealthbar(bool toggle)
+    {
+        healthBar.gameObject.SetActive(toggle);
+    }
+
     protected virtual void Die()
     {
-        healthBar.gameObject.SetActive(false);
+        ToggleHealthbar(false);
         if(AttackingCO != null) StopCoroutine(AttackingCO);
 
         ScreenShakeListener.Instance.Shake(3);
         movement.rb.simulated = false;
-        GetComponent<CircleCollider2D>().enabled = false;
+        GetComponent<CapsuleCollider2D>().enabled = false;
 
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);

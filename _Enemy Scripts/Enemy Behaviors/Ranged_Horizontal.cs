@@ -46,7 +46,7 @@ public class Ranged_Horizontal : Base_CombatBehavior
         ProjectileController script = projectileObj.GetComponent<ProjectileController>();
         script.damage = damage;
         script.speed = speed;
-        script.playerToRight = combat.playerToRight; //Knockback direction
+        script.playerToRight = raycast.playerToRight; //Knockback direction
 
         yield return new WaitForSeconds(animEndingTime);
         combat.isAttacking = false;

@@ -9,84 +9,110 @@ public class Archer_EnemyController : Base_EnemyController
     [SerializeField] float lungeDist = .3f;
     public float distanceToPlayer;
     // public bool backToWall;
-    public bool attackClose;
-    public bool attackMain;
-    public bool playerToRight;
-    public bool playerInFront;
+    // public bool attackClose;
+    // public bool attackMain;
+    Transform playerPos;
+    [SerializeField] public bool lunging;
+    
+    protected override void Start()
+    {
+        base.Start();
+        playerPos = GameManager.Instance.playerTransform;
+        lunging = false;
+    }
 
 
     protected override void AttackCheckClose()
     {
-        if (!PlatformCheck()) return;
+        if(combat.altAttacking) return; //Check if attack is already started, this prevents Manualflip being called during attack coroutine
+        if (!PlatformCheck() || isRangedAttack) return;
         if (raycast.playerInRangeClose)
         {
+            PlayerDistCheck();
+            combat.altAttacking = true;
             StartCoroutine(LungeAttack());
-        } 
+        }else
+        {
+            combat.altAttacking = true;
+            combat.AttackFar();
+        }
+    }
+
+    protected override void AttackCheckFar()
+    {
+        if(combat.altAttacking) return;
+        if (!PlatformCheck() && !isRangedAttack) return;
+        if (raycast.playerInRangeFar && combat.CanAttackFar())
+        {
+            combat.altAttacking = true;
+            StartCoroutine(LungeAttack());
+        }
+        // base.AttackCheckFar();
+    }
+
+    // -- Reference -- DELETE WHEN DONE
+    // protected virtual void AttackCheckClose11()
+    // {
+    //     //Only attack the player if they're on the same platform
+    //     if (!PlatformCheck()) return;
+    //     if (raycast.playerInRangeClose) combat.AttackClose();
+    // }
+
+    // protected virtual void AttackCheckFar11()
+    // {
+    //     //Ranged enemies can attack the player on separate platforms if in range
+    //     if (!PlatformCheck() && !isRangedAttack) return;
+    //     if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
+    // }
+
+    // ---------------------------------
+
+    protected float PlayerDistCheck()
+    {
+        distanceToPlayer = Mathf.Abs(playerPos.position.x - transform.position.x);
+        return distanceToPlayer;
     }
 
     IEnumerator LungeAttack()
     {
+        //Lunge then flip towards the Player and start Attack
         LungeCheck();
-        Debug.Log("LUNGING");
-        yield return new WaitForSeconds(.2f);
-        Debug.Log("shooting after");
+        combat.animator.PlayManualAnim(1, 0.75f); //Vanish
+        combat.ToggleHealthbar(false);
+        yield return new WaitForSeconds(0.75f);
+        combat.ToggleHealthbar(true);
+        // yield return new WaitForSeconds(.35f);
+        
+        ManualFlip(raycast.playerToRight);
+        yield return new WaitForSeconds(0.1f);
+        // ManualFlip(raycast.playerDetectedToRight);
         combat.AttackFar();
     }
 
     public void LungeCheck(float lungeStrength = 4f, float duration = .3f)
     {
-        // Increased lunge strength to catch Player if too far
-        if(distanceToPlayer > 1.6f) lungeStrength = distanceToPlayer*1.8f;
         movement.ToggleFlip(false);
-        
-        if(raycast.backToWall)
-        { //Back to wall and Player is close behind/under the Boss
-            if(attackClose || attackMain)
-            {
-                lungeStrength += 2f;
-                //Lunge away then flip to Attack
-                LungeStart(movement.isFacingRight, lungeStrength, duration);
-            }else{
-                lungeStrength += 2f;
-                LungeStart(playerToRight, lungeStrength, duration);
-            }
-        }
-        else
+
+        if(raycast.playerInRangeClose) //Player too close
         {
-            if(!playerInFront)
-            { //Player is behind Boss
-                //Player is either close or in range
-                if(attackClose || attackMain)
-                {
-                    lungeStrength += 2f;
-                    LungeStart(!playerToRight, lungeStrength, duration);
-                }
-                else{
-                    LungeStart(playerToRight, lungeStrength, duration);
-                }
+            if(raycast.backToWall || !raycast.backToLedge)
+            {
+                //Lunge forwards
+                lungeStrength += 4;
+                LungeStart(movement.isFacingRight, lungeStrength, duration);
             }
             else
-            { //Player is in front
-                if(attackClose)
-                {
-                    // lungeStrength += 1f;
-
-                    //Player is too close, lunge backwards, lungeStrength based on Attack
-                    // LungeStart(!playerToRight, lungeStrength, duration);
-                }
-                //Player is out of normal attack range, lunge forward
-                else if(!attackMain && !attackClose)
-                {
-                    // LungeStart(playerToRight, lungeStrength, duration);
-                }
-                // else attackMain, don't move
+            {
+                //Lunge backwards
+                lungeStrength += 4;
+                LungeStart(!movement.isFacingRight, lungeStrength, duration);
             }
         }
-        ManualFlip(playerToRight);
     }
 
     void LungeStart(bool lungeToRight, float strength = 4f, float duration = .3f)
     {
+        // combat.animator.PlayManualAnim(1, 0.75f);
         movement.Lunge(lungeToRight, strength, duration);
     }
 
