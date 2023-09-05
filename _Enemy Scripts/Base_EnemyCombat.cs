@@ -77,6 +77,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public bool isAttacking;
     // public bool playerToRight; //Updated somewhere //TODO:
     public bool altAttacking;
+    [SerializeField] protected bool damageImmune;
     public float kbResist = 0;
     public bool knockbackImmune = false;
     Coroutine StunnedCO;
@@ -113,6 +114,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isKnockedback = false;
         isLunging = false;
         knockbackImmune = false;
+        damageImmune = false;
         if (healthBar == null) healthBar = GetComponentInChildren<HealthBar>();
         if (healthBar != null)
         {
@@ -142,7 +144,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         altAttacking = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
+        if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
+        else enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
+        
         playerTransform = GameManager.Instance.playerTransform;
     }
 
@@ -426,6 +430,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
+        if (damageImmune) return;
 
         HitFlash(); //Set material to white, short delay before resetting
 
@@ -486,6 +491,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public virtual void ToggleHealthbar(bool toggle)
     {
         healthBar.gameObject.SetActive(toggle);
+    }
+
+    public virtual void ToggleDamageImmune(bool toggle)
+    {
+        damageImmune = toggle;
     }
 
     protected virtual void Die()

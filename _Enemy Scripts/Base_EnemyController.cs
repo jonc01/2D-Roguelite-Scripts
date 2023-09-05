@@ -66,6 +66,7 @@ public class Base_EnemyController : MonoBehaviour
         MoveCheck();
         LedgeWallCheck();
         ChasePlayer();
+
         AttackCheckClose();
         AttackCheckFar();
         // PlayerToRightCheck();
@@ -73,6 +74,7 @@ public class Base_EnemyController : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
+        playerDetected = raycast.aggroed;
         PlatformCheck();
     }
 
@@ -109,12 +111,14 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void ChasePlayer()
     {
+        if (!movement.canMove) return;
         if (raycast.currPlatform != currPlayerPlatform) return;
         if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
-
-        if (raycast.playerDetectFront || raycast.playerDetectBack)
+        
+        // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
+        if (playerDetected)
         {
-            playerDetected = true;
+            // playerDetected = true; //-
             StopPatrolling();
 
             if (isIdling)
@@ -124,7 +128,7 @@ public class Base_EnemyController : MonoBehaviour
             }
             movement.MoveRight(raycast.playerDetectedToRight);
         }
-        else playerDetected = false;
+        // else playerDetected = false; //-
     }
 
     protected void MoveCheck()

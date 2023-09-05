@@ -21,16 +21,17 @@ public class Ranged_Static : Base_CombatBehavior
     public override void Attack()
     {
         if (!canFire || combat.isAttacking) return;
+        // if (!canFire || combat.altAttacking) return;
         StartCoroutine(ShootCO());
     }
 
     IEnumerator ShootCO()
     {
+        combat.isAttacking = true;
         movement.ToggleFlip(false);
         canFire = false;
         canAttack = false;
         movement.canMove = false;
-        combat.isAttacking = true;
         combat.knockbackImmune = true;
         movement.rb.velocity = Vector3.zero;
 

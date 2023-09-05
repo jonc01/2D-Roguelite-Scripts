@@ -18,7 +18,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         backToWallCheck,
         backToLedgeCheck;
 
-    [Space]
+    [Space(10)]
     [Header("=== Adjustable Variables ===")] //Raycast variables
     [SerializeField] private float ledgeCheckDistance = 0.05f;
     [SerializeField]
@@ -29,16 +29,18 @@ public class Base_EnemyRaycast : MonoBehaviour
     public float attackRangeClose = 0.67f; //when to start attacking player, uses a raycast to detect if player is within range
     public float attackRangeFar = 1f;
 
-    [Space]
+    [Space(10)]
     [Header("Current Platform")]
     public int currPlatform;
     [SerializeField] private bool updatePlatform;
 
-    [Space]
+    [Space(10)]
     [Header("=== Raycast Checks ===")]
     [SerializeField] Transform playerTransform;
+    public float distanceToPlayer;
     public bool playerToRight;
     public bool playerDetectedToRight;
+    public bool aggroed;
     [SerializeField]
     public bool
         playerDetectFront,
@@ -78,7 +80,10 @@ public class Base_EnemyRaycast : MonoBehaviour
         // movement.canFlip = isGrounded;
         
         //Not grounded, allow CheckPlatform() to get platform ID once
-        if (isGrounded) if(updatePlatform) CheckPlatform();
+        if (isGrounded)
+        {
+            if(updatePlatform) CheckPlatform();
+        }
         else updatePlatform = true;
 
         AttackCheck();
@@ -86,6 +91,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         PlayerDetectCheck();
         UpdatePlayerToRight();
         UpdatePlayerDetectedToRight();
+        GetDistToPlayer();
     }
 
     // void FixedUpdate()
@@ -113,8 +119,11 @@ public class Base_EnemyRaycast : MonoBehaviour
         Vector3 down = transform.TransformDirection(Vector3.down) * ledgeCheckDistance;
         Debug.DrawRay(ledgeCheck.position, down, Color.green);
 
-        Vector3 right = transform.TransformDirection(Vector3.right) * wallCheckDistance;
-        //Debug.DrawRay(wallPlayerCheck.position, right, Color.blue);
+        if(wallPlayerCheck != null)
+        {
+            Vector3 right = transform.TransformDirection(Vector3.right) * wallCheckDistance;
+            Debug.DrawRay(wallPlayerCheck.position, right, Color.blue);
+        }
 
         Vector3 attackRight = transform.TransformDirection(Vector3.right) * playerCheckDistanceFront;
         Debug.DrawRay(wallPlayerCheck.position, attackRight, Color.cyan);
@@ -128,6 +137,11 @@ public class Base_EnemyRaycast : MonoBehaviour
         Vector3 playerInAttackRangeClose = transform.TransformDirection(Vector3.right) * attackRangeClose;
         Debug.DrawRay(attackCheck.position, playerInAttackRangeClose, Color.magenta);
 
+        if(backToLedgeCheck != null)
+        {
+            Vector3 ledgeCheckBack = transform.TransformDirection(Vector3.down) * ledgeCheckDistance;
+            Debug.DrawRay(backToLedgeCheck.position, ledgeCheckBack, Color.green);
+        }
     }
 
     void AttackCheck()
@@ -144,7 +158,7 @@ public class Base_EnemyRaycast : MonoBehaviour
         //Optional checks (not used for all Enemies)
         if(backToWallCheck != null)
         {
-            backToWall = Physics2D.Raycast(wallPlayerCheck.position, transform.right, -wallCheckDistance, groundLayer);
+            backToWall = Physics2D.Raycast(wallPlayerCheck.position, -transform.right, wallCheckDistance, groundLayer);
         }
 
         if(backToLedgeCheck != null)
@@ -164,11 +178,25 @@ public class Base_EnemyRaycast : MonoBehaviour
         playerToRight = transform.position.x < playerTransform.position.x;
     }
 
+    public void GetDistToPlayer()
+    {
+        distanceToPlayer = Mathf.Abs(transform.position.x - playerTransform.position.x);
+    }
+
     void UpdatePlayerDetectedToRight()
     {
         // Updates 'playerDetectedToRight' bool using raycasts
-        if (playerDetectFront)  playerDetectedToRight = movement.isFacingRight;
-        else if (playerDetectBack)  playerDetectedToRight = !movement.isFacingRight;
+        if (playerDetectFront)
+        {
+            playerDetectedToRight = movement.isFacingRight;
+            aggroed = true;
+        }
+        else if (playerDetectBack)
+        {
+            playerDetectedToRight = !movement.isFacingRight;
+            aggroed = true;
+        }
+        else aggroed = false;
         //! don't use this for knockback, won't behave correctly if the player is midair or the enemy can't update
 
         //if (playerDetectFront)
