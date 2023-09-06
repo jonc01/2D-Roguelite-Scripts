@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Base_EnemyCombat : MonoBehaviour, IDamageable
@@ -25,6 +26,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
+    [SerializeField] bool showGizmos = false;
     [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
     [Header("*Animation Times")]
     [SerializeField] float fullAttackAnimTime; //1f, 1.416667f
@@ -77,6 +79,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public bool isAttacking;
     // public bool playerToRight; //Updated somewhere //TODO:
     public bool altAttacking;
+    public bool chasePlayer;
     [SerializeField] protected bool damageImmune;
     public float kbResist = 0;
     public bool knockbackImmune = false;
@@ -142,11 +145,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         isAttacking = false;
         altAttacking = false;
+        chasePlayer = true;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
         else enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
-        
+
         playerTransform = GameManager.Instance.playerTransform;
     }
 
@@ -237,6 +241,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual bool CanAttackFar()
     {
+        if(AttackFarBehavior == null) return false;
         return AttackFarBehavior.canAttack;
     }
 
@@ -298,6 +303,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     private void OnDrawGizmos()
     {
+        if (!showGizmos) return;
         if (attackPoint == null) return;
 
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
@@ -377,28 +383,29 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     public virtual void Lunge(bool lungeToRight, float strength = 8, float delay = .1f)
     {
-        KnockbackNullCheckCO();
-
-        isKnockedback = true;
+        // KnockbackNullCheckCO();
+        LungeNullCheckCO();
+        Debug.Log("lunge called");
+        // isKnockedback = true;
+        isLunging = true;
         movement.ToggleFlip(false);
 
-        float lungeDir = lungeToRight != true ? -1 : 1; //get knocked back in opposite direction of player
+        float lungeDir = lungeToRight != true ? 1 : -1; //lunge towards player
         // Vector2 direction = new Vector2(lungeDir, movement.rb.velocity.y);
         // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);]
         movement.rb.velocity = new Vector2(lungeDir * strength, movement.rb.velocity.y);
 
-        KnockbackCO = StartCoroutine(KnockbackReset(delay));
+        // KnockbackCO = StartCoroutine(KnockbackReset(delay));
+        LungeCO = StartCoroutine(LungeReset(delay));
     }
 
     IEnumerator LungeReset(float delay, float recoveryDelay = .1f)
     {
-        Debug.Log("4 - LungeResetting");
         yield return new WaitForSeconds(delay);
-        movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
-        Debug.Log("5 - Stopping Lunge");
+        movement.rb.velocity = Vector2.zero;
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
-        movement.canMove = true;
+        movement.canMove = true; //TODO: avoid overlapping canMove resets
 
         movement.ToggleFlip(true);
         

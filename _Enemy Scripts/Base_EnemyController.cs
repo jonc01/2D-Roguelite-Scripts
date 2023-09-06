@@ -28,6 +28,7 @@ public class Base_EnemyController : MonoBehaviour
     {
         if(movement == null) movement = GetComponent<Base_EnemyMovement>();
         if(combat == null) combat = GetComponent<Base_EnemyCombat>();
+        if(raycast == null) raycast = GetComponentInChildren<Base_EnemyRaycast>();
     }
 
     protected virtual void Start()
@@ -64,6 +65,7 @@ public class Base_EnemyController : MonoBehaviour
         StartLanding();
 
         MoveCheck();
+
         LedgeWallCheck();
         ChasePlayer();
 
@@ -111,6 +113,7 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void ChasePlayer()
     {
+        if (!combat.chasePlayer) return;
         if (!movement.canMove) return;
         if (raycast.currPlatform != currPlayerPlatform) return;
         if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
@@ -133,7 +136,9 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void MoveCheck()
     {
-        if (playerDetected) return;
+        // if (playerDetected) return;
+        // if(combat.isAttacking || combat.altAttacking) return;
+        if(combat.isAttacking) return;
 
         //LedgeCheck raycast or wallcheck to turn around
         if (raycast.ledgeDetect) //&& movement.canMove)
@@ -148,9 +153,9 @@ public class Base_EnemyController : MonoBehaviour
             //Switch between Patrolling or Idling, and the duration to run the action
             if (!isPatrolling && !isIdling)
             {
-                bool switchDir = (Random.value > .5f);
-                bool idleSwitch = (Random.value > .5f);
-                float coDuration = (Random.Range(CODurationLower, CODurationUpper));
+                bool switchDir = Random.value > .5f;
+                bool idleSwitch = Random.value > .5f;
+                float coDuration = Random.Range(CODurationLower, CODurationUpper);
 
                 if (idleSwitch) StartPatrol(coDuration, switchDir);
                 else StartIdle(coDuration, switchDir);

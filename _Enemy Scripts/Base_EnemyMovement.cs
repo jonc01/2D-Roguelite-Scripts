@@ -69,6 +69,13 @@ public class Base_EnemyMovement : MonoBehaviour
         Flip();
     }
 
+    public virtual void Jump()
+    {
+        float jumpStrength = 4f;
+        Vector2 jumpDir = new Vector2(rb.velocity.x, jumpStrength);
+        rb.AddForce(jumpDir, ForceMode2D.Impulse);
+    }
+
     public virtual void Lunge(bool lungeToRight, float strength = 4, float duration = .3f)
     {
         canMove = false;

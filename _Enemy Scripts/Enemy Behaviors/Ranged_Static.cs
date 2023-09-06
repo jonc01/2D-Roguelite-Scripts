@@ -50,9 +50,10 @@ public class Ranged_Static : Base_CombatBehavior
         combat.isAttacking = false;
 
         movement.canMove = true;
-        yield return new WaitForSeconds(attackSpeed);
+        combat.chasePlayer = true;
         combat.altAttacking = false;
         movement.ToggleFlip(true);
+        yield return new WaitForSeconds(attackSpeed);
         canFire = true;
         canAttack = true;
     }

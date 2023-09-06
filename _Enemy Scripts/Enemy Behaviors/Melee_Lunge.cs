@@ -43,6 +43,7 @@ public class Melee_Lunge : Base_CombatBehavior
         movement.ToggleFlip(false);
         movement.canMove = false;
         combat.isAttacking = true;
+        combat.chasePlayer = true;
 
         //Start Lunge animation
         combat.animator.PlayManualAnim(0, fullAnimTime);
@@ -53,7 +54,9 @@ public class Melee_Lunge : Base_CombatBehavior
         if(allowFlipBeforeAttack) combat.FacePlayer();
 
         combat.knockbackImmune = true;
+
         allowCollision = true;
+        Debug.Log("calling lunge");
         combat.Lunge(movement.isFacingRight, 8f, .2f);
 
         yield return new WaitForSeconds(animEndingTime);
@@ -63,6 +66,7 @@ public class Melee_Lunge : Base_CombatBehavior
 
         movement.canMove = true;
         movement.ToggleFlip(true);
+        combat.chasePlayer = true;
         
         yield return new WaitForSeconds(attackSpeed);
         canLunge = true;
