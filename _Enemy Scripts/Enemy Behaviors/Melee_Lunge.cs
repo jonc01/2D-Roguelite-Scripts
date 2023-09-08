@@ -10,7 +10,6 @@ public class Melee_Lunge : Base_CombatBehavior
     [SerializeField] bool allowFlipBeforeAttack = false;
     [SerializeField] bool canLunge;
     [SerializeField] public bool isLunging;
-    Coroutine LungingCO;
 
     [SerializeField] bool allowCollision;
 
@@ -32,18 +31,16 @@ public class Melee_Lunge : Base_CombatBehavior
     public override void Attack() 
     {
         if (!canLunge || !combat.isAlive) return;
+
         StartCoroutine(LungeCO());
     }
 
     IEnumerator LungeCO()
     {
-        // knockbackImmune = true;
         playerHit = false;
         canLunge = false;
         movement.ToggleFlip(false);
-        movement.canMove = false;
         combat.isAttacking = true;
-        combat.chasePlayer = true;
 
         //Start Lunge animation
         combat.animator.PlayManualAnim(0, fullAnimTime);
@@ -53,20 +50,16 @@ public class Melee_Lunge : Base_CombatBehavior
 
         if(allowFlipBeforeAttack) combat.FacePlayer();
 
-        combat.knockbackImmune = true;
-
         allowCollision = true;
-        Debug.Log("calling lunge");
-        combat.Lunge(movement.isFacingRight, 8f, .2f);
-
+        // combat.Lunge(movement.isFacingRight, 8f, .2f);
+        combat.GetKnockback(movement.isFacingRight, 8f, .2f);
+        
         yield return new WaitForSeconds(animEndingTime);
         allowCollision = false;
         combat.isAttacking = false;
-        combat.knockbackImmune = false;
 
-        movement.canMove = true;
         movement.ToggleFlip(true);
-        combat.chasePlayer = true;
+        movement.canMove = true;
         
         yield return new WaitForSeconds(attackSpeed);
         canLunge = true;
@@ -81,8 +74,7 @@ public class Melee_Lunge : Base_CombatBehavior
             {
                 playerHit = true;
                 player.GetComponent<Base_PlayerCombat>().TakeDamage(combat.attackDamage, transform.position.x);
-                //TODO: pass xPos to hit the Player and get < or > to get knockback direction
-                // player.GetComponent<Base_PlayerCombat>().GetKnockback(!combat.playerToRight, combat.knockbackStrength);
+                
                 player.GetComponent<Base_PlayerCombat>().GetKnockback(transform.position.x, combat.knockbackStrength);
             }
         }

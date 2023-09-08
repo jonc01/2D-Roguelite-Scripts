@@ -376,7 +376,7 @@ public class Base_PlayerCombat : MonoBehaviour
             if (attackPoints[currAttackIndex] == null) return;
 
             Gizmos.DrawWireCube(attackPoints[currAttackIndex].position, 
-                new Vector3((hitBoxLength[currAttackIndex]),
+                new Vector3(hitBoxLength[currAttackIndex],
                 hitBoxHeight[currAttackIndex], 0));
             
             Gizmos.DrawWireCube(parryPoint.position, new Vector3(parryHitBoxLength, parryHitboxHeight, 0));

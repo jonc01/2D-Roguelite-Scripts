@@ -32,7 +32,8 @@ public class Base_EnemyRaycast : MonoBehaviour
     [Space(10)]
     [Header("Current Platform")]
     public int currPlatform;
-    [SerializeField] private bool updatePlatform;
+    [SerializeField] protected bool updatePlatform;
+    [SerializeField] protected float updatingPlatformTimer;
 
     [Space(10)]
     [Header("=== Raycast Checks ===")]
@@ -82,9 +83,13 @@ public class Base_EnemyRaycast : MonoBehaviour
         //Not grounded, allow CheckPlatform() to get platform ID once
         if (isGrounded)
         {
-            if(updatePlatform) CheckPlatform();
+            CheckPlatform();
         }
-        else updatePlatform = true;
+        else
+        {
+            updatingPlatformTimer = 2;
+            updatePlatform = true;
+        }
 
         AttackCheck();
         LedgeWallCheck();
@@ -107,11 +112,17 @@ public class Base_EnemyRaycast : MonoBehaviour
     void CheckPlatform()
     {
         //Only updating platform after IsGrounded() returns false, then update once
-        // if (!updatePlatform) return;
+        if (!updatePlatform) return;
+
+        if(updatingPlatformTimer > 0)
+        {
+            updatingPlatformTimer -= Time.deltaTime;
+        }
+        else updatePlatform = false;
 
         int i = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).GetInstanceID();
         if (i != currPlatform) currPlatform = i;
-        updatePlatform = false;
+        // updatePlatform = false;
     }
 
     void DebugDrawRaycast()

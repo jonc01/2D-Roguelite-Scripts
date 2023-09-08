@@ -92,12 +92,13 @@ public class Base_EnemyController : MonoBehaviour
     protected virtual void AttackCheckClose()
     {
         //Only attack the player if they're on the same platform
-        if (!PlatformCheck()) return;
+        if (!PlatformCheck() || combat.altAttacking) return;
         if (raycast.playerInRangeClose) combat.AttackClose();
     }
 
     protected virtual void AttackCheckFar()
     {
+        if (combat.altAttacking) return;
         //Ranged enemies can attack the player on separate platforms if in range
         if (!PlatformCheck() && !isRangedAttack) return;
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
@@ -129,16 +130,16 @@ public class Base_EnemyController : MonoBehaviour
                 StopIdling();
                 movement.canMove = true;
             }
-            movement.MoveRight(raycast.playerDetectedToRight);
+            // movement.MoveRight(raycast.playerDetectedToRight);
+            movement.MoveRight(raycast.playerToRight);
         }
         // else playerDetected = false; //-
     }
 
     protected void MoveCheck()
     {
-        // if (playerDetected) return;
         // if(combat.isAttacking || combat.altAttacking) return;
-        if(combat.isAttacking) return;
+        if(combat.isAttacking || playerDetected) return;
 
         //LedgeCheck raycast or wallcheck to turn around
         if (raycast.ledgeDetect) //&& movement.canMove)
@@ -158,7 +159,10 @@ public class Base_EnemyController : MonoBehaviour
                 float coDuration = Random.Range(CODurationLower, CODurationUpper);
 
                 if (idleSwitch) StartPatrol(coDuration, switchDir);
-                else StartIdle(coDuration, switchDir);
+                else 
+                {
+                    StartIdle(coDuration, switchDir);
+                }
             }
         }
     }
@@ -181,7 +185,7 @@ public class Base_EnemyController : MonoBehaviour
     {
         isIdling = true;
         movement.canMove = false;
-        movement.DisableMove();
+        // movement.DisableMove();
         if (switchDir)
             FlipDir();
 
@@ -198,6 +202,7 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void StopPatrolling()
     {
+        if(!isPatrolling) return;
         if (PatrolCO != null)
             StopCoroutine(PatrolCO);
 

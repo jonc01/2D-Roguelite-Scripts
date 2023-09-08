@@ -385,12 +385,18 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         // KnockbackNullCheckCO();
         LungeNullCheckCO();
+        // if(strength <= 0) return;
         Debug.Log("lunge called");
         // isKnockedback = true;
         isLunging = true;
         movement.ToggleFlip(false);
 
-        float lungeDir = lungeToRight != true ? 1 : -1; //lunge towards player
+        // float lungeDir = lungeToRight != true ? 1 : -1; //lunge towards player
+
+        float lungeDir;
+        if(lungeToRight) lungeDir = 1;
+        else lungeDir = -1;
+
         // Vector2 direction = new Vector2(lungeDir, movement.rb.velocity.y);
         // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);]
         movement.rb.velocity = new Vector2(lungeDir * strength, movement.rb.velocity.y);
@@ -402,14 +408,17 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     IEnumerator LungeReset(float delay, float recoveryDelay = .1f)
     {
         yield return new WaitForSeconds(delay);
+        movement.rb.velocity = Vector3.zero;
         movement.canMove = false;
-        movement.rb.velocity = Vector2.zero;
+        movement.ToggleFlip(false);
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
-        movement.canMove = true; //TODO: avoid overlapping canMove resets
-
-        movement.ToggleFlip(true);
-        
         isLunging = false;
+
+        if(!isAttacking)
+        {
+            movement.ToggleFlip(true);
+            movement.canMove = true; //TODO: avoid overlapping canMove resets
+        }
     }
 
     void LungeNullCheckCO()

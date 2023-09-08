@@ -29,7 +29,7 @@ public class Archer_EnemyController : Base_EnemyController
         if (raycast.playerInRangeClose)
         {
             PlayerDistCheck();
-            combat.altAttacking = true;
+            // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
         }
     }
@@ -42,7 +42,7 @@ public class Archer_EnemyController : Base_EnemyController
 
         if (raycast.playerInRangeFar && combat.CanAttackFar())
         {
-            combat.altAttacking = true;
+            // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
         }
     }
@@ -55,6 +55,7 @@ public class Archer_EnemyController : Base_EnemyController
 
     IEnumerator LungeAttack()
     {
+        combat.altAttacking = true;
         combat.chasePlayer = false;
         combat.isAttacking = true;
         combat.animator.PlayManualAnim(1, 0.75f); //Vanish
@@ -81,7 +82,7 @@ public class Archer_EnemyController : Base_EnemyController
 
     public void LungeCheck(float lungeStrength = 4f, float duration = .3f)
     {
-        movement.ToggleFlip(false);
+        // movement.ToggleFlip(false);
         
         if(raycast.playerInRangeClose) //Player too close
         {

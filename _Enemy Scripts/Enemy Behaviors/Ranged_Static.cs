@@ -33,7 +33,7 @@ public class Ranged_Static : Base_CombatBehavior
         canAttack = false;
         movement.canMove = false;
         combat.knockbackImmune = true;
-        movement.rb.velocity = Vector3.zero;
+        // movement.rb.velocity = Vector3.zero;
 
         yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
 

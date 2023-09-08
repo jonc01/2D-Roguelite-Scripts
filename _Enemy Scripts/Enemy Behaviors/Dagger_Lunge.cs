@@ -8,8 +8,11 @@ public class Dagger_Lunge : Base_CombatBehavior
     [Header("= LungeAttack =")]
     [SerializeField] Rigidbody2D rb;
     [SerializeField] Animator anim;
-    [SerializeField] bool canLunge;
+    // [SerializeField] bool canLunge;
     [SerializeField] int currAttack;
+    [SerializeField] float attackResetDelay = 2f;
+    [SerializeField] float attackResetTimer;
+    [Space(10)]
     [SerializeField] float[] fullAnimTimes;
     [SerializeField] float[] animDelayTimes;
 
@@ -23,18 +26,20 @@ public class Dagger_Lunge : Base_CombatBehavior
     protected override void Start()
     {
         base.Start(); //base script references
-        canLunge = true;
+        // canLunge = true;
         if(anim == null) anim = GetComponentInChildren<Animator>();
         if(rb == null) rb = GetComponent<Rigidbody2D>();
 
+        attackResetTimer = 0;
         currAttack = 0;
     }
 
     public override void Attack()
     {
-        if(!canLunge || !combat.isAlive) return;
-
-        if(combat.isAttacking) return;
+        // if(!canLunge || !combat.isAlive) return;
+        if(!combat.isAlive) return;
+        if (combat.isAttacking || combat.altAttacking) return;
+        
         if(currAttack == 0)
         {
             StartCoroutine(LungeAttackCO());
@@ -50,81 +55,85 @@ public class Dagger_Lunge : Base_CombatBehavior
             // TESTLUNGE();
             combat.Lunge(movement.isFacingRight, 8);
         }
+
+        if(attackResetTimer > 0)
+        {
+            attackResetTimer -= Time.deltaTime;
+            if(attackResetTimer <= 0) currAttack = 0;
+        }
     }
 
     IEnumerator LungeAttackCO()
     {
-        Debug.Log("starting lunge Dagger");
-        canLunge = false;
         combat.isAttacking = true;
         combat.altAttacking = true;
+        combat.chasePlayer = false;
 
         // combat.knockbackImmune = true;
 
         yield return new WaitForSeconds(chargeUpAnimDelay);
 
+        movement.ToggleFlip(false);
+
         //Attack 1
         combat.animator.PlayManualAnim(0, fullAnimTimes[0]);
-        // StartLunge(raycast.playerToRight);
-        combat.Lunge(movement.isFacingRight);
-        yield return new WaitForSeconds(AnimDelayTime(0));
+        // combat.Lunge(movement.isFacingRight, 8);
+        combat.GetKnockback(movement.isFacingRight, 8); //TODO: no idea why Lunge doesn't work
+        yield return new WaitForSeconds(animDelayTimes[0]);
+        movement.canMove = false;
         CheckHit(0);
 
-        yield return new WaitForSeconds(GetFullAnimTime(0) - AnimDelayTime(0));
+        yield return new WaitForSeconds(fullAnimTimes[0] - animDelayTimes[0]);
+
+        movement.ToggleFlip(true);
 
         //Attack 2
         combat.animator.PlayManualAnim(1, fullAnimTimes[1]);
-        // StartLunge(raycast.playerToRight); //- might not use lunge, since no delay
-        combat.Lunge(movement.isFacingRight);
-        yield return new WaitForSeconds(AnimDelayTime(1));
+        yield return new WaitForSeconds(animDelayTimes[1]);
         CheckHit(1);
 
-        yield return new WaitForSeconds(GetFullAnimTime(1) - AnimDelayTime(1));
+        yield return new WaitForSeconds(fullAnimTimes[1] - animDelayTimes[1]);
 
         yield return new WaitForSeconds(attackSpeed);
 
-        canLunge = true;
         combat.isAttacking = false;
         combat.altAttacking = false;
+        movement.canMove = true;
+        combat.chasePlayer = true;
+
         currAttack = 1;
+        attackResetTimer = attackResetDelay; //Start time to reset attack combo if delayed
         // combat.knockbackImmune = false;
     }
 
     IEnumerator SwipeAttackCO()
     {
         combat.isAttacking = true;
+        combat.altAttacking = true;
+        movement.canMove = false;
+        combat.chasePlayer = false;
 
         combat.animator.PlayManualAnim(2, fullAnimTimes[2]);
-        yield return new WaitForSeconds(AnimDelayTime(2));
+        yield return new WaitForSeconds(animDelayTimes[2]);
         CheckHit(2);
-        yield return new WaitForSeconds(GetFullAnimTime(2) - AnimDelayTime(2));
+        yield return new WaitForSeconds(fullAnimTimes[2] - animDelayTimes[2]);
 
         yield return new WaitForSeconds(attackSpeed);
 
         combat.isAttacking = false;
+        combat.altAttacking = false;
+        movement.canMove = true;
+        combat.chasePlayer = true;
+
+        attackResetTimer = 0; //Timer no longer needed
         currAttack = 0;
-    }
-
-    // void PlayAnimation(int index)
-    // {
-    //     combat.animator.PlayManualAnim(index, fullAnimTimes[index]);
-    // }
-
-    float GetFullAnimTime(int index)
-    {
-        return fullAnimTimes[index];
-    }
-
-    float AnimDelayTime(int index)
-    {
-        return animDelayTimes[index];
     }
 
     private void CheckHit(int index)
     {
         // Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(attackPoint.position, combat.attackRange, combat.playerLayer);
 
-        Collider2D[] hitPlayers = Physics2D.OverlapBoxAll(attackPoint[index].position, new Vector2(hitboxWidth[index], hitboxHeight[index]), combat.playerLayer);
+        Collider2D[] hitPlayers = Physics2D.OverlapBoxAll(attackPoint[index].position, new Vector2(hitboxWidth[index], hitboxHeight[index]), 0, combat.playerLayer);
 
         foreach (Collider2D player in hitPlayers)
         {
