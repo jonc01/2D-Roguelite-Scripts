@@ -22,6 +22,8 @@ public class Base_PlayerMovement : MonoBehaviour
     [Header("Current Platform")]
     public int currPlatform;
     private bool updatePlatform;
+    [SerializeField] protected float updatingPlatformTimer;
+
 
     [Space(10)]
 
@@ -186,7 +188,7 @@ public class Base_PlayerMovement : MonoBehaviour
             }
             canDoubleJump = false;
             doubleJumped = false;
-            if (updatePlatform) CheckPlatform();
+            CheckPlatform();
             CheckRunVFX();
         }
         else
@@ -194,6 +196,7 @@ public class Base_PlayerMovement : MonoBehaviour
             //Not grounded, allow CheckPlatform() to get platform ID once
             runTimer = 0;
             updatePlatform = true;
+            updatingPlatformTimer = 2;
             canDoubleJump = true;
         }
     }
@@ -383,11 +386,16 @@ public class Base_PlayerMovement : MonoBehaviour
     void CheckPlatform()
     {
         //Only updating platform after IsGrounded() returns false, then update once
-        //if (!updatePlatform) return;
+        if (!updatePlatform) return;
+
+        if(updatingPlatformTimer > 0)
+        {
+            updatingPlatformTimer -= Time.deltaTime;
+        }
+        else updatePlatform = false;
 
         int i = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).GetInstanceID();
         if (i != currPlatform) currPlatform = i;
-        updatePlatform = false;
         // string j = Physics2D.OverlapCircle(groundCheck.position, 0.01f, groundLayer).name;
         // Debug.Log("Current Platform: " + j);
     }

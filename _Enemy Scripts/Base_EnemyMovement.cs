@@ -51,7 +51,8 @@ public class Base_EnemyMovement : MonoBehaviour
     {
         if (!combat.isAlive || combat.isStunned || !canMove)
         {
-            if(!combat.isKnockedback)// || combat.isLunging)// || _isKnockedback)
+            // if(!combat.isKnockedback)// || combat.isLunging)// || _isKnockedback)
+            if(!combat.isKnockedback)
                 DisableMove();
 
             return;
@@ -69,48 +70,18 @@ public class Base_EnemyMovement : MonoBehaviour
         Flip();
     }
 
-    public virtual void Lunge(bool lungeToRight, float strength = 4, float duration = .3f)
+    public virtual void Jump()
     {
-        canMove = false;
-        //Reversed Knockback, moving towards player instead of backwards
-        combat.GetKnockback(!lungeToRight, strength, duration);
+        float jumpStrength = 4f;
+        Vector2 jumpDir = new Vector2(rb.velocity.x, jumpStrength);
+        rb.AddForce(jumpDir, ForceMode2D.Impulse);
     }
 
-    // public virtual void GetKnockback(bool playerToRight, float strength = 8, float delay = .5f)
+    // public virtual void Lunge(bool lungeToRight, float strength = 4, float duration = .3f)
     // {
-    //     Debug.Log("Knockback called from Movement");
-    //     // KnockbackNullCheckCO();
-
-    //     // if (strength <= 0) return;
-
-    //     // _isKnockedback = true;
-    //     // ToggleFlip(false);
-
-    //     // float temp = playerToRight != true ? 1 : -1; //get knocked back in opposite direction of player
-    //     // Vector2 direction = new Vector2(temp, rb.velocity.y);
-    //     // rb.AddForce(direction * strength, ForceMode2D.Impulse);
-
-    //     // LungingCO = StartCoroutine(KnockbackReset(delay));
-    // }
-
-    // IEnumerator KnockbackReset(float delay, float recoveryDelay = .1f)
-    // {
-    //     yield return new WaitForSeconds(delay);
-    //     rb.velocity = Vector3.zero;
     //     canMove = false;
-    //     yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
-    //     canMove = true;
-    //     ToggleFlip(true);
-    //     _isKnockedback = false;
-    // }
-
-    // void KnockbackNullCheckCO()
-    // {
-    //     if (LungingCO == null) return;
-    //     StopCoroutine(LungingCO);
-    //     canMove = true;
-    //     ToggleFlip(true);
-    //     _isKnockedback = false;
+    //     //Reversed Knockback, moving towards player instead of backwards
+    //     combat.GetKnockback(!lungeToRight, strength, duration);
     // }
 
     #region Flip
@@ -146,7 +117,7 @@ public class Base_EnemyMovement : MonoBehaviour
     #endregion
 
     #region Toggles
-    public void DisableMove()
+    public void DisableMove() //controlled when canMove is false
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
     }

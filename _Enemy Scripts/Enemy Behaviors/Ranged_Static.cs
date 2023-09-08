@@ -21,18 +21,19 @@ public class Ranged_Static : Base_CombatBehavior
     public override void Attack()
     {
         if (!canFire || combat.isAttacking) return;
+        // if (!canFire || combat.altAttacking) return;
         StartCoroutine(ShootCO());
     }
 
     IEnumerator ShootCO()
     {
+        combat.isAttacking = true;
         movement.ToggleFlip(false);
         canFire = false;
         canAttack = false;
         movement.canMove = false;
-        combat.isAttacking = true;
         combat.knockbackImmune = true;
-        movement.rb.velocity = Vector3.zero;
+        // movement.rb.velocity = Vector3.zero;
 
         yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
 
@@ -49,9 +50,10 @@ public class Ranged_Static : Base_CombatBehavior
         combat.isAttacking = false;
 
         movement.canMove = true;
-        yield return new WaitForSeconds(attackSpeed);
+        combat.chasePlayer = true;
         combat.altAttacking = false;
         movement.ToggleFlip(true);
+        yield return new WaitForSeconds(attackSpeed);
         canFire = true;
         canAttack = true;
     }

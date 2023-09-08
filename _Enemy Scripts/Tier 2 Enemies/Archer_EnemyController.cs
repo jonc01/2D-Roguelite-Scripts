@@ -21,51 +21,31 @@ public class Archer_EnemyController : Base_EnemyController
         lunging = false;
     }
 
-
     protected override void AttackCheckClose()
     {
         if(combat.altAttacking) return; //Check if attack is already started, this prevents Manualflip being called during attack coroutine
         if (!PlatformCheck() || isRangedAttack) return;
+
         if (raycast.playerInRangeClose)
         {
             PlayerDistCheck();
-            combat.altAttacking = true;
+            // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
-        }else
-        {
-            combat.altAttacking = true;
-            combat.AttackFar();
         }
     }
 
     protected override void AttackCheckFar()
     {
         if(combat.altAttacking) return;
+        //Player isn't on the same platform, and enemy doesn't have range
         if (!PlatformCheck() && !isRangedAttack) return;
+
         if (raycast.playerInRangeFar && combat.CanAttackFar())
         {
-            combat.altAttacking = true;
+            // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
         }
-        // base.AttackCheckFar();
     }
-
-    // -- Reference -- DELETE WHEN DONE
-    // protected virtual void AttackCheckClose11()
-    // {
-    //     //Only attack the player if they're on the same platform
-    //     if (!PlatformCheck()) return;
-    //     if (raycast.playerInRangeClose) combat.AttackClose();
-    // }
-
-    // protected virtual void AttackCheckFar11()
-    // {
-    //     //Ranged enemies can attack the player on separate platforms if in range
-    //     if (!PlatformCheck() && !isRangedAttack) return;
-    //     if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
-    // }
-
-    // ---------------------------------
 
     protected float PlayerDistCheck()
     {
@@ -75,45 +55,51 @@ public class Archer_EnemyController : Base_EnemyController
 
     IEnumerator LungeAttack()
     {
-        //Lunge then flip towards the Player and start Attack
-        LungeCheck();
+        combat.altAttacking = true;
+        combat.chasePlayer = false;
+        combat.isAttacking = true;
         combat.animator.PlayManualAnim(1, 0.75f); //Vanish
         combat.ToggleHealthbar(false);
-        yield return new WaitForSeconds(0.75f);
+        combat.ToggleDamageImmune(true);
+        yield return new WaitForSeconds(0.2f);
+        movement.canMove = false;
+
+        //Lunge then flip towards the Player and start Attack
+        if(PlayerDistCheck() <= raycast.attackRangeClose) LungeCheck(9);
+        else LungeCheck(0);
+
+        yield return new WaitForSeconds(0.55f);
+        combat.ToggleDamageImmune(false);
         combat.ToggleHealthbar(true);
         // yield return new WaitForSeconds(.35f);
         
         ManualFlip(raycast.playerToRight);
-        yield return new WaitForSeconds(0.1f);
-        // ManualFlip(raycast.playerDetectedToRight);
+        yield return new WaitForSeconds(0.05f);
+        
+        combat.isAttacking = false;
         combat.AttackFar();
     }
 
     public void LungeCheck(float lungeStrength = 4f, float duration = .3f)
     {
-        movement.ToggleFlip(false);
-
+        // movement.ToggleFlip(false);
+        
         if(raycast.playerInRangeClose) //Player too close
         {
             if(raycast.backToWall || !raycast.backToLedge)
             {
                 //Lunge forwards
-                lungeStrength += 4;
-                LungeStart(movement.isFacingRight, lungeStrength, duration);
+                combat.Lunge(!raycast.playerDetectedToRight, lungeStrength, duration);
             }
             else
             {
                 //Lunge backwards
-                lungeStrength += 4;
-                LungeStart(!movement.isFacingRight, lungeStrength, duration);
+                combat.Lunge(raycast.playerDetectedToRight, lungeStrength, duration);
             }
+        }else
+        {
+            combat.Lunge(!raycast.playerDetectedToRight, lungeStrength, duration);
         }
-    }
-
-    void LungeStart(bool lungeToRight, float strength = 4f, float duration = .3f)
-    {
-        // combat.animator.PlayManualAnim(1, 0.75f);
-        movement.Lunge(lungeToRight, strength, duration);
     }
 
     void ManualFlip(bool faceRight)

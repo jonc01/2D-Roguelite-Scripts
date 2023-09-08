@@ -28,6 +28,7 @@ public class Base_EnemyController : MonoBehaviour
     {
         if(movement == null) movement = GetComponent<Base_EnemyMovement>();
         if(combat == null) combat = GetComponent<Base_EnemyCombat>();
+        if(raycast == null) raycast = GetComponentInChildren<Base_EnemyRaycast>();
     }
 
     protected virtual void Start()
@@ -64,8 +65,10 @@ public class Base_EnemyController : MonoBehaviour
         StartLanding();
 
         MoveCheck();
+
         LedgeWallCheck();
         ChasePlayer();
+
         AttackCheckClose();
         AttackCheckFar();
         // PlayerToRightCheck();
@@ -73,6 +76,7 @@ public class Base_EnemyController : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
+        playerDetected = raycast.aggroed;
         PlatformCheck();
     }
 
@@ -88,12 +92,13 @@ public class Base_EnemyController : MonoBehaviour
     protected virtual void AttackCheckClose()
     {
         //Only attack the player if they're on the same platform
-        if (!PlatformCheck()) return;
+        if (!PlatformCheck() || combat.altAttacking) return;
         if (raycast.playerInRangeClose) combat.AttackClose();
     }
 
     protected virtual void AttackCheckFar()
     {
+        if (combat.altAttacking) return;
         //Ranged enemies can attack the player on separate platforms if in range
         if (!PlatformCheck() && !isRangedAttack) return;
         if (raycast.playerInRangeFar && combat.CanAttackFar()) combat.AttackFar();
@@ -109,12 +114,15 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void ChasePlayer()
     {
+        if (!combat.chasePlayer) return;
+        if (!movement.canMove) return;
         if (raycast.currPlatform != currPlayerPlatform) return;
         if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
-
-        if (raycast.playerDetectFront || raycast.playerDetectBack)
+        
+        // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
+        if (playerDetected)
         {
-            playerDetected = true;
+            // playerDetected = true; //-
             StopPatrolling();
 
             if (isIdling)
@@ -122,14 +130,16 @@ public class Base_EnemyController : MonoBehaviour
                 StopIdling();
                 movement.canMove = true;
             }
-            movement.MoveRight(raycast.playerDetectedToRight);
+            // movement.MoveRight(raycast.playerDetectedToRight);
+            movement.MoveRight(raycast.playerToRight);
         }
-        else playerDetected = false;
+        // else playerDetected = false; //-
     }
 
     protected void MoveCheck()
     {
-        if (playerDetected) return;
+        // if(combat.isAttacking || combat.altAttacking) return;
+        if(combat.isAttacking || playerDetected) return;
 
         //LedgeCheck raycast or wallcheck to turn around
         if (raycast.ledgeDetect) //&& movement.canMove)
@@ -144,12 +154,15 @@ public class Base_EnemyController : MonoBehaviour
             //Switch between Patrolling or Idling, and the duration to run the action
             if (!isPatrolling && !isIdling)
             {
-                bool switchDir = (Random.value > .5f);
-                bool idleSwitch = (Random.value > .5f);
-                float coDuration = (Random.Range(CODurationLower, CODurationUpper));
+                bool switchDir = Random.value > .5f;
+                bool idleSwitch = Random.value > .5f;
+                float coDuration = Random.Range(CODurationLower, CODurationUpper);
 
                 if (idleSwitch) StartPatrol(coDuration, switchDir);
-                else StartIdle(coDuration, switchDir);
+                else 
+                {
+                    StartIdle(coDuration, switchDir);
+                }
             }
         }
     }
@@ -172,7 +185,7 @@ public class Base_EnemyController : MonoBehaviour
     {
         isIdling = true;
         movement.canMove = false;
-        movement.DisableMove();
+        // movement.DisableMove();
         if (switchDir)
             FlipDir();
 
@@ -189,6 +202,7 @@ public class Base_EnemyController : MonoBehaviour
 
     protected void StopPatrolling()
     {
+        if(!isPatrolling) return;
         if (PatrolCO != null)
             StopCoroutine(PatrolCO);
 
