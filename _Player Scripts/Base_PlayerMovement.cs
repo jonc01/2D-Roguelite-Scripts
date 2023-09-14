@@ -258,16 +258,13 @@ public class Base_PlayerMovement : MonoBehaviour
     #region Drop-through Platform
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        /*if(collision.gameObject.CompareTag("SolidPlatform"))
-        {
-            currentOneWayPlatform = null;
-        }*/
-
         if (collision.gameObject.CompareTag("OneWayPlatform"))
         {
             currentOneWayPlatform = collision.gameObject;
             canDropThrough = true;
         }
+
+        // ManualPlatformCheck(collision);
     }
 
     private void OnCollisionExit2D(Collision2D collision)
@@ -276,6 +273,15 @@ public class Base_PlayerMovement : MonoBehaviour
         {
             currentOneWayPlatform = null;
             canDropThrough = false;
+        }
+    }
+
+    public void ManualPlatformCheck(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("OneWayPlatform"))
+        {
+            currentOneWayPlatform = collision.gameObject;
+            canDropThrough = true;
         }
     }
 

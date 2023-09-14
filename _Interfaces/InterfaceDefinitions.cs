@@ -4,7 +4,8 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    Transform GetPosition();
+    Transform GetHitPosition();
+    Transform GetGroundPosition();
     void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0);
     void TakeDamageStatus(float damageTaken);
 }

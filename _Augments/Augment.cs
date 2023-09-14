@@ -9,7 +9,7 @@ public class Augment : ScriptableObject
     public int AugmentID;
     // public Color32 TierColor;
 
-    public enum _Tier { Common, Rare, Epic, Legendary, Overcharged, Unstable };
+    public enum _Tier { Common, Rare, Epic, Legendary, Unstable };
     // public int Tier = 0; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
     public _Tier Tier; //0: Common, 1: Rare, 2: Epic, 3: Legendary, 4: Overcharged, 5: Unstable
     // public int MaxLevel = 5; 

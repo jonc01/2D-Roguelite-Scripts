@@ -63,6 +63,7 @@ public class AugmentScript : MonoBehaviour
         if(augmentScrObj == null) { Debug.Log("No Augment Scriptable Object referenced!"); return; }
         Name = augmentScrObj.Name;
         Icon_Image = augmentScrObj.AugmentIcon;
+        Tier = (int)augmentScrObj.Tier;
 
         //
         baseDescription = augmentScrObj.Description;

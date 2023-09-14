@@ -270,10 +270,7 @@ public class AugmentDisplay : MonoBehaviour
             case 3: //Legendary
                 Border_Image.color = new Color(1, 0.4445357f, 0.1745283f); //Orange
                 break;
-            case 4: //Overcharged
-                Border_Image.color = Color.cyan;
-                break;
-            case 5: //Unstable
+            case 4: //Unstable
                 Border_Image.color = Color.red;
                 break;
             default:

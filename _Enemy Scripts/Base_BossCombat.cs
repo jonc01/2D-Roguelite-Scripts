@@ -456,9 +456,15 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         TakeDamage(damageTaken);
     }
 
-    public virtual Transform GetPosition()
+    public virtual Transform GetHitPosition()
     {
         return hitEffectsOffset;
+    }
+
+    public virtual Transform GetGroundPosition()
+    {
+        return transform;
+        // return bottomOffset;
     }
 
     protected void HitFlash(float resetDelay = .1f)

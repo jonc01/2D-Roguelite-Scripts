@@ -11,7 +11,7 @@ public class AugmentPool : MonoBehaviour
     public int totalOwnedAugments;
 
     [Header("Augment Lists by Tier")]
-    public AugmentPoolHelper[] augmentPoolHelpers; //Tiers 0, 1, 2, 3, 4, 5
+    public AugmentPoolHelper[] augmentPoolHelpers; //Tiers 0, 1, 2, 3, 4
     
     [Header("Augment Lists")]
     public List<AugmentScript> ownedAugments; //picked augments and can be pulled from with a higher level
@@ -214,12 +214,7 @@ public class AugmentPool : MonoBehaviour
         /////////////////////////////////////////////////////////
 
 
-        if(rand <= .02f){ //Overcharged or Unstable - 2%
-            // rand = Random.Range(0f, 1.0f);
-            rand = Random.value;
-            if(rand < .5f) augmentTier = 4; 
-            else augmentTier = 5; 
-        }
+        if(rand <= .02f) augmentTier = 4; //Unstable - 2%
         else if(rand <= .06f) augmentTier = 3; //Legendary - 4%
         else if(rand <= .20f) augmentTier = 2; //Epic - 14%
         else if(rand <= .50f) augmentTier = 1; //Rare - 30%
