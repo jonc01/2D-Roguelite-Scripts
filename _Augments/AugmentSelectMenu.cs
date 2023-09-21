@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using System.Net.Http.Headers;
 
 public class AugmentSelectMenu : MonoBehaviour
 {
@@ -10,36 +9,37 @@ public class AugmentSelectMenu : MonoBehaviour
     //This is used for either 
     //  the Reward to [Choose] a free Augment
     //  the Shop menu to [Buy] an Augment
-    [SerializeField] ShopController shopController;
-    [SerializeField] AugmentInventory augmentInventory;
-    [SerializeField] AugmentPool pool;
-    [SerializeField] GameObject refreshingStockOverlay;
-    private bool allowInput;
+    [SerializeField] protected ShopController shopController;
+    [SerializeField] protected AugmentInventory augmentInventory;
+    [SerializeField] protected AugmentPool pool;
+    [SerializeField] protected GameObject refreshingStockOverlay;
+    protected bool allowInput;
 
     [Header("SHOP or REWARD")]
     [SerializeField] public bool isShop = false;
     // [SerializeField] public bool duplicates = false;
     [SerializeField] public bool upgradeShop = false;
+    [SerializeField] public bool bloodShop = false;
 
     [Header("Refresh Cost")]
     [SerializeField] public bool refreshAllowed = false;
     [SerializeField] public int refreshCost = 100;
-    [SerializeField] TextMeshProUGUI refreshButtonText;
+    [SerializeField] protected TextMeshProUGUI refreshButtonText;
 
     [Header("Augment Slots")]
-    [SerializeField] AugmentDisplay[] menuSlots;
-    [SerializeField] private int[] augmentLevels;
+    [SerializeField] protected AugmentDisplay[] menuSlots;
+    [SerializeField] protected int[] augmentLevels;
     [SerializeField] public List<AugmentScript> augmentsInStock;
 
     [Header("=== Shop ===")]
-    [SerializeField] int[] prices; //Includes prices for all augments based on Tier
+    [SerializeField] protected int[] prices; //Includes prices for all augments based on Tier
 
-    private int totalAugments = 3;
-    private bool refreshingStock;
+    protected int totalAugments = 3;
+    protected bool refreshingStock;
     public bool augmentSelected;
-    private bool initialStockDone = false;
+    protected bool initialStockDone = false;
     
-    void Awake()
+    protected virtual void Awake()
     {
         augmentSelected = false;
         initialStockDone = false;
@@ -53,7 +53,7 @@ public class AugmentSelectMenu : MonoBehaviour
         if(pool == null) pool = GameManager.Instance.AugmentPool;
     }
 
-    void OnEnable()
+    protected virtual void OnEnable()
     {
         allowInput = true;
 
@@ -68,7 +68,7 @@ public class AugmentSelectMenu : MonoBehaviour
         else if(refreshButtonText != null) refreshButtonText.text = refreshCost.ToString();
     }
 
-    void OnDisable()
+    protected void OnDisable()
     {
         GameManager.Instance.shopOpen = false;
         GameManager.Instance.rewardOpen = false;
@@ -94,7 +94,7 @@ public class AugmentSelectMenu : MonoBehaviour
         StartCoroutine(RefreshStockCO());
     }
 
-    IEnumerator RefreshStockCO()
+    protected IEnumerator RefreshStockCO()
     {
         refreshingStock = true;
         refreshingStockOverlay.SetActive(true);
@@ -132,9 +132,11 @@ public class AugmentSelectMenu : MonoBehaviour
         refreshingStockOverlay.SetActive(false);
     }
 
-    public void SelectAugment(AugmentScript augment, bool randomizeLevel)
+    public virtual void SelectAugment(AugmentScript augment, bool randomizeLevel)
     {
         if(!allowInput) return;
+
+        //Check references
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
         int chosenIndex = augmentsInStock.IndexOf(augment);
 
@@ -160,13 +162,13 @@ public class AugmentSelectMenu : MonoBehaviour
         StartCoroutine(DisableSelectMenu(.5f));
     }
 
-    IEnumerator DisableSelectMenu(float delay)
+    protected IEnumerator DisableSelectMenu(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
         transform.parent.gameObject.SetActive(false);
     }
 
-    void UpdateDisplay(bool purchased = false)
+    protected void UpdateDisplay(bool purchased = false)
     {
         //only using 'purchased' if allowing multiple purchases
         for(int i=0; i<menuSlots.Length; i++)
@@ -182,10 +184,21 @@ public class AugmentSelectMenu : MonoBehaviour
                 //Display Price
                 currAugSlot.Price = prices[i];
                 //Price is red if Player can't afford
-                if(prices[i] > GameManager.Instance.Inventory.goldAmount)
-                    currAugSlot.UpdateColor(false);
-                else
-                    currAugSlot.UpdateColor(true);
+                if(bloodShop)
+                {
+                    if(prices[i] > GameManager.Instance.PlayerCombat.currentHP + 1)
+                        currAugSlot.UpdateColor(false);
+                    else
+                        currAugSlot.UpdateColor(true);
+                }
+                else //Normal Shop
+                {
+                    if(prices[i] > GameManager.Instance.Inventory.goldAmount)
+                        currAugSlot.UpdateColor(false);
+                    else
+                        currAugSlot.UpdateColor(true);
+                }
+
             }
             else //Hide Prices (0)
             {
@@ -226,7 +239,7 @@ public class AugmentSelectMenu : MonoBehaviour
         else return false;
     }
 
-    private int GetPrice(AugmentScript augment)
+    protected virtual int GetPrice(AugmentScript augment)
     {
         //TODO: None of these values are balanced, just placeholders
         int totalPrice = 0;

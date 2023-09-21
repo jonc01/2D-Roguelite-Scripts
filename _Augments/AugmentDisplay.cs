@@ -137,8 +137,17 @@ public class AugmentDisplay : MonoBehaviour
         if(!allowInput) return;
         if(selectMenu.isShop)
         {
-            if(Price > GameManager.Instance.Inventory.goldAmount) return; //Player can't afford
-            GameManager.Instance.Inventory.UpdateGold(-Price); //Take gold from player, update display
+            //Take player health if blood Shop, else take gold
+            if(selectMenu.bloodShop)
+            {
+                if(Price > GameManager.Instance.PlayerCombat.currentHP) return;
+                GameManager.Instance.PlayerCombat.TakeDamage(Price);
+            }
+            else
+            {
+                if(Price > GameManager.Instance.Inventory.goldAmount) return; //Player can't afford
+                GameManager.Instance.Inventory.UpdateGold(-Price); //Take gold from player, update display
+            }
         }
 
         allowInput = false;
@@ -216,7 +225,18 @@ public class AugmentDisplay : MonoBehaviour
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         
-        if(PriceDisplay != null) PriceDisplay.text = Price.ToString();
+        if(PriceDisplay != null)
+        {
+            if(selectMenu.bloodShop)
+            {
+                PriceDisplay.text = "-" + Price.ToString() + " HP";
+            }
+            else
+            {
+                PriceDisplay.text = Price.ToString();
+            }
+        }
+
         GetBorderColor();
     }
 
