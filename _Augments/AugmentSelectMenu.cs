@@ -162,6 +162,12 @@ public class AugmentSelectMenu : MonoBehaviour
         StartCoroutine(DisableSelectMenu(.5f));
     }
 
+    public void CloseSelectMenu(float delay = .5f)
+    {
+        //For external calls
+        StartCoroutine(DisableSelectMenu(delay));
+    }
+
     protected IEnumerator DisableSelectMenu(float delay)
     {
         yield return new WaitForSecondsRealtime(delay);
@@ -186,7 +192,7 @@ public class AugmentSelectMenu : MonoBehaviour
                 //Price is red if Player can't afford
                 if(bloodShop)
                 {
-                    if(prices[i] > GameManager.Instance.PlayerCombat.currentHP + 1)
+                    if(prices[i] >= (int)GameManager.Instance.PlayerCombat.currentHP)
                         currAugSlot.UpdateColor(false);
                     else
                         currAugSlot.UpdateColor(true);

@@ -60,7 +60,6 @@ public class AugmentSelectMenu_Blood : AugmentSelectMenu
             default: break;
         }
 
-        Debug.Log("Health cost: " + totalHealthCost);
         return totalHealthCost;
     }
 }

@@ -354,7 +354,7 @@ public class Base_PlayerCombat : MonoBehaviour
         //float blockDuration;
 
         // blockAnimTime
-        yield return new WaitForSeconds(blockDelay); //0.0834f\
+        yield return new WaitForSeconds(blockDelay + blockDelayAnimTime); //0.0834f\
         isParrying = true;
         yield return new WaitForSeconds(blockDuration);
         isParrying = false;
