@@ -7,16 +7,16 @@ using TMPro;
 public class AugmentDisplay : MonoBehaviour
 {
     [SerializeField] public AugmentScript augmentScript;
-    [SerializeField] private AugmentSelectMenu selectMenu;
+    [SerializeField] protected AugmentSelectMenu selectMenu;
     public bool allowInput;
 
     [Space(10)]
     [Header("Display Toggles")]
-    [SerializeField] bool inInventory = false;
-    [SerializeField] GameObject selectedOverlay;
-    [SerializeField] private TextMeshProUGUI selectedOverlayText;
-    [SerializeField] private GameObject ownedText;
-    [SerializeField] GameObject FullDisplayParent;
+    [SerializeField] protected bool inInventory = false;
+    [SerializeField] protected GameObject selectedOverlay;
+    [SerializeField] protected TextMeshProUGUI selectedOverlayText;
+    [SerializeField] protected GameObject ownedText;
+    [SerializeField] protected GameObject FullDisplayParent;
 
     [Space(10)]
     [Header("== Needed Setup ==")]
@@ -27,7 +27,7 @@ public class AugmentDisplay : MonoBehaviour
     [SerializeField] public bool alwaysDisplay = false;
     [Space(10)]
     [Header("Display on Hover")]
-    [SerializeField] GameObject ToggleDescParent;
+    [SerializeField] protected GameObject ToggleDescParent;
     [SerializeField] public TextMeshProUGUI DisplayName;
     [SerializeField] public TextMeshProUGUI DisplayDescription;
     [SerializeField] public TextMeshProUGUI DisplayLevel;
@@ -35,13 +35,13 @@ public class AugmentDisplay : MonoBehaviour
     [Header("Price")]
     [SerializeField] public TextMeshProUGUI PriceDisplay;
     [SerializeField] public int Price;
-    private Button button;
+    protected Button button;
     
     [Header("Duplicate")]
-    [SerializeField] private bool randomizeLevel = false;
+    [SerializeField] protected bool randomizeLevel = false;
     [SerializeField] public bool upgradeShop = false;
 
-    void Start()
+    protected void Start()
     {
         randomizeLevel = false;
         if(augmentScript == null)
@@ -57,7 +57,7 @@ public class AugmentDisplay : MonoBehaviour
         if(ownedText != null) ownedText.SetActive(false);
     }
 
-    void OnEnable()
+    protected void OnEnable()
     {
         if(selectMenu == null) selectMenu = GetComponentInParent<AugmentSelectMenu>();
         RefreshInfo();
@@ -86,7 +86,7 @@ public class AugmentDisplay : MonoBehaviour
         selectedOverlayText.text = overlayText;
     }
 
-    IEnumerator RevealAugment()
+    protected IEnumerator RevealAugment()
     {
         allowInput = false;
         // yield return new WaitForSecondsRealtime(.2f);
@@ -132,13 +132,22 @@ public class AugmentDisplay : MonoBehaviour
         }
     }
 
-    public void SelectAugment()
+    public virtual void SelectAugment()
     {
         if(!allowInput) return;
         if(selectMenu.isShop)
         {
-            if(Price > GameManager.Instance.Inventory.goldAmount) return; //Player can't afford
-            GameManager.Instance.Inventory.UpdateGold(-Price); //Take gold from player, update display
+            //Take player health if blood Shop, else take gold
+            if(selectMenu.bloodShop)
+            {
+                if(Price >= GameManager.Instance.PlayerCombat.currentHP) return;
+                GameManager.Instance.PlayerCombat.TakeDamage(Price);
+            }
+            else
+            {
+                if(Price > GameManager.Instance.Inventory.goldAmount) return; //Player can't afford
+                GameManager.Instance.Inventory.UpdateGold(-Price); //Take gold from player, update display
+            }
         }
 
         allowInput = false;
@@ -146,7 +155,7 @@ public class AugmentDisplay : MonoBehaviour
         ToggleOverlay(true);
     }
 
-    public void RefreshInfo()
+    public virtual void RefreshInfo()
     {
         if(augmentScript == null) return;
 
@@ -216,7 +225,18 @@ public class AugmentDisplay : MonoBehaviour
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
         
-        if(PriceDisplay != null) PriceDisplay.text = Price.ToString();
+        if(PriceDisplay != null)
+        {
+            if(selectMenu.bloodShop)
+            {
+                PriceDisplay.text = "-" + Price.ToString() + " HP";
+            }
+            else
+            {
+                PriceDisplay.text = Price.ToString();
+            }
+        }
+
         GetBorderColor();
     }
 
@@ -254,7 +274,7 @@ public class AugmentDisplay : MonoBehaviour
         FullDisplayParent.SetActive(toggle);
     }
 
-    private void GetBorderColor()
+    protected void GetBorderColor()
     {
         switch(augmentScript.Tier)
         {
@@ -270,10 +290,7 @@ public class AugmentDisplay : MonoBehaviour
             case 3: //Legendary
                 Border_Image.color = new Color(1, 0.4445357f, 0.1745283f); //Orange
                 break;
-            case 4: //Overcharged
-                Border_Image.color = Color.cyan;
-                break;
-            case 5: //Unstable
+            case 4: //Unstable
                 Border_Image.color = Color.red;
                 break;
             default:

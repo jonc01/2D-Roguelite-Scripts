@@ -49,7 +49,8 @@ public class Base_AoE_Explosion : MonoBehaviour
             {
                 damageable.TakeDamage(damage, true, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(2);
-                Transform enemyHitOffset = damageable.GetPosition();
+                // Transform enemyHitOffset = damageable.GetPosition();
+                Transform enemyHitOffset = damageable.GetGroundPosition();
 
                 if(statusEffectPrefab != null)
                 {

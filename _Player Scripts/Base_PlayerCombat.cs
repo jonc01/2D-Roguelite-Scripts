@@ -286,7 +286,7 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 damageable.TakeDamage(damageDealt, true, knockbackStrength, transform.position.x);
-                Transform enemyPos = damageable.GetPosition();
+                Transform enemyPos = damageable.GetHitPosition();
                 augmentInventory.OnHit(enemyPos);
                 HitStopAnim(attackAnimFull, groundAttack);
 
@@ -313,7 +313,7 @@ public class Base_PlayerCombat : MonoBehaviour
             {
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
                 damageable.TakeDamageStatus(1);
-                Transform enemyPos = damageable.GetPosition();
+                Transform enemyPos = damageable.GetHitPosition();
                 augmentInventory.OnParry(enemyPos);
                 // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
@@ -354,7 +354,7 @@ public class Base_PlayerCombat : MonoBehaviour
         //float blockDuration;
 
         // blockAnimTime
-        yield return new WaitForSeconds(blockDelay); //0.0834f\
+        yield return new WaitForSeconds(blockDelay + blockDelayAnimTime); //0.0834f\
         isParrying = true;
         yield return new WaitForSeconds(blockDuration);
         isParrying = false;

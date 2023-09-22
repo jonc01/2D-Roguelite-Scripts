@@ -35,13 +35,14 @@ public class Ranged_Global : Ranged_Horizontal
 
 
         combat.PlayIndicator(); //---------------------------
+        Vector3 playerPos = GetPlayerPosX(); //Only get player position here
+        
         yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up portion of animation
 
         combat.animator.PlayManualAnim(0, fullAnimTime);
 
         PlayIndicatorExplode();
 
-        Vector3 playerPos = GetPlayerPosX();
         //Instantiate projectile, set variables from this script
         GameObject projectileObj = Instantiate(globalProjectile, playerPos, transform.rotation);
         CastExplosion script = projectileObj.GetComponent<CastExplosion>();

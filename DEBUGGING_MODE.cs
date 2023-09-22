@@ -54,7 +54,7 @@ public class DEBUGGING_MODE : MonoBehaviour
                 // damageable.TakeDamage(damage);
                 damageable.TakeDamageStatus(damage);
                 ScreenShakeListener.Instance.Shake(3);
-                Transform enemyHitOffset = damageable.GetPosition();
+                Transform enemyHitOffset = damageable.GetHitPosition();
 
                 // if(statusEffectPrefab != null)
                 // {
