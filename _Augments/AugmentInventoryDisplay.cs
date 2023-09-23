@@ -20,6 +20,7 @@ public class AugmentInventoryDisplay : MonoBehaviour
         for(int i=0; i<numSlots; i++)
         {
             AugmentSlots[i].augmentScript = augmentList[i];
+            augmentList[i].displayedIndex = i; //Set index value for reference
         }
 
         ToggleSlots();
@@ -34,5 +35,11 @@ public class AugmentInventoryDisplay : MonoBehaviour
             if(augSlot.augmentScript != null) AugmentSlots[i].gameObject.SetActive(true);
             else AugmentSlots[i].gameObject.SetActive(false);
         }
+    }
+
+    public void ToggleAugmentStatus(int currIdx, float timerDuration)
+    {
+        //Get Augment index in displayed Augments
+        AugmentSlots[currIdx].ToggleAugmentStatus(true, timerDuration);
     }
 }

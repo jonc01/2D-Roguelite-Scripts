@@ -35,10 +35,11 @@ public class Ranged_Global : Ranged_Horizontal
 
 
         combat.PlayIndicator(); //---------------------------
-        Vector3 playerPos = GetPlayerPosX(); //Only get player position here
         
         yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up portion of animation
 
+        Vector3 playerPos = GetPlayerPosX(); //Only get player position here
+        
         combat.animator.PlayManualAnim(0, fullAnimTime);
 
         PlayIndicatorExplode();

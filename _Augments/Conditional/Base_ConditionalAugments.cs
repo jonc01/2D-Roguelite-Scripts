@@ -6,20 +6,20 @@ public class Base_ConditionalAugments : MonoBehaviour
 {
     [Header("Setup")]
     [SerializeField] public float procChance = 1.0f; //default 100%, 0.0 - 1.0f
-    [SerializeField] public float duration;
+    [SerializeField] public float buffDuration;
     [SerializeField] protected bool active;
     [SerializeField] public float buffAmount; //TODO: need to update this to the AugmentScript values
     [SerializeField] public float buffAmountPercent;
     [SerializeField] protected Base_PlayerCombat playerCombat;
     [Header("Debugging")]
-    [SerializeField] protected float durationTimer;
+    [SerializeField] protected float timerDuration;
     [SerializeField] protected AugmentScript augmentScript;
     [SerializeField] protected int currentLevel;
 
     protected virtual void Start()
     {
         playerCombat = GameManager.Instance.PlayerCombat;
-        durationTimer = 0;
+        timerDuration = 0;
         active = false;
         if(augmentScript == null) augmentScript = GetComponent<AugmentScript>();
     }
@@ -33,6 +33,8 @@ public class Base_ConditionalAugments : MonoBehaviour
     protected virtual void Activate()
     {
         Debug.Log(name + " Augment Activated");
+
+        GameManager.Instance.AugmentInventory.augmentInventoryDisplay.ToggleAugmentStatus(augmentScript.displayedIndex, buffDuration);
     }
 
 //

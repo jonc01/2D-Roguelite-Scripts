@@ -565,6 +565,15 @@ public class Base_PlayerCombat : MonoBehaviour
         CheckDie();
     }
 
+    public void TakeTrueDamage(float damageTaken)
+    {
+        if(!isAlive) return;
+
+        currentHP -= damageTaken;
+        healthBar.UpdateHealth(currentHP);
+        CheckDie();
+    }
+
     public void HealPlayer(float healAmount, bool showNumber = true)
     {
         if (!isAlive) return;

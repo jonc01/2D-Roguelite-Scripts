@@ -25,6 +25,7 @@ public class AugmentScript : MonoBehaviour
     public int DebuffedStat;
     public float debuffedAmount; //TODO: might not use, just use a negative value for buffedAmount
     public float debuffedAmountPercent; //TODO: might not use, just use a negative value for buffedAmount
+    public int displayedIndex = 0;
 
     // [Header("Conditional Stats")]
     // public float conditionalBuffedAmount;
