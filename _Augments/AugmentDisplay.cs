@@ -244,7 +244,6 @@ public class AugmentDisplay : MonoBehaviour
                 }
             }
 
-
             ToggleOverlay(toggleOverlay, isMaxLevel); //maxLevel false | "Purchased" overlay
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
@@ -268,6 +267,7 @@ public class AugmentDisplay : MonoBehaviour
     {
         if(augmentScript == null) return;
 
+        RefreshInfo();
         DisplayName.text = augmentScript.Name;
         AugmentIcon_Image.sprite = augmentScript.Icon_Image;
         DisplayDescription.text = augmentScript.Description;

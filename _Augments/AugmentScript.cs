@@ -25,6 +25,9 @@ public class AugmentScript : MonoBehaviour
     public int DebuffedStat;
     public float debuffedAmount; //TODO: might not use, just use a negative value for buffedAmount
     public float debuffedAmountPercent; //TODO: might not use, just use a negative value for buffedAmount
+    [Space(10)]
+    public bool isConditional;
+    public float procChance;
     public int displayedIndex = 0;
 
     // [Header("Conditional Stats")]
@@ -81,6 +84,9 @@ public class AugmentScript : MonoBehaviour
 
         baseBuffedAmount = buffedAmount;
         baseBuffedAmountPercent = buffedAmountPercent;
+
+        isConditional = augmentScrObj.isConditional;
+        procChance = augmentScrObj.procChance;
         // baseBuffedAmountPercent = 
         // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
         UpdateConditional();
@@ -90,10 +96,12 @@ public class AugmentScript : MonoBehaviour
 //
     private void UpdateConditional()
     {
-        //TODO: need to test update with UpdateStatsToLevel()
         if(ConditionalAugmentScript == null) return;
         // ConditionalAugmentScript.buffAmount = buffedAmount;
         // ConditionalAugmentScript.buffAmountPercent = buffedAmountPercent;
+
+        //Update proc chance with current level
+        procChance = augmentScrObj.procChance + ((AugmentLevel - 1) * augmentScrObj.procChancePerLevel);
         ConditionalAugmentScript.UpdateLevelStats();
     }
 
@@ -130,7 +138,7 @@ public class AugmentScript : MonoBehaviour
     {
         if(augmentScrObj == null) return;
 
-        string divider = "";;
+        string divider = "";
         float stat;
         string statType = "";// = BuffedStatName;
         //Separates Stat names if a space is needed
@@ -167,9 +175,20 @@ public class AugmentScript : MonoBehaviour
             {
                 string buffedDesc = "?" + divider;
                 Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+                if(isConditional)
+                {
+                    // Description = Description.Replace('$', '?');
+                    Description = baseDescription.Replace('$', '?');
+                }
             }else{
                 string buffedDesc = stat.ToString() + divider;
                 Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+                if(isConditional)
+                {
+                    float procDesc = procChance*100f;
+                    // Description = Description.Replace('$', procStr);
+                    Description = baseDescription.Replace('$'.ToString(), procDesc.ToString("N0"));
+                }
             }
             // string conditionalDesc = conditionalBuffedAmount.ToString();
             // Description = baseDescription.Replace('@'.ToString(), conditionalDesc);

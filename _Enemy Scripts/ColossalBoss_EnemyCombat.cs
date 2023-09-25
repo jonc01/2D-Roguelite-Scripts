@@ -67,7 +67,12 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
     void FixedUpdate()
     {
-        if(!canFly) return;
+        if(!canFly)
+        {
+            movement.rb.gravityScale = originalScale;
+            movement.rb.drag = originalDrag;
+            return;
+        }
         
         //
         var step = movement.moveSpeed * Time.deltaTime;
@@ -578,7 +583,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 canFly = false;
                 movement.rb.gravityScale = originalScale;
                 movement.rb.drag = originalDrag;
-            } 
+            }
             StartCoroutine(ChangePhase());
         }
         attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies

@@ -278,7 +278,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Player behind enemy
         if (enemyController.raycast.playerDetectBack)
         {
-            Debug.Log("Should Flip to get player");
             movement.ManualFlip(!movement.isFacingRight);
         }
     }

@@ -25,7 +25,7 @@ public class Base_AoE_Explosion : MonoBehaviour
     protected virtual void Start()
     {
         if(animator == null) animator = GetComponent<Animator>();
-        animator.Play(hashedAnimName);
+        if(animDuration > 0) animator.Play(hashedAnimName);
         Explode();
         Invoke("DeleteObject", animDuration); //delete object after the animation is over
     }

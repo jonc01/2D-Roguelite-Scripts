@@ -22,6 +22,7 @@ public class Base_ConditionalAugments : MonoBehaviour
         timerDuration = 0;
         active = false;
         if(augmentScript == null) augmentScript = GetComponent<AugmentScript>();
+        if(augmentScript != null) procChance = augmentScript.procChance;
     }
 
     public virtual void TriggerAugment()
