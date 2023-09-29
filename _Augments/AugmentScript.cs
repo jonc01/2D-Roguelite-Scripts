@@ -177,8 +177,11 @@ public class AugmentScript : MonoBehaviour
                 Description = baseDescription.Replace('#'.ToString(), buffedDesc);
                 if(isConditional)
                 {
+                    string tempDesc = Description;
+                    Description = tempDesc.Replace('$'.ToString(), '?'.ToString());
+
                     // Description = Description.Replace('$', '?');
-                    Description = baseDescription.Replace('$', '?');
+                    Description = baseDescription.Replace('$'.ToString(), '?'.ToString());
                 }
             }else{
                 string buffedDesc = stat.ToString() + divider;
@@ -187,7 +190,7 @@ public class AugmentScript : MonoBehaviour
                 {
                     float procDesc = procChance*100f;
                     // Description = Description.Replace('$', procStr);
-                    Description = baseDescription.Replace('$'.ToString(), procDesc.ToString("N0"));
+                    Description = baseDescription.Replace('$'.ToString(), procDesc.ToString("N0")); 
                 }
             }
             // string conditionalDesc = conditionalBuffedAmount.ToString();

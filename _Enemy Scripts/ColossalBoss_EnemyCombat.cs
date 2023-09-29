@@ -581,7 +581,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
             if(canFly)
             {
                 canFly = false;
-                movement.rb.gravityScale = originalScale;
+                movement.rb.gravityScale = originalScale; //TODO: might not be needed if using update check
                 movement.rb.drag = originalDrag;
             }
             StartCoroutine(ChangePhase());

@@ -12,7 +12,7 @@ public class Base_AoE_Explosion : MonoBehaviour
     [SerializeField] protected float animDuration;
 
     [Header("-----")]
-    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] public float damage;
     [SerializeField] protected float hitboxWidth;
     [SerializeField] protected float hitBoxHeight;
@@ -20,7 +20,10 @@ public class Base_AoE_Explosion : MonoBehaviour
     [SerializeField] protected bool showGizmos = false;
 
     [Header("= Status Effect =")]
-    [SerializeField] GameObject statusEffectPrefab;
+    [SerializeField] protected GameObject statusEffectPrefab;
+
+    [Header("- optional -")]
+    [SerializeField] protected bool attachStatusToEnemy = true;
 
     protected virtual void Start()
     {
@@ -54,7 +57,14 @@ public class Base_AoE_Explosion : MonoBehaviour
 
                 if(statusEffectPrefab != null)
                 {
-                    Instantiate(statusEffectPrefab, enemyHitOffset.position, statusEffectPrefab.transform.rotation, enemy.transform);
+                    if(attachStatusToEnemy)
+                    {
+                        Instantiate(statusEffectPrefab, enemyHitOffset.position, statusEffectPrefab.transform.rotation, enemy.transform);
+                    }
+                    else
+                    {
+                        Instantiate(statusEffectPrefab, enemyHitOffset.position, enemyHitOffset.transform.rotation);
+                    }
                 }
             }
         }
