@@ -8,6 +8,7 @@ public class Base_DamageOverTime : MonoBehaviour
     [SerializeField] public float tickFrequency;
     [SerializeField] public float damagePerTick;
     [SerializeField] float duration;
+    [SerializeField] protected int damageColorIdx = 0;
 
     [Header("Status - Debugging -")]
     public bool isActive;
@@ -73,7 +74,7 @@ public class Base_DamageOverTime : MonoBehaviour
 
     void DealDamage()
     {
-        if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick);
+        if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick, damageColorIdx);
         if(playerCombat != null) playerCombat.TakeDamage(damagePerTick);
         if(enemyCombat == null && playerCombat == null) isActive = false;
     }

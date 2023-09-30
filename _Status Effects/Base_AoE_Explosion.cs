@@ -50,7 +50,7 @@ public class Base_AoE_Explosion : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, knockbackStrength);
+                damageable.TakeDamage(damage, true, false, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(2);
                 // Transform enemyHitOffset = damageable.GetPosition();
                 Transform enemyHitOffset = damageable.GetGroundPosition();

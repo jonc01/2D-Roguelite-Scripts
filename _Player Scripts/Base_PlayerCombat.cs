@@ -285,9 +285,9 @@ public class Base_PlayerCombat : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damageDealt, true, knockbackStrength, transform.position.x);
-                Transform enemyPos = damageable.GetHitPosition();
-                augmentInventory.OnHit(enemyPos);
+                damageable.TakeDamage(damageDealt, true, true, knockbackStrength, transform.position.x);
+                // Transform enemyPos = damageable.GetHitPosition();
+                // augmentInventory.OnHit(enemyPos); //Calling from Enemy TakeDamage
                 HitStopAnim(attackAnimFull, groundAttack);
 
                 if(isAirAttacking) movement.Float(.3f);
@@ -312,7 +312,7 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
-                damageable.TakeDamageStatus(1);
+                damageable.TakeDamageStatus(1, 3);
                 Transform enemyPos = damageable.GetHitPosition();
                 augmentInventory.OnParry(enemyPos);
                 // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);

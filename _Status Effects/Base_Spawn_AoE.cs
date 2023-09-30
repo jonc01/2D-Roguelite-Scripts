@@ -7,6 +7,7 @@ public class Base_Spawn_AoE : MonoBehaviour
     [Header("Setup")]
     [SerializeField] public float damage = 5;
     [SerializeField] public float knockbackStrength = 1;
+    [SerializeField] public bool canProcOnHit = true;
 
     [Header("HitBox")]
     [SerializeField] protected LayerMask enemyLayer;
@@ -34,7 +35,7 @@ public class Base_Spawn_AoE : MonoBehaviour
     protected virtual IEnumerator Attack()
     {
         anim.Play(hashedAnimName);
-        
+
         yield return new WaitForSeconds(animDelayTime);
         CheckHit();
 
@@ -56,7 +57,7 @@ public class Base_Spawn_AoE : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, knockbackStrength);
+                damageable.TakeDamage(damage, true, canProcOnHit, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
             }
         }
