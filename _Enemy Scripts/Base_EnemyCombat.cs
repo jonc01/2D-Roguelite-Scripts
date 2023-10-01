@@ -278,7 +278,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Player behind enemy
         if (enemyController.raycast.playerDetectBack)
         {
-            Debug.Log("Should Flip to get player");
             movement.ManualFlip(!movement.isFacingRight);
         }
     }
@@ -443,12 +442,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         animator.StopAttackAnimCO();
     }
 
-    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
+    public virtual void TakeDamage(float damageTaken, bool knockback = false, bool procOnHit = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
         if (damageImmune) return;
 
         HitFlash(); //Set material to white, short delay before resetting
+        if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(hitEffectsOffset);
 
         float totalDamage = damageTaken - defense;
 
@@ -477,9 +477,32 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
     }
 
-    public virtual void TakeDamageStatus(float damageTaken)
+    public virtual void TakeDamageStatus(float damageTaken, int colorIdx)
     {
-        TakeDamage(damageTaken, false);
+        // TakeDamage(damageTaken, false, false);
+
+        if (!isAlive || isSpawning) return;
+        if (damageImmune) return;
+
+        HitFlash(); //Set material to white, short delay before resetting
+
+        float totalDamage = damageTaken - defense;
+
+        //Damage can never be lower than 1
+        if (totalDamage <= 0) totalDamage = 1;
+        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        currentHP -= totalDamage;
+        healthBar.UpdateHealth(currentHP);
+        if(playAudioClips != null) playAudioClips.PlayRandomClip();
+
+        //Display Damage number
+        InstantiateManager.Instance.TextPopups.ShowStatusDamage(totalDamage, textPopupOffset.position, colorIdx);
+
+        if (currentHP <= 0)
+        {
+            isAlive = false;
+            Die();
+        }
     }
 
     public virtual Transform GetHitPosition()

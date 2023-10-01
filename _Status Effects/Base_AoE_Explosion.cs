@@ -12,7 +12,7 @@ public class Base_AoE_Explosion : MonoBehaviour
     [SerializeField] protected float animDuration;
 
     [Header("-----")]
-    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] public float damage;
     [SerializeField] protected float hitboxWidth;
     [SerializeField] protected float hitBoxHeight;
@@ -20,12 +20,15 @@ public class Base_AoE_Explosion : MonoBehaviour
     [SerializeField] protected bool showGizmos = false;
 
     [Header("= Status Effect =")]
-    [SerializeField] GameObject statusEffectPrefab;
+    [SerializeField] protected GameObject statusEffectPrefab;
+
+    [Header("- optional -")]
+    [SerializeField] protected bool attachStatusToEnemy = true;
 
     protected virtual void Start()
     {
         if(animator == null) animator = GetComponent<Animator>();
-        animator.Play(hashedAnimName);
+        if(animDuration > 0) animator.Play(hashedAnimName);
         Explode();
         Invoke("DeleteObject", animDuration); //delete object after the animation is over
     }
@@ -47,14 +50,21 @@ public class Base_AoE_Explosion : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, knockbackStrength);
+                damageable.TakeDamage(damage, true, false, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(2);
                 // Transform enemyHitOffset = damageable.GetPosition();
                 Transform enemyHitOffset = damageable.GetGroundPosition();
 
                 if(statusEffectPrefab != null)
                 {
-                    Instantiate(statusEffectPrefab, enemyHitOffset.position, statusEffectPrefab.transform.rotation, enemy.transform);
+                    if(attachStatusToEnemy)
+                    {
+                        Instantiate(statusEffectPrefab, enemyHitOffset.position, statusEffectPrefab.transform.rotation, enemy.transform);
+                    }
+                    else
+                    {
+                        Instantiate(statusEffectPrefab, enemyHitOffset.position, enemyHitOffset.transform.rotation);
+                    }
                 }
             }
         }

@@ -18,6 +18,11 @@ public class AugmentDisplay : MonoBehaviour
     [SerializeField] protected GameObject ownedText;
     [SerializeField] protected GameObject FullDisplayParent;
 
+    [Header("Augment Status Display")]
+    [SerializeField] protected GameObject timerParent;
+    [SerializeField] protected TextMeshProUGUI timerDisplay;
+    [SerializeField] float timer;
+
     [Space(10)]
     [Header("== Needed Setup ==")]
     [Header("Icons")]
@@ -55,6 +60,9 @@ public class AugmentDisplay : MonoBehaviour
         else ToggleDescriptionDisplay(true);
 
         if(ownedText != null) ownedText.SetActive(false);
+        if(timerParent != null) timerParent.SetActive(false);
+
+        timer = 0;
     }
 
     protected void OnEnable()
@@ -65,6 +73,21 @@ public class AugmentDisplay : MonoBehaviour
         if(selectedOverlayText == null && selectedOverlay != null) selectedOverlayText = selectedOverlay.GetComponentInChildren<TextMeshProUGUI>();
 
         StartCoroutine(RevealAugment());
+    }
+
+    void Update()
+    {
+        if(timerParent == null || timerDisplay == null) return;
+
+        if(timer > 0)
+        {
+            timer -= Time.deltaTime;
+            timerDisplay.text = timer.ToString("N1") + "s";
+        }
+        else
+        {
+            timerParent.SetActive(false);
+        }
     }
     
     public void ToggleOverlay(bool toggle, bool maxLevel = false)
@@ -141,7 +164,8 @@ public class AugmentDisplay : MonoBehaviour
             if(selectMenu.bloodShop)
             {
                 if(Price >= GameManager.Instance.PlayerCombat.currentHP) return;
-                GameManager.Instance.PlayerCombat.TakeDamage(Price);
+                GameManager.Instance.PlayerCombat.TakeTrueDamage(Price);
+                // GameManager.Instance.PlayerCombat.TakeDamage(Price);
             }
             else
             {
@@ -220,7 +244,6 @@ public class AugmentDisplay : MonoBehaviour
                 }
             }
 
-
             ToggleOverlay(toggleOverlay, isMaxLevel); //maxLevel false | "Purchased" overlay
         }
         else DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
@@ -244,6 +267,7 @@ public class AugmentDisplay : MonoBehaviour
     {
         if(augmentScript == null) return;
 
+        RefreshInfo();
         DisplayName.text = augmentScript.Name;
         AugmentIcon_Image.sprite = augmentScript.Icon_Image;
         DisplayDescription.text = augmentScript.Description;
@@ -296,5 +320,14 @@ public class AugmentDisplay : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    public void ToggleAugmentStatus(bool toggle, float timerDuration)
+    {
+        if(timerParent == null) return;
+
+        //Toggle timer display and start timer
+        timerParent.SetActive(toggle);
+        if(toggle) timer = timerDuration;
     }
 }

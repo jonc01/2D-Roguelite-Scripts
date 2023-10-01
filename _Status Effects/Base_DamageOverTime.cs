@@ -7,61 +7,91 @@ public class Base_DamageOverTime : MonoBehaviour
     [Header("Setup")]
     [SerializeField] public float tickFrequency;
     [SerializeField] public float damagePerTick;
-    [SerializeField] float duration;
+    [SerializeField] public float duration;
+    [SerializeField] protected int damageColorIdx = 0;
 
     [Header("Status - Debugging -")]
     public bool isActive;
-    [SerializeField] float overallTimer;
-    private float tickTimer;
+    [SerializeField] public float overallTimer;
+    protected float tickTimer;
 
     [Header("Target Object")]
     [SerializeField] protected IDamageable enemyCombat;
-    [SerializeField] Base_PlayerCombat playerCombat;
+    [SerializeField] protected Base_PlayerCombat playerCombat;
 
 
     [Header("Animation Setup")]
-    [SerializeField] private Animator anim;
-    [SerializeField] private string animName;
-    [SerializeField] private int hashedAnimName;
-    [SerializeField] private int hashedAnimNameBlank; //-34935967
+    [SerializeField] protected Animator anim;
+    [SerializeField] protected string animName;
+    [SerializeField] protected int hashedAnimName;
+    [SerializeField] protected int hashedAnimNameBlank; //-34935967
 
-    private bool endingStatus = false;
+    protected bool endingStatus = false;
 
-    void Awake()
+    protected void Awake()
     {
         if(anim == null) anim = GetComponent<Animator>();
     }
     
-    void Start()
+    protected virtual void Start()
     {
         isActive = true;
         if(hashedAnimName != 0) anim.Play(hashedAnimName);
         else anim.Play(animName);
         tickTimer = 0;
-        overallTimer = 0;
+        overallTimer = duration;
         endingStatus = false;
 
         enemyCombat = GetComponentInParent<IDamageable>();
         playerCombat = GetComponentInParent<Base_PlayerCombat>();
+
     }
 
-    void FixedUpdate()
+    protected virtual void CheckForExistingDoT()
+    {
+        //Not called by default, override with inherit
+        Base_DamageOverTime existingDoT = transform.parent.GetComponentInChildren<Base_DamageOverTime>();
+        if(existingDoT != null)
+        {
+            overallTimer += duration;
+            damagePerTick += 1;
+        }
+    }
+
+    public virtual void AddToBaseDuration(float durationAdded)
+    {
+        duration += durationAdded;
+    }
+
+    public virtual void ExtendTimer(float timeAdded)
+    {
+        overallTimer += timeAdded;
+        //Timer cannot exceed full duration by default
+        if(overallTimer > duration) overallTimer = duration;
+    }
+
+    public virtual void ResetTimer()
+    {
+        overallTimer = duration;
+    }
+
+    protected virtual void FixedUpdate()
     {
         if(isActive)
         {
-            overallTimer += Time.deltaTime;
-            if(overallTimer >= duration + 1) //+1 to allow for 1s delay
+            overallTimer -= Time.deltaTime;
+            if(overallTimer <= 0) //+1 to allow for 1s delay
             {
                 isActive = false;
                 return;
             }
 
-            tickTimer += Time.deltaTime;
+            tickTimer -= Time.deltaTime; //Countdown timer
 
-            if(tickTimer >= tickFrequency) //1 second
+            if(tickTimer <= 0) //
             {
                 DealDamage();
-                tickTimer = 0;
+                tickTimer = tickFrequency; //Reset tick timer
             }
         }
         else
@@ -71,14 +101,14 @@ public class Base_DamageOverTime : MonoBehaviour
         }
     }
 
-    void DealDamage()
+    protected void DealDamage()
     {
-        if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick);
+        if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick, damageColorIdx);
         if(playerCombat != null) playerCombat.TakeDamage(damagePerTick);
         if(enemyCombat == null && playerCombat == null) isActive = false;
     }
 
-    IEnumerator EndStatus(float endDelay = 1)
+    protected IEnumerator EndStatus(float endDelay = 1)
     {
         endingStatus = true;
         anim.Play(hashedAnimNameBlank);

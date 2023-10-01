@@ -32,11 +32,10 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, knockbackStrength);
+                damageable.TakeDamage(damage, true, false, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
             }
         }
-    
     }
 
     private void OnDrawGizmos()

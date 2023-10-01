@@ -49,7 +49,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
-    public override void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
+    public override void TakeDamage(float damageTaken, bool knockback = false, bool procOnHit = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
         // if (movement.isFacingRight == playerToRight) //facing player, Shield blocks damage and knockback
@@ -61,13 +61,13 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
             // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO
             CheckCounterHit();
         }
-        else base.TakeDamage(damageTaken, knockback, strength, xPos);
+        else base.TakeDamage(damageTaken, knockback, procOnHit, strength, xPos);
     }
 
-    public override void TakeDamageStatus(float damageTaken)
+    public override void TakeDamageStatus(float damageTaken, int colorIdx)
     {
         //Ignore Block
-        base.TakeDamage(damageTaken);
+        base.TakeDamageStatus(damageTaken, colorIdx);
     }
 
     protected override void Die()

@@ -19,9 +19,9 @@ public class CA_IncreasedAttackSpeed : Base_ConditionalAugments
     void FixedUpdate()
     {
         if(!active) return;
-        if(durationTimer <= 0) StopBuff();
+        if(timerDuration <= 0) StopBuff();
         Debug.Log("ATTACK SPEED IS WORKING: " + playerCombat.attackSpeed);
-        durationTimer -= Time.fixedDeltaTime;
+        timerDuration -= Time.fixedDeltaTime;
         // Time.deltaTime
     }
 
@@ -35,7 +35,7 @@ public class CA_IncreasedAttackSpeed : Base_ConditionalAugments
         base.Activate(); //sets values
         if(active)
         {
-            durationTimer = duration; //Refresh duration
+            timerDuration = buffDuration; //Refresh duration
             return;
         }
         
@@ -45,7 +45,7 @@ public class CA_IncreasedAttackSpeed : Base_ConditionalAugments
         
         buffedAttackSpeed = baseAttackSpeed - (baseAttackSpeed * buffAmountPercent); //percent is calculated in AugmentScript
         
-        durationTimer = duration;
+        timerDuration = buffDuration;
         playerCombat.attackSpeed = buffedAttackSpeed; //TODO: need to adjust amount, probably increase Tier to Epic or Legendary
         
 

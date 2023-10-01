@@ -38,7 +38,6 @@ public class Augment : ScriptableObject
         Attack, Attack_Speed, 
         Crit_Chance, Crit_Multiplier };
     public _BuffedStat BuffedStat;
-    //TODO: figure out how to buff the specified player stat//needs testing, might work
     
     [Header("= Debuffed Stats =")]
     public float StatDecrease;
@@ -50,10 +49,17 @@ public class Augment : ScriptableObject
         CritChance, CritMultiplier };
     public _DebuffedStat DebuffedStat;
 
+    [Header("= Conditional Augments =")]
+    public bool isConditional;
+    // [Range(0.01f, 1.0f)]
+    [Header("[0.01  -  1.0]")]
+    public float procChance;
+    // [Range(0.01f, 1.0f)]
+    public float procChancePerLevel;
+
     // [Space(10)]
     // [Header("== Conditional Augments (Only AugmentType != 0) ==")]
     // public float conditionalBuffAmount;
-
 
 
 

@@ -93,8 +93,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] public int currentPhase;
     [SerializeField] protected float[] healthPhase;
     protected bool changingPhase;
-    [SerializeField] GameObject PhaseShield;
-    [SerializeField] ToggleEffectAnimator PhaseShieldBreak;
+    [SerializeField] protected GameObject PhaseShield;
+    [SerializeField] protected ToggleEffectAnimator PhaseShieldBreak;
 
     [Header("--- Attack Logic variables ---")]
     public bool attackClose;
@@ -365,6 +365,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         if (AttackingCO != null) StopCoroutine(AttackingCO);
         if (AttackEndCO != null) StopCoroutine(AttackEndCO);
         isAttacking = false;
+
         movement.canMove = true;
         movement.ToggleFlip(toggleFlip);
         //Cancels Attack animation
@@ -389,7 +390,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
     }
 
-    protected IEnumerator ChangePhase()
+    protected virtual IEnumerator ChangePhase()
     {
         changingPhase = true;
         //Stop Attack and AttackEnd Coroutines
@@ -424,15 +425,20 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 #endregion
 
 #region TakeDamage, HitFlash, Die
-    public virtual void TakeDamage(float damageTaken, bool knockback = false, float strength = 8, float xPos = 0)
+    public virtual void TakeDamage(float damageTaken, bool knockback = false, bool procOnHit = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
 
         float totalDamage = damageTaken - defense;
         //Damage can never be lower than 1
-        if (totalDamage <= 0) totalDamage = 1;
+        if (totalDamage <= 0)
+        {
+            if(changingPhase) totalDamage = 0;
+            else totalDamage = 1;
+        } 
 
         HitFlash(); //Set material to white, short delay before resetting
+        if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(transform);
         //Play hit effect, reduce hp
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
@@ -451,9 +457,30 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         }
     }
 
-    public virtual void TakeDamageStatus(float damageTaken)
+    public virtual void TakeDamageStatus(float damageTaken, int colorIdx)
     {
-        TakeDamage(damageTaken);
+        // TakeDamageStatus(damageTaken, colorIdx);
+
+        if (!isAlive || isSpawning) return;
+
+        HitFlash(); //Set material to white, short delay before resetting
+
+        float totalDamage = damageTaken - defense;
+
+        //Damage can never be lower than 1
+        if (totalDamage <= 0) totalDamage = 1;
+        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        currentHP -= totalDamage;
+        healthBar.UpdateHealth(currentHP);
+
+        //Display Damage number
+        InstantiateManager.Instance.TextPopups.ShowStatusDamage(totalDamage, textPopupOffset.position, colorIdx);
+
+        if (currentHP <= 0)
+        {
+            isAlive = false;
+            Die();
+        }
     }
 
     public virtual Transform GetHitPosition()

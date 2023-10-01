@@ -571,17 +571,63 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         {
             //Change to next Phase
             if(changingPhase) return;
+
             currentPhase++;
-            //If flying, drop to ground
-            if(canFly)
-            {
-                canFly = false;
-                movement.rb.gravityScale = originalScale;
-                movement.rb.drag = originalDrag;
-            } 
             StartCoroutine(ChangePhase());
         }
         attackEndDelay = 0.1f; //If no delay, attackSpeed delay still applies
+    }
+
+    protected override IEnumerator ChangePhase()
+    {
+        // return base.ChangePhase();
+        // protected virtual IEnumerator ChangePhase()
+    
+        changingPhase = true;
+        //Stop Attack and AttackEnd Coroutines
+        StopAttack();        
+
+        //Toggle Shield gameobject and increase defenses
+        PhaseShieldBreak.PlayAnim(0);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(0)); //anim delay before enabling shield
+
+        PhaseShield.SetActive(true);
+        float baseDefense = defense;
+        defense = 999;
+        movement.canMove = false;
+        canAttack = false;
+        
+        yield return new WaitForSeconds(1.5f);
+        animator.PlayManualAnim(6, 1.083f); //Buff anim
+        yield return new WaitForSeconds(0.667f); //Shorter time to pop shield
+
+        //Toggle Shield gameobject and remove defenses
+        PhaseShieldBreak.PlayAnim(1);
+        PhaseShield.SetActive(false);
+        defense = baseDefense;
+        ScreenShakeListener.Instance.Shake(3);
+        yield return new WaitForSeconds(PhaseShieldBreak.GetAnimTime(1));
+        movement.canMove = true;
+        isAttacking = false;
+        canAttack = true;
+        changingPhase = false;
+    
+    }
+
+    protected override void StopAttack(bool toggleFlip = false)
+    {
+        if (AttackingCO != null) StopCoroutine(AttackingCO);
+        if (AttackEndCO != null) StopCoroutine(AttackEndCO);
+        isAttacking = false;
+
+        canFly = false;
+        movement.rb.gravityScale = originalScale;
+        movement.rb.drag = originalDrag;
+
+        movement.canMove = true;
+        movement.ToggleFlip(toggleFlip);
+        //Cancels Attack animation
+        animator.StopAttackAnimCO();
     }
 
     protected override void Die()

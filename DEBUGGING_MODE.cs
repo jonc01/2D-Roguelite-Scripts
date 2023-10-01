@@ -52,7 +52,7 @@ public class DEBUGGING_MODE : MonoBehaviour
             if(damageable != null)
             {
                 // damageable.TakeDamage(damage);
-                damageable.TakeDamageStatus(damage);
+                damageable.TakeDamageStatus(damage, 3);
                 ScreenShakeListener.Instance.Shake(3);
                 Transform enemyHitOffset = damageable.GetHitPosition();
 

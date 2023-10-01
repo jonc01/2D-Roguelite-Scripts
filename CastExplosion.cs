@@ -19,6 +19,16 @@ public class CastExplosion : MonoBehaviour
     [Header("Adjustable Variables")]
     [SerializeField] int screenshakeIntensity = 1;
     [SerializeField] float startDelay = 0;
+
+    [Header("(optional) Move to Ground")]
+    [SerializeField] bool moveToGround = false;
+    [SerializeField] Transform optionalRaycast;
+    [SerializeField] float groundCheckDist = 1;
+    [SerializeField] LayerMask groundLayer;
+    private bool checkForGround = false;
+
+    [Space(10)]
+
     [Header("Knockback")]
     public bool hasKnockBack = true;
     [SerializeField] float knockbackStrength = 2f;
@@ -46,6 +56,7 @@ public class CastExplosion : MonoBehaviour
         if (animChargeUp == null) animChargeUp = GetComponentInChildren<Animator>();
         if (animExplosion == null) animExplosion = GetComponent<Animator>();
         if (TOGGLE) gameObject.SetActive(false);
+        checkForGround = false;
     }
 
     void Start()
@@ -56,12 +67,45 @@ public class CastExplosion : MonoBehaviour
 
     void OnEnable()
     {
+        // if(moveToGround) checkForGround = true;
+
         // if (TOGGLE) StartCoroutine(PlayAnims());
         StartCoroutine(PlayAnims());
     }
 
+    void Update()
+    {
+        if(checkForGround)
+        {
+            GetGround();
+            DebugDrawRaycast();
+        }
+    }
+
+    private void GetGround()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(optionalRaycast.position, Vector2.down, groundCheckDist, groundLayer);
+        if(hit.collider != null)
+        {
+            checkForGround = false;
+            transform.position = hit.point;
+        }
+    }
+
+    void DebugDrawRaycast()
+    {
+        Vector3 down = transform.TransformDirection(Vector3.down) * groundCheckDist;
+        Debug.DrawRay(optionalRaycast.position, down, Color.red);
+    }
+
     IEnumerator PlayAnims()
     {
+        if(moveToGround) 
+        {
+            yield return new WaitForSeconds(.02f);
+            checkForGround = true;
+        }
+
         yield return new WaitForSeconds(startDelay);
 
         if(animChargeUp != null) //Skip this delay if no ChargeUp

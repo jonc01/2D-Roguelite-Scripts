@@ -5,7 +5,7 @@ using UnityEngine;
 public class AugmentInventory : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] AugmentInventoryDisplay augmentInventoryDisplay;
+    [SerializeField] public AugmentInventoryDisplay augmentInventoryDisplay;
     [SerializeField] Base_PlayerCombat combat;
     [SerializeField] Base_PlayerMovement movement;
     [Header("====== BASE STATS ======")]
@@ -38,6 +38,7 @@ public class AugmentInventory : MonoBehaviour
 
     [Header("Augments")]
     [SerializeField] private List<AugmentScript> heldAugments;
+    [SerializeField] private List<AugmentDisplay> heldAugmentDisplays;
 
     [Header("Conditional Augments")]
     [SerializeField] private List<Base_ConditionalAugments> onKillAugments;
@@ -49,6 +50,7 @@ public class AugmentInventory : MonoBehaviour
     void Awake()
     {
         heldAugments = new List<AugmentScript>();
+        heldAugmentDisplays = new List<AugmentDisplay>();
         
         if(combat == null) combat = GetComponentInParent<Base_PlayerCombat>();
         if(movement == null) movement = GetComponentInParent<Base_PlayerMovement>();
@@ -133,6 +135,7 @@ public class AugmentInventory : MonoBehaviour
             default: break;
         }
     }
+
 #endregion
 
 #region Stat Managers
@@ -227,6 +230,10 @@ public class AugmentInventory : MonoBehaviour
             return;
         }
         heldAugments.Add(augment);
+
+        AugmentDisplay currDisplay = augment.GetComponent<AugmentDisplay>();
+        heldAugmentDisplays.Add(currDisplay);
+
         if(augmentInventoryDisplay != null) augmentInventoryDisplay.AddAugmentToDisplay(heldAugments);
         UpdateAugments();
     }
@@ -234,6 +241,10 @@ public class AugmentInventory : MonoBehaviour
     public void RemoveAugment(AugmentScript augment)
     {
         heldAugments.Remove(augment);
+
+        AugmentDisplay currDisplay = augment.GetComponent<AugmentDisplay>();
+        heldAugmentDisplays.Remove(currDisplay);
+        
         RemoveAugmentStats(augment);
         ResetModifiedStats();
         
