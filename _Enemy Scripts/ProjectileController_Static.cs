@@ -59,7 +59,7 @@ public class ProjectileController_Static : ProjectileController
             if (player.GetComponent<Base_PlayerCombat>() != null)
             {
                 var playerObj = player.GetComponent<Base_PlayerCombat>();
-                playerObj.TakeDamage(damage);
+                playerObj.TakeDamage(damage, transform.position.x);
                 if (knockbackStrength > 0) playerObj.GetKnockback(transform.position.x, knockbackStrength);
             }
         }

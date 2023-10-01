@@ -312,7 +312,7 @@ public class Base_PlayerCombat : MonoBehaviour
             if(damageable != null)
             {
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
-                damageable.TakeDamageStatus(1, 3);
+                damageable.TakeDamageStatus(1, 0);
                 Transform enemyPos = damageable.GetHitPosition();
                 augmentInventory.OnParry(enemyPos);
                 // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
