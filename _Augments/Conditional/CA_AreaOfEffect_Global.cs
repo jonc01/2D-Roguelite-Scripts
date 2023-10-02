@@ -20,7 +20,7 @@ public class CA_AreaOfEffect_Global : Base_ConditionalAugments
         StartProcCooldown();
         //Instantiate an explosion at the enemy position, prefab applies status effect
         if(explosionPrefab != null)
-        {
+        {    
             Instantiate(explosionPrefab, objectHitPos.position, explosionPrefab.transform.rotation);
         }
         else

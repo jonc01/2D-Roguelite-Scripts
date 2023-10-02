@@ -468,7 +468,12 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         float totalDamage = damageTaken - defense;
 
         //Damage can never be lower than 1
-        if (totalDamage <= 0) totalDamage = 1;
+        if (totalDamage <= 0)
+        {
+            if(changingPhase) totalDamage = 0;
+            else totalDamage = 1;
+        }
+
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
