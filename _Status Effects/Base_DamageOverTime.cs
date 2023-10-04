@@ -108,6 +108,12 @@ public class Base_DamageOverTime : MonoBehaviour
         if(enemyCombat == null && playerCombat == null) isActive = false;
     }
 
+    public virtual void CleanseDebuff()
+    {
+        isActive = false;
+        StartCoroutine(EndStatus());
+    }
+
     protected IEnumerator EndStatus(float endDelay = 1)
     {
         endingStatus = true;

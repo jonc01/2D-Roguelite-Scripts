@@ -28,6 +28,7 @@ public class DEBUGGING_MODE : MonoBehaviour
             if(playerCombat == null) return;
             playerCombat.maxHP = 9999;
             playerCombat.HealPlayer(9999);
+            playerCombat.kbResist = 9999;
         }
 
         if(Input.GetKey(KeyCode.LeftShift))

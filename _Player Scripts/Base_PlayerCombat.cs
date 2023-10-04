@@ -384,14 +384,14 @@ public class Base_PlayerCombat : MonoBehaviour
     }
 
     // public void GetKnockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
-    public void GetKnockback(float enemyXPos, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(float enemyXPos, float kbForce = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         if(isParrying) return;
         KnockbackNullCheckCO();
 
-        if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
+        if (kbResist > 0) kbForce -= kbResist;
+        if (kbForce <= 0) return;
 
         isKnockedback = true;
 
@@ -399,23 +399,23 @@ public class Base_PlayerCombat : MonoBehaviour
         kbToRight = enemyXPos < transform.position.x;
         // if(enemyXPos < transform.position.x) kbToRight = false;
 
-        KnockbackCO = StartCoroutine(Knockback(kbToRight, strength, recoveryDelay));
+        KnockbackCO = StartCoroutine(Knockback(kbToRight, kbForce, recoveryDelay));
         // float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         // Vector2 direction = new Vector2(temp, .3f);
         // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
     }
 
-    public void GetKnockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(bool kbToRight, float kbForce = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         KnockbackNullCheckCO();
 
-        if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return; //Full knockback resist
+        if (kbResist > 0) kbForce -= kbResist;
+        if (kbForce <= 0) return; //Full knockback resist
 
         isKnockedback = true;
 
-        KnockbackCO = StartCoroutine(KnockbackManual(kbToRight, strength, recoveryDelay));
+        KnockbackCO = StartCoroutine(KnockbackManual(kbToRight, kbForce, recoveryDelay));
     }
 
     IEnumerator Knockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
