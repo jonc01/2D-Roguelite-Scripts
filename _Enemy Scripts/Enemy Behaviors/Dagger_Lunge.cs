@@ -113,12 +113,14 @@ public class Dagger_Lunge : Base_CombatBehavior
         movement.canMove = false;
         combat.chasePlayer = false;
 
+        movement.ToggleFlip(false);
         combat.animator.PlayManualAnim(2, fullAnimTimes[2]);
         yield return new WaitForSeconds(animDelayTimes[2]);
         CheckHit(2);
         yield return new WaitForSeconds(fullAnimTimes[2] - animDelayTimes[2]);
 
         yield return new WaitForSeconds(attackSpeed);
+        movement.ToggleFlip(true);
 
         combat.isAttacking = false;
         combat.altAttacking = false;

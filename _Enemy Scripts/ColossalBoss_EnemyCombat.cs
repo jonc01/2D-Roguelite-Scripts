@@ -636,6 +636,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         healthBar.gameObject.SetActive(false);
         isAlive = false;
 
+
         //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
         StopAllCoroutines();
@@ -654,6 +655,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
 
         playDeathAnim = true;
+        CleanseDebuffs();
 
         //Show death effects then spawn XP Orbs
         ScreenShakeListener.Instance.Shake(3);

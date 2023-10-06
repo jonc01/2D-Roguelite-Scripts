@@ -58,14 +58,14 @@ public class AugmentInventory : MonoBehaviour
     }
 
 #region Conditional Augments
-    public void OnKill(Transform enemyPosition)
+    public void OnKill(Transform enemyPosition, float addProcChance = 0)
     {
         //Currently being called in Base_EnemyCombat
         Debug.Log("OnKill");
         if(onKillAugments.Count <= 0) return;
         for(int i=0; i<onKillAugments.Count; i++)
         {
-            onKillAugments[i].TriggerAugment(enemyPosition);
+            onKillAugments[i].TriggerAugment(enemyPosition, addProcChance);
         }
     }
 
@@ -79,33 +79,35 @@ public class AugmentInventory : MonoBehaviour
         }
     }
 
-    public void OnHit()
+    public void OnHit(float addProcChance = 0)
     {
         Debug.Log("OnHit");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
-            onHitAugments[i].TriggerAugment();
+            onHitAugments[i].TriggerAugment(addProcChance);
         }
     }
 
-    public void OnHit(Transform objectHitPos)
+    public void OnHit(Transform objectHitPos, float addProcChance = 0)
     {
         Debug.Log("OnHit position");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
-            onHitAugments[i].TriggerAugment(objectHitPos);
+            onHitAugments[i].TriggerAugment(objectHitPos, addProcChance);
         }
     }
 
-    public void OnParry(Transform objectHitPos)
+    //
+
+    public void OnParry(Transform objectHitPos, float addProcChance = 0)
     {
         Debug.Log("On Parry");
         if(onParryAugments.Count <= 0) return;
         for(int i=0; i<onParryAugments.Count; i++)
         {
-            onParryAugments[i].TriggerAugment(objectHitPos);
+            onParryAugments[i].TriggerAugment(objectHitPos, addProcChance);
         }
     }
 
