@@ -180,6 +180,8 @@ public class AugmentInventory : MonoBehaviour
         combat.attackSpeed += modified_AttackSpeed; //lower is faster, stats are already subtracted
         combat.knockbackStrength += modified_KnockbackStrength;
         combat.kbResist += modified_kbResist;
+
+        SetConditionalStats();
     }
 
     private void ResetModifiedStats()
@@ -191,6 +193,14 @@ public class AugmentInventory : MonoBehaviour
         modified_AttackSpeed = 0;
         modified_KnockbackStrength = 0;
         modified_kbResist = 0;
+    }
+
+    private void SetConditionalStats()
+    {
+        for(int i=0; i<heldAugments.Count; i++)
+        {
+            heldAugments[i].AddConditionalAugment(); //Only for Unstable augments
+        }
     }
 #endregion
 
@@ -237,6 +247,7 @@ public class AugmentInventory : MonoBehaviour
         heldAugmentDisplays.Add(currDisplay);
 
         if(augmentInventoryDisplay != null) augmentInventoryDisplay.AddAugmentToDisplay(heldAugments);
+        
         UpdateAugments();
     }
 

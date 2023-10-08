@@ -86,5 +86,8 @@ public class Base_ConditionalAugments : MonoBehaviour
         buffAmountPercent = augmentScript.buffedAmountPercent * .01f; //Convert to %
     }
 
-    
+    public virtual void SetConditionalAugmentStats()
+    {
+        //placeholder for override
+    }
 }

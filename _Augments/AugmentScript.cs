@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.TextCore.Text;
 
 public class AugmentScript : MonoBehaviour
 {
@@ -107,10 +106,19 @@ public class AugmentScript : MonoBehaviour
 
     public void UpdateLevel(int level)
     {
-        AugmentLevel = level;
+        if(level >= MaxLevel) AugmentLevel = MaxLevel;
+        else AugmentLevel = level;
+
         UpdateStatsToLevel();
     }
 
+#region Augment Added to Inventory
+    public void AddConditionalAugment()
+    {
+        if(ConditionalAugmentScript == null) return;
+        ConditionalAugmentScript.SetConditionalAugmentStats();
+    }
+#endregion
 
 #region Change Stats based on Level
     private void UpdateStatsToLevel()

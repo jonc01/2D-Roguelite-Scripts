@@ -15,7 +15,7 @@ public class Base_PlayerCombat : MonoBehaviour
     //[SerializeField] private Transform attackPoint;
     //[SerializeField] private float attackRange;
     [SerializeField] private Transform textPopupOffset;
-    [SerializeField] HealthBar healthBar;
+    [SerializeField] protected HealthBar healthBar;
     [SerializeField] private bool showGizmos = false;
 
     public HitStop hitStop; //Stops time, hitStop animations are separate
@@ -26,19 +26,19 @@ public class Base_PlayerCombat : MonoBehaviour
 
     [Space(10)]
     [Header("- Hitboxes -")]
-    [SerializeField] float attackMoveDelay = .0f;
-    [SerializeField] Transform[] attackPoints;
+    [SerializeField] protected float attackMoveDelay = .0f;
+    [SerializeField] protected Transform[] attackPoints;
     //G1(.56, .294), G2/A1(.437, .149), G3(.318, .144), A2(.479, .208)
     [SerializeField] float[] hitBoxLength; //.95f, 1.35f, 1.75f, 1.35f, 1.52f
     [SerializeField] float[] hitBoxHeight; //.63f, 0.25f, 0.25f, 0.25f, 0.28f
     
     [Space(10)]
     [Header("- Parry -")]
-    [SerializeField] Transform parryPoint;
-    [SerializeField] float parryHitBoxLength; //.64f
-    [SerializeField] float parryHitboxHeight; //.61f   
-    [SerializeField] float parryHitAddProcChance = .2f;
-    [SerializeField] float parryShieldDuration = .3f;
+    [SerializeField] protected Transform parryPoint;
+    [SerializeField] protected float parryHitBoxLength; //.64f
+    [SerializeField] protected float parryHitboxHeight; //.61f   
+    [SerializeField] protected float parryHitAddProcChance = .2f;
+    [SerializeField] protected float parryShieldDuration = .3f;
     [SerializeField] GameObject parryImmuneTextUI;
     [SerializeField] GameObject parryImmuneShield;
 
@@ -75,7 +75,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float currentHP;
     public float defense;
     public float kbResist; //Knockback resist
-    private float base_kbResist;
+    protected float base_kbResist;
 
     [SerializeField]
     public float attackDamage,
@@ -84,24 +84,30 @@ public class Base_PlayerCombat : MonoBehaviour
         critMultiplier,
         knockbackStrength;
 
+    [Space(10)]
+    [Header("- Debugging - Base Stats")]
+    [SerializeField] public float base_attackDamage;
+    [SerializeField] public float base_attackSpeed;
+
+    [Space(10)]
     //Attack Bools and Counters
     public int currAttackIndex; //Used to reference hitboxes
     public int currentAttack;
     public int currentAirAttack;
-    float timeSinceAttack;
-    float timeSinceAirAttack; //only for move check, not attack speed
-    float timeSinceBlock;
+    protected float timeSinceAttack;
+    protected float timeSinceAirAttack; //only for move check, not attack speed
+    protected float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
     [SerializeField] public bool isParrying;
-    [SerializeField] private float parryShieldTimer;
+    [SerializeField] protected float parryShieldTimer;
 
     public float blockAttackSpeed;
 
     [Space(10)]
     [Header("- Bools -")]
-    [SerializeField] bool dashImmune;
-    [SerializeField] bool damageImmune;
+    [SerializeField] protected bool dashImmune;
+    [SerializeField] protected bool damageImmune;
     //Bools
     public bool isStunned;
     public bool isAlive;
@@ -116,7 +122,7 @@ public class Base_PlayerCombat : MonoBehaviour
     Coroutine KnockbackResetCO;
 
 
-    void Start()
+    protected void Start()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
@@ -135,6 +141,10 @@ public class Base_PlayerCombat : MonoBehaviour
             critMultiplier = character.Base_CritMultiplier;
             knockbackStrength = character.Base_KnockbackStrength;
         }
+
+        base_attackDamage = attackDamage;
+        base_attackSpeed = attackSpeed;
+
         currentHP = maxHP;
         if (healthBar != null) healthBar.SetHealth(maxHP);
 

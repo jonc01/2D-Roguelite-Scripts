@@ -6,6 +6,7 @@ public class Base_Spawn_AoE : MonoBehaviour
 {
     [Header("Setup")]
     [SerializeField] public float damage = 5;
+    [SerializeField] public bool statusDamage = true;
     [SerializeField] public float knockbackStrength = 1;
     [SerializeField] public bool canProcOnHit = true;
 
@@ -57,7 +58,9 @@ public class Base_Spawn_AoE : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, canProcOnHit, knockbackStrength);
+                if(statusDamage) damageable.TakeDamageStatus(damage, 0);
+                else damageable.TakeDamage(damage, true, canProcOnHit, knockbackStrength, transform.position.x);
+
                 ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
             }
         }

@@ -15,6 +15,7 @@ public class Base_AoE_Explosion : MonoBehaviour
     [Header("-----")]
     [SerializeField] protected LayerMask enemyLayer;
     [SerializeField] public float damage;
+    [SerializeField] protected bool statusDamage = true; //can't be blocked
     [SerializeField] protected Transform optionalHitBoxOffset;
     [SerializeField] protected float hitboxWidth;
     [SerializeField] protected float hitBoxHeight;
@@ -65,7 +66,9 @@ public class Base_AoE_Explosion : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable == null) return;
         
-            damageable.TakeDamage(damage, true, false, knockbackStrength);
+            if(statusDamage) damageable.TakeDamageStatus(damage, 0);
+            else damageable.TakeDamage(damage, true, false, knockbackStrength, transform.position.x);
+
             ScreenShakeListener.Instance.Shake(2);
             // Transform enemyHitOffset = damageable.GetPosition();
             Transform enemyHitOffset;

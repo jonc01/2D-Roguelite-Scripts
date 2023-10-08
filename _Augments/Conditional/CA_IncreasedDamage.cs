@@ -5,13 +5,12 @@ using UnityEngine;
 public class CA_IncreasedDamage : Base_ConditionalAugments
 {
     [Header("= CA_IncreaseAttackSpeed =")]
-    [SerializeField] float baseAttackDamage; //return to this value after effect ends
-    [SerializeField] float buffedAttackDamage; //combat.attackSpeed is set to this value for the duration
+    [SerializeField] float buffedAttackDamage; //combat.attackDamage is set to this value for the duration
     
     protected override void Start()
     {
         base.Start();
-        baseAttackDamage = GameManager.Instance.AugmentInventory.base_AttackDamage;
+        // baseAttackDamage = GameManager.Instance.AugmentInventory.base_AttackDamage;
     }
 
     void FixedUpdate()
@@ -25,24 +24,25 @@ public class CA_IncreasedDamage : Base_ConditionalAugments
     protected override void Activate()
     {
         base.Activate(); //sets values
+
         if(active)
         {
             timerDuration = buffDuration; //Refresh duration
+            StartProcCooldown();
             return;
         }
         
         active = true;
 
-        buffedAttackDamage = baseAttackDamage + buffAmount;
+        buffedAttackDamage = playerCombat.base_attackDamage + buffAmount;
         
         timerDuration = buffDuration;
         playerCombat.attackDamage = buffedAttackDamage;
-        
     }
 
     protected virtual void StopBuff()
     {
         active = false;
-        playerCombat.attackDamage = baseAttackDamage;
+        playerCombat.attackDamage = playerCombat.base_attackDamage;
     }
 }
