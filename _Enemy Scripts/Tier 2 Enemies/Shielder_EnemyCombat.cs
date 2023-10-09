@@ -78,10 +78,9 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         GetComponent<CapsuleCollider2D>().enabled = false;
 
         isAlive = false;
-        GameManager.Instance.AugmentInventory.OnKill(transform);
+        GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
         ScreenShakeListener.Instance.Shake(2);
         //InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
-
 
         StartCoroutine(DelayDeath());
     }

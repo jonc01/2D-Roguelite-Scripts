@@ -101,11 +101,17 @@ public class Base_DamageOverTime : MonoBehaviour
         }
     }
 
-    protected void DealDamage()
+    protected virtual void DealDamage()
     {
         if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick, damageColorIdx);
         if(playerCombat != null) playerCombat.TakeDamage(damagePerTick);
         if(enemyCombat == null && playerCombat == null) isActive = false;
+    }
+
+    public virtual void CleanseDebuff()
+    {
+        isActive = false;
+        StartCoroutine(EndStatus());
     }
 
     protected IEnumerator EndStatus(float endDelay = 1)

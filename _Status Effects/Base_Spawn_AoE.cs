@@ -6,8 +6,10 @@ public class Base_Spawn_AoE : MonoBehaviour
 {
     [Header("Setup")]
     [SerializeField] public float damage = 5;
+    [SerializeField] public bool statusDamage = true;
     [SerializeField] public float knockbackStrength = 1;
     [SerializeField] public bool canProcOnHit = true;
+    [SerializeField] protected GameObject explosionParentOffset;
 
     [Header("HitBox")]
     [SerializeField] protected LayerMask enemyLayer;
@@ -29,6 +31,7 @@ public class Base_Spawn_AoE : MonoBehaviour
     
     protected void OnEnable() //TODO: or Start(), OnEnable() if pooling
     {
+        if(explosionParentOffset == null) explosionParentOffset = gameObject;
         StartCoroutine(Attack());
     }
 
@@ -40,7 +43,8 @@ public class Base_Spawn_AoE : MonoBehaviour
         CheckHit();
 
         yield return new WaitForSeconds(fullAnimTime - animDelayTime);
-        Destroy(gameObject);
+
+        Destroy(explosionParentOffset);
     }
 
     protected virtual void CheckHit()
@@ -57,7 +61,9 @@ public class Base_Spawn_AoE : MonoBehaviour
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if(damageable != null)
             {
-                damageable.TakeDamage(damage, true, canProcOnHit, knockbackStrength);
+                if(statusDamage) damageable.TakeDamageStatus(damage, 0);
+                else damageable.TakeDamage(damage, true, canProcOnHit, knockbackStrength, transform.position.x);
+
                 ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
             }
         }

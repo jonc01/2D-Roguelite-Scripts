@@ -72,6 +72,6 @@ public class HealthBar : MonoBehaviour
         lerpTimer = 0f;
 
         if(healthNumbers != null)
-            healthNumbers.text = currentHealth + " / " + maxHealth;
+            healthNumbers.text = currentHealth.ToString("N0") + " / " + maxHealth.ToString("N0");
     }
 }

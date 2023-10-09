@@ -59,6 +59,10 @@ public class AugmentDisplay : MonoBehaviour
         if(!alwaysDisplay) ToggleDescriptionDisplay(false);
         else ToggleDescriptionDisplay(true);
 
+        //Info refresh
+        // int level = augmentScript.AugmentLevel;
+        // augmentScript.UpdateLevel(level);
+
         if(ownedText != null) ownedText.SetActive(false);
         if(timerParent != null) timerParent.SetActive(false);
 
@@ -224,6 +228,7 @@ public class AugmentDisplay : MonoBehaviour
 
                 if(selectMenu.IsMaxLevel(augmentScript)) //max Level no upgrade
                 {
+                    DisplayLevel.text = "Lv" + augmentScript.AugmentLevel;
                     augmentScript.UpdateDescription();
                     randomizeLevel = false;
 

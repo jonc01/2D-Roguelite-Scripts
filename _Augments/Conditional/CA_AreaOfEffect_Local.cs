@@ -12,6 +12,10 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
     [SerializeField] private float knockbackStrength = 4f;
     [SerializeField] private bool showGizmos = false;
 
+    [Header("- optional -")]
+    [SerializeField] protected bool hasAnimation = false;
+    [SerializeField] protected int blockIndicatorIdx;
+
     protected override void Start()
     {
         base.Start();
@@ -27,6 +31,8 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
 
         //if (damageMultiplier > 1) knockbackStrength = 6; //TODO: set variable defintion in Inspector
 
+        if(hasAnimation) PlayEffectOnPlayer();
+
         foreach (Collider2D enemy in hitEnemies)
         {
             IDamageable damageable = enemy.GetComponent<IDamageable>();
@@ -35,6 +41,7 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
                 damageable.TakeDamage(damage, true, false, knockbackStrength);
                 ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
             }
+            //
         }
     }
 
@@ -48,5 +55,10 @@ public class CA_AreaOfEffect_Local : Base_ConditionalAugments
                 new Vector3((hitboxWidth),
                 hitBoxHeight, 0));
         }
+    }
+
+    void PlayEffectOnPlayer()
+    {
+        playerCombat.ToggleIndicator(blockIndicatorIdx);
     }
 }

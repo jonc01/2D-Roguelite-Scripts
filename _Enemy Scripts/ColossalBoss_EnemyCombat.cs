@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class ColossalBoss_EnemyCombat : Base_BossCombat
@@ -596,6 +595,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         defense = 999;
         movement.canMove = false;
         canAttack = false;
+
+        CleanseDebuffs();
         
         yield return new WaitForSeconds(1.5f);
         animator.PlayManualAnim(6, 1.083f); //Buff anim
@@ -635,6 +636,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         healthBar.gameObject.SetActive(false);
         isAlive = false;
 
+
         //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
         StopAllCoroutines();
@@ -653,6 +655,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
 
         playDeathAnim = true;
+        CleanseDebuffs();
 
         //Show death effects then spawn XP Orbs
         ScreenShakeListener.Instance.Shake(3);

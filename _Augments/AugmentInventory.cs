@@ -58,14 +58,14 @@ public class AugmentInventory : MonoBehaviour
     }
 
 #region Conditional Augments
-    public void OnKill(Transform enemyPosition)
+    public void OnKill(Transform enemyPosition, float addProcChance = 0)
     {
         //Currently being called in Base_EnemyCombat
         Debug.Log("OnKill");
         if(onKillAugments.Count <= 0) return;
         for(int i=0; i<onKillAugments.Count; i++)
         {
-            onKillAugments[i].TriggerAugment(enemyPosition);
+            onKillAugments[i].TriggerAugment(enemyPosition, addProcChance);
         }
     }
 
@@ -79,33 +79,35 @@ public class AugmentInventory : MonoBehaviour
         }
     }
 
-    public void OnHit()
+    public void OnHit(float addProcChance = 0)
     {
         Debug.Log("OnHit");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
-            onHitAugments[i].TriggerAugment();
+            onHitAugments[i].TriggerAugment(addProcChance);
         }
     }
 
-    public void OnHit(Transform objectHitPos)
+    public void OnHit(Transform objectHitPos, float addProcChance = 0)
     {
         Debug.Log("OnHit position");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
-            onHitAugments[i].TriggerAugment(objectHitPos);
+            onHitAugments[i].TriggerAugment(objectHitPos, addProcChance);
         }
     }
 
-    public void OnParry(Transform objectHitPos)
+    //
+
+    public void OnParry(Transform objectHitPos, float addProcChance = 0)
     {
         Debug.Log("On Parry");
         if(onParryAugments.Count <= 0) return;
         for(int i=0; i<onParryAugments.Count; i++)
         {
-            onParryAugments[i].TriggerAugment(objectHitPos);
+            onParryAugments[i].TriggerAugment(objectHitPos, addProcChance);
         }
     }
 
@@ -178,6 +180,8 @@ public class AugmentInventory : MonoBehaviour
         combat.attackSpeed += modified_AttackSpeed; //lower is faster, stats are already subtracted
         combat.knockbackStrength += modified_KnockbackStrength;
         combat.kbResist += modified_kbResist;
+
+        SetConditionalStats();
     }
 
     private void ResetModifiedStats()
@@ -189,6 +193,14 @@ public class AugmentInventory : MonoBehaviour
         modified_AttackSpeed = 0;
         modified_KnockbackStrength = 0;
         modified_kbResist = 0;
+    }
+
+    private void SetConditionalStats()
+    {
+        for(int i=0; i<heldAugments.Count; i++)
+        {
+            heldAugments[i].AddConditionalAugment(); //Only for Unstable augments
+        }
     }
 #endregion
 
@@ -235,6 +247,7 @@ public class AugmentInventory : MonoBehaviour
         heldAugmentDisplays.Add(currDisplay);
 
         if(augmentInventoryDisplay != null) augmentInventoryDisplay.AddAugmentToDisplay(heldAugments);
+        
         UpdateAugments();
     }
 

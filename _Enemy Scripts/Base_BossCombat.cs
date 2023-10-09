@@ -405,6 +405,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         defense = 999;
         movement.canMove = false;
         canAttack = false;
+
+        CleanseDebuffs();
         
         yield return new WaitForSeconds(1.5f);
         animator.PlayManualAnim(6, 1.083f); //Buff anim
@@ -420,6 +422,18 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         isAttacking = false;
         canAttack = true;
         changingPhase = false;
+    }
+
+    protected virtual void CleanseDebuffs()
+    {
+        int totalChildren = transform.childCount;
+        for(int i=0; i<totalChildren; i++)
+        {
+            Base_DamageOverTime currDebuff = transform.GetChild(i).GetComponent<Base_DamageOverTime>();
+
+            if(currDebuff != null) currDebuff.CleanseDebuff();
+            //make sure index is correct
+        }
     }
 
 #endregion
@@ -468,7 +482,12 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         float totalDamage = damageTaken - defense;
 
         //Damage can never be lower than 1
-        if (totalDamage <= 0) totalDamage = 1;
+        if (totalDamage <= 0)
+        {
+            if(changingPhase) totalDamage = 0;
+            else totalDamage = 1;
+        }
+
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);

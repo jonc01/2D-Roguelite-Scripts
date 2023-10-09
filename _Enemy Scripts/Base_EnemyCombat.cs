@@ -445,12 +445,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     public virtual void TakeDamage(float damageTaken, bool knockback = false, bool procOnHit = false, float strength = 8, float xPos = 0)
     {
         if (!isAlive || isSpawning) return;
-        if (damageImmune) return;
+        if (damageImmune || damageTaken <= 0) return;
 
         HitFlash(); //Set material to white, short delay before resetting
         if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(hitEffectsOffset);
 
         float totalDamage = damageTaken - defense;
+
+
 
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
@@ -482,21 +484,17 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         // TakeDamage(damageTaken, false, false);
 
         if (!isAlive || isSpawning) return;
-        if (damageImmune) return;
+        if (damageImmune || damageTaken <= 0) return;
 
         HitFlash(); //Set material to white, short delay before resetting
 
-        float totalDamage = damageTaken - defense;
-
-        //Damage can never be lower than 1
-        if (totalDamage <= 0) totalDamage = 1;
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
-        currentHP -= totalDamage;
+        currentHP -= damageTaken;
         healthBar.UpdateHealth(currentHP);
         if(playAudioClips != null) playAudioClips.PlayRandomClip();
 
         //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowStatusDamage(totalDamage, textPopupOffset.position, colorIdx);
+        InstantiateManager.Instance.TextPopups.ShowStatusDamage(damageTaken, textPopupOffset.position, colorIdx);
 
         if (currentHP <= 0)
         {
@@ -557,7 +555,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
-        GameManager.Instance.AugmentInventory.OnKill(hitEffectsOffset);
+        // GameManager.Instance.AugmentInventory.OnKill(hitEffectsOffset);
+        GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
         if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject

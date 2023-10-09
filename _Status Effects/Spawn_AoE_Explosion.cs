@@ -7,7 +7,7 @@ public class Spawn_AoE_Explosion : Base_AoE_Explosion
     [Header("= Spawn Only =")]
     [SerializeField] Transform hitboxOffset;
 
-    protected override void Explode()
+    protected override void CheckExplodeHit()
     {
         // base.Explode();
         Collider2D[] hitEnemies = 

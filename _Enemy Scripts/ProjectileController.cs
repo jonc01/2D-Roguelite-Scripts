@@ -61,7 +61,7 @@ public class ProjectileController : MonoBehaviour
             var target = collision.GetComponent<Base_EnemyCombat>();
             if(target != null)
             {
-                target.TakeDamageStatus(damage, 3);
+                target.TakeDamageStatus(damage, 0);
                 DestroyProjectile();
                 target.GetKnockback(!playerToRight, knockbackStrength);
             }

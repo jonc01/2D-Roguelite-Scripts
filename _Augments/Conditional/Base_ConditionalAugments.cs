@@ -47,10 +47,19 @@ public class Base_ConditionalAugments : MonoBehaviour
         procCooldownTimer = procCooldown;
     }
 
-    public virtual void TriggerAugment()
+    public virtual void TriggerAugment(float addProcChance = 0)
     {
         float rand = Random.Range(0f, 1.0f);
-	    if(rand < procChance) Activate();
+	    if(rand < (procChance + addProcChance))
+            Activate();
+    }
+    
+    public virtual void TriggerAugment(Transform objectHitPos, float addProcChance = 0)
+    {
+        float rand = Random.Range(0f, 1.0f);
+	    // if(rand < procChance) Activate(objectHitPos);
+        if(rand < (procChance + addProcChance))
+            Activate(objectHitPos);
     }
 
     protected virtual void Activate()
@@ -60,14 +69,6 @@ public class Base_ConditionalAugments : MonoBehaviour
         StartProcCooldown();
 
         GameManager.Instance.AugmentInventory.augmentInventoryDisplay.ToggleAugmentStatus(augmentScript.displayedIndex, buffDuration);
-    }
-
-//
-
-    public virtual void TriggerAugment(Transform objectHitPos)
-    {
-        float rand = Random.Range(0f, 1.0f);
-	    if(rand < procChance) Activate(objectHitPos);
     }
 
     protected virtual void Activate(Transform objectHitPos)
@@ -83,5 +84,10 @@ public class Base_ConditionalAugments : MonoBehaviour
         if(augmentScript == null) return;
         buffAmount = augmentScript.buffedAmount;
         buffAmountPercent = augmentScript.buffedAmountPercent * .01f; //Convert to %
+    }
+
+    public virtual void SetConditionalAugmentStats()
+    {
+        //placeholder for override
     }
 }

@@ -20,7 +20,6 @@ public class CA_IncreasedAttackSpeed : Base_ConditionalAugments
     {
         if(!active) return;
         if(timerDuration <= 0) StopBuff();
-        Debug.Log("ATTACK SPEED IS WORKING: " + playerCombat.attackSpeed);
         timerDuration -= Time.fixedDeltaTime;
         // Time.deltaTime
     }

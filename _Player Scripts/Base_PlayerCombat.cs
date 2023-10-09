@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Base_PlayerCombat : MonoBehaviour
 {
 
-    [Header("References/Setup")]
+    [Header("- References/Setup -")]
     public Base_Character character;
     public Base_PlayerMovement movement;
     public AnimatorManager animator;
@@ -15,7 +15,7 @@ public class Base_PlayerCombat : MonoBehaviour
     //[SerializeField] private Transform attackPoint;
     //[SerializeField] private float attackRange;
     [SerializeField] private Transform textPopupOffset;
-    [SerializeField] HealthBar healthBar;
+    [SerializeField] protected HealthBar healthBar;
     [SerializeField] private bool showGizmos = false;
 
     public HitStop hitStop; //Stops time, hitStop animations are separate
@@ -24,16 +24,25 @@ public class Base_PlayerCombat : MonoBehaviour
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
 
-    [SerializeField] float attackMoveDelay = .0f;
-
-    [SerializeField] Transform[] attackPoints;
+    [Space(10)]
+    [Header("- Hitboxes -")]
+    [SerializeField] protected float attackMoveDelay = .0f;
+    [SerializeField] protected Transform[] attackPoints;
     //G1(.56, .294), G2/A1(.437, .149), G3(.318, .144), A2(.479, .208)
     [SerializeField] float[] hitBoxLength; //.95f, 1.35f, 1.75f, 1.35f, 1.52f
     [SerializeField] float[] hitBoxHeight; //.63f, 0.25f, 0.25f, 0.25f, 0.28f
-    [SerializeField] Transform parryPoint;
-    [SerializeField] float parryHitBoxLength; //.64f
-    [SerializeField] float parryHitboxHeight; //.61f    
+    
+    [Space(10)]
+    [Header("- Parry -")]
+    [SerializeField] protected Transform parryPoint;
+    [SerializeField] protected float parryHitBoxLength; //.64f
+    [SerializeField] protected float parryHitboxHeight; //.61f   
+    [SerializeField] protected float parryHitAddProcChance = .2f;
+    [SerializeField] protected float parryShieldDuration = .3f;
+    [SerializeField] GameObject parryImmuneTextUI;
+    [SerializeField] GameObject parryImmuneShield;
 
+    [Space(10)]
     [Header("Ground Attack Animator Setup")]
     //array of attack anim time (ground)
     public int totalNumGroundAttacks;
@@ -51,9 +60,10 @@ public class Base_PlayerCombat : MonoBehaviour
     public float blockFullAnimTime;
     public float blockDelayAnimTime;
     public float blockDelay;
-    public float blockDuration;
+    public float blockDuration = 0.125f;
     private float blockDelayAndDuration;
     public bool parryDeflecting;
+    [SerializeField] public GameObject[] blockIndicatorAnim;
 
     [Space(10)]
 
@@ -65,6 +75,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public float currentHP;
     public float defense;
     public float kbResist; //Knockback resist
+    protected float base_kbResist;
 
     [SerializeField]
     public float attackDamage,
@@ -73,20 +84,30 @@ public class Base_PlayerCombat : MonoBehaviour
         critMultiplier,
         knockbackStrength;
 
+    [Space(10)]
+    [Header("- Debugging - Base Stats")]
+    [SerializeField] public float base_attackDamage;
+    [SerializeField] public float base_attackSpeed;
+
+    [Space(10)]
     //Attack Bools and Counters
     public int currAttackIndex; //Used to reference hitboxes
     public int currentAttack;
     public int currentAirAttack;
-    float timeSinceAttack;
-    float timeSinceAirAttack; //only for move check, not attack speed
-    float timeSinceBlock;
+    protected float timeSinceAttack;
+    protected float timeSinceAirAttack; //only for move check, not attack speed
+    protected float timeSinceBlock;
     public bool isAttacking;
     public bool isAirAttacking;
     [SerializeField] public bool isParrying;
+    [SerializeField] protected float parryShieldTimer;
 
     public float blockAttackSpeed;
-    bool dashImmune;
 
+    [Space(10)]
+    [Header("- Bools -")]
+    [SerializeField] protected bool dashImmune;
+    [SerializeField] protected bool damageImmune;
     //Bools
     public bool isStunned;
     public bool isAlive;
@@ -101,7 +122,7 @@ public class Base_PlayerCombat : MonoBehaviour
     Coroutine KnockbackResetCO;
 
 
-    void Start()
+    protected void Start()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
@@ -120,6 +141,10 @@ public class Base_PlayerCombat : MonoBehaviour
             critMultiplier = character.Base_CritMultiplier;
             knockbackStrength = character.Base_KnockbackStrength;
         }
+
+        base_attackDamage = attackDamage;
+        base_attackSpeed = attackSpeed;
+
         currentHP = maxHP;
         if (healthBar != null) healthBar.SetHealth(maxHP);
 
@@ -129,9 +154,14 @@ public class Base_PlayerCombat : MonoBehaviour
         isAirAttacking = false;
         isParrying = false;
         parryDeflecting = false;
+        parryShieldTimer = 0;
         currentAttack = 0;
         currentAirAttack = 0;
         currAttackIndex = 0;
+
+        base_kbResist = kbResist;
+
+        damageImmune = false;
         dashImmune = false;
 
         blockDelayAndDuration = blockDelay+blockDuration;
@@ -146,6 +176,7 @@ public class Base_PlayerCombat : MonoBehaviour
         timeSinceAttack += Time.deltaTime;
         timeSinceAirAttack += Time.deltaTime; //only for move check, not attack speed
         timeSinceBlock += Time.deltaTime;
+        ParryShieldCheck();
         if (isStunned) return;
 
         if (Input.GetKeyDown(KeyCode.Y)) //TODO: temp testing
@@ -297,10 +328,18 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
+    public float GetMultipliedDamage()
+    {
+        return groundAttackDamageMultipliers[currentAttack - 1] * attackDamage;
+    }
+
     void ParryCounter()
     {
         parryDeflecting = true;
         Invoke("ResetParrying", blockDuration);
+        parryShieldTimer = parryShieldDuration;
+        if(parryImmuneTextUI != null) parryImmuneTextUI.SetActive(true);
+        if(parryImmuneShield != null) parryImmuneShield.SetActive(true);
 
         Collider2D[] hitEnemies = 
             Physics2D.OverlapBoxAll(parryPoint.position,
@@ -313,8 +352,11 @@ public class Base_PlayerCombat : MonoBehaviour
             {
                 // damageable.TakeDamage(1, true, knockbackStrength, transform.position.x);
                 damageable.TakeDamageStatus(1, 0);
-                Transform enemyPos = damageable.GetHitPosition();
-                augmentInventory.OnParry(enemyPos);
+                Transform enemyHitPos = damageable.GetHitPosition();
+                augmentInventory.OnHit(enemyHitPos, parryHitAddProcChance);
+
+                Transform enemyGroundPos = damageable.GetGroundPosition();
+                augmentInventory.OnParry(enemyGroundPos);
                 // InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
 
                 hitStop.Stop(); //Successful hit //.083f is 1 frame
@@ -325,6 +367,23 @@ public class Base_PlayerCombat : MonoBehaviour
     void ResetParrying()
     {
         parryDeflecting = false;
+    }
+
+    void ParryShieldCheck()
+    {
+
+        if(parryShieldTimer > 0)
+        {
+            parryShieldTimer -= Time.deltaTime;
+            kbResist = 999;
+            damageImmune = true;
+        }else
+        {
+            kbResist = base_kbResist;
+            damageImmune = false;
+            if(parryImmuneTextUI != null) parryImmuneTextUI.SetActive(false);
+            if(parryImmuneShield != null) parryImmuneShield.SetActive(false);
+        }
     }
 
     public void Block()
@@ -369,6 +428,12 @@ public class Base_PlayerCombat : MonoBehaviour
         else animator.PlayAirAttackAnim(currentAirAttack, attackAnimFull, true);
     }
 
+    public void ToggleIndicator(int index)
+    {
+        if(blockIndicatorAnim[index].activeSelf) return;
+        blockIndicatorAnim[index].SetActive(true);
+    }
+
     private void OnDrawGizmos()
     {
         if (showGizmos)
@@ -384,14 +449,14 @@ public class Base_PlayerCombat : MonoBehaviour
     }
 
     // public void GetKnockback(bool enemyToRight, float strength = 4, float recoveryDelay = .15f)
-    public void GetKnockback(float enemyXPos, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(float enemyXPos, float kbForce = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         if(isParrying) return;
         KnockbackNullCheckCO();
 
-        if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return;
+        if (kbResist > 0) kbForce -= kbResist;
+        if (kbForce <= 0) return;
 
         isKnockedback = true;
 
@@ -399,23 +464,23 @@ public class Base_PlayerCombat : MonoBehaviour
         kbToRight = enemyXPos < transform.position.x;
         // if(enemyXPos < transform.position.x) kbToRight = false;
 
-        KnockbackCO = StartCoroutine(Knockback(kbToRight, strength, recoveryDelay));
+        KnockbackCO = StartCoroutine(Knockback(kbToRight, kbForce, recoveryDelay));
         // float temp = enemyToRight != true ? 1 : -1; //get knocked back in opposite direction of player
         // Vector2 direction = new Vector2(temp, .3f);
         // movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
     }
 
-    public void GetKnockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
+    public void GetKnockback(bool kbToRight, float kbForce = 4, float recoveryDelay = .15f)
     {
         if (!isAlive || dashImmune) return;
         KnockbackNullCheckCO();
 
-        if (kbResist > 0) strength -= kbResist;
-        if (strength <= 0) return; //Full knockback resist
+        if (kbResist > 0) kbForce -= kbResist;
+        if (kbForce <= 0) return; //Full knockback resist
 
         isKnockedback = true;
 
-        KnockbackCO = StartCoroutine(KnockbackManual(kbToRight, strength, recoveryDelay));
+        KnockbackCO = StartCoroutine(KnockbackManual(kbToRight, kbForce, recoveryDelay));
     }
 
     IEnumerator Knockback(bool kbToRight, float strength = 4, float recoveryDelay = .15f)
@@ -510,6 +575,12 @@ public class Base_PlayerCombat : MonoBehaviour
     public void TakeDamage(float damageTaken, float enemyXPos, bool screenshake = false, int shakeNum = 1)
     {
         if (!isAlive || dashImmune) return;
+
+        if(damageImmune)
+        {
+            InstantiateManager.Instance.TextPopups.ShowDamage(0, textPopupOffset.position);
+            return;
+        }
         
         bool damageFromRight = enemyXPos > transform.position.x;
         //Only allow parry if the Player is facing the enemy
@@ -532,6 +603,12 @@ public class Base_PlayerCombat : MonoBehaviour
     public void TakeDamage(float damageTaken, bool screenshakeOR = false)
     {
         if (!isAlive || dashImmune) return;
+
+        if(damageImmune)
+        {
+            InstantiateManager.Instance.TextPopups.ShowDamage(0, textPopupOffset.position);
+            return;
+        }
 
         HitFlash();
 

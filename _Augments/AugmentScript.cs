@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.TextCore.Text;
 
 public class AugmentScript : MonoBehaviour
 {
@@ -52,7 +51,11 @@ public class AugmentScript : MonoBehaviour
     void Awake()
     {
         // if(Description == null) Description = GetComponentInChildren<TextMeshProUGUI>();
-        if(augmentScrObj == null) return;
+        if(augmentScrObj == null)
+        {
+            Debug.Log(name + " No AugmentScrObj");
+            return;
+        } 
         MaxLevel = augmentScrObj.MaxLevel; //Max level is determined by its tier;
         GetAugmentVariables();
     }
@@ -89,6 +92,7 @@ public class AugmentScript : MonoBehaviour
         procChance = augmentScrObj.procChance;
         // baseBuffedAmountPercent = 
         // DebuffedStat = augmentScrObj. //TODO: might just use "modifiedStat", then use + or - for changes
+        UpdateLevel(AugmentLevel);
         UpdateConditional();
         UpdateDescription();
         Debug.Log("Augment Stats loaded");
@@ -96,21 +100,29 @@ public class AugmentScript : MonoBehaviour
 //
     private void UpdateConditional()
     {
-        if(ConditionalAugmentScript == null) return;
-        // ConditionalAugmentScript.buffAmount = buffedAmount;
-        // ConditionalAugmentScript.buffAmountPercent = buffedAmountPercent;
+        if(ConditionalAugmentScript == null || augmentScrObj == null) return;
 
         //Update proc chance with current level
         procChance = augmentScrObj.procChance + ((AugmentLevel - 1) * augmentScrObj.procChancePerLevel);
-        ConditionalAugmentScript.UpdateLevelStats();
+
+        if(isConditional) ConditionalAugmentScript.UpdateLevelStats();
     }
 
     public void UpdateLevel(int level)
     {
-        AugmentLevel = level;
+        if(level > MaxLevel) AugmentLevel = MaxLevel;
+        else AugmentLevel = level;
+
         UpdateStatsToLevel();
     }
 
+#region Augment Added to Inventory
+    public void AddConditionalAugment()
+    {
+        if(ConditionalAugmentScript == null) return;
+        ConditionalAugmentScript.SetConditionalAugmentStats();
+    }
+#endregion
 
 #region Change Stats based on Level
     private void UpdateStatsToLevel()
