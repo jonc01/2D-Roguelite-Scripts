@@ -101,7 +101,7 @@ public class Base_DamageOverTime : MonoBehaviour
         }
     }
 
-    protected void DealDamage()
+    protected virtual void DealDamage()
     {
         if(enemyCombat != null) enemyCombat.TakeDamageStatus(damagePerTick, damageColorIdx);
         if(playerCombat != null) playerCombat.TakeDamage(damagePerTick);

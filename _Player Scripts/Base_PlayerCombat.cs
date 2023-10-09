@@ -328,6 +328,11 @@ public class Base_PlayerCombat : MonoBehaviour
         }
     }
 
+    public float GetMultipliedDamage()
+    {
+        return groundAttackDamageMultipliers[currentAttack - 1] * attackDamage;
+    }
+
     void ParryCounter()
     {
         parryDeflecting = true;
