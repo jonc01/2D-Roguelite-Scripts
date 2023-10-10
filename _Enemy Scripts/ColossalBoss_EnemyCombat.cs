@@ -662,7 +662,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         // InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
-        if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+        if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
         GameManager.Instance.AugmentInventory.OnKill(transform);
     }
 
