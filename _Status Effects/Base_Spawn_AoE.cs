@@ -22,7 +22,7 @@ public class Base_Spawn_AoE : MonoBehaviour
     [SerializeField] protected Animator anim;
     [SerializeField] protected string animName;
     [SerializeField] protected int hashedAnimName;
-    [SerializeField] protected int hashedAnimNameBlank; //-34935967
+    [SerializeField] protected int hashedAnimNameBlank = -34935967;
 
     [Space(10)]
     [SerializeField] protected float fullAnimTime;

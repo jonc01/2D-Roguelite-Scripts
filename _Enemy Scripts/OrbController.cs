@@ -86,7 +86,6 @@ public class OrbController : MonoBehaviour
     {
         //Check to make sure hits aren't registered multiple times on collision
         if (hitDone) return;
-        // hitDone = true
         GiveGold(); //GiveXP
 
         Invoke("DisableVelocity", .25f);
