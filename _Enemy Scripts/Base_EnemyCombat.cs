@@ -41,7 +41,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
     public Transform healthbarTransform;
-    [SerializeField] protected EnemyStageManager enemyStageManager;
+    [SerializeField] protected EnemyWaveManager enemyWaveManager;
 
     [Space(10)]
 
@@ -149,7 +149,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
-        else enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
+        else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
 
         playerTransform = GameManager.Instance.playerTransform;
     }
@@ -557,7 +557,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isAlive = false;
         // GameManager.Instance.AugmentInventory.OnKill(hitEffectsOffset);
         GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
-        if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+        if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject
         sr.enabled = false;

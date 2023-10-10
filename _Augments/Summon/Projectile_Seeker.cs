@@ -94,6 +94,13 @@ public class Projectile_Seeker : MonoBehaviour
 
     protected void SetTarget()
     {
+        if(nearbyTargets.Count == 0)
+        {
+            targetPos = transform.position;
+            HitTarget();
+            return;
+        }
+
         //Compare distances of nearby enemies to find the closest target
         int closestTargetIdx = 0;
         float closestDist = Vector3.Distance(nearbyTargets[closestTargetIdx].position, transform.position);
@@ -106,6 +113,8 @@ public class Projectile_Seeker : MonoBehaviour
                 closestTargetIdx = i;
             }
         }
+
+
 
         //Set target
         targetPos = nearbyTargets[closestTargetIdx].position;
@@ -129,7 +138,6 @@ public class Projectile_Seeker : MonoBehaviour
     {
         //Checks to make sure hits aren't registered multiple times on collision
         if (projectileHit) return;
-
 
         animator.Play(hashedAnimName);
         ExplodeHit();
@@ -155,6 +163,7 @@ public class Projectile_Seeker : MonoBehaviour
 
     protected void DisableVelocity()
     {
+        //Disable gravity and stop velocity to keep projectile in place
         rb.gravityScale = 0;
         rb.velocity = Vector2.zero;
     }

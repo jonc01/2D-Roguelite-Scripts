@@ -44,7 +44,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public Base_BossAnimator animator;
     [SerializeField] protected SpriteRenderer sr;
     [SerializeField] protected HealthBar healthBar;
-    [SerializeField] protected EnemyStageManager enemyStageManager;
+    [SerializeField] protected EnemyWaveManager enemyWaveManager;
     [SerializeField] protected float spawnDelay = 1f;
 
     [Space(10)]
@@ -163,7 +163,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         changingPhase = false;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        enemyStageManager = transform.parent.parent.GetComponent<EnemyStageManager>();
+        enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
     }
 
     protected virtual void OnEnable()
@@ -544,7 +544,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         //Base_EnemyAnimator checks for playDeathAnim to play Death animation
         playDeathAnim = true;
-        if(enemyStageManager != null) enemyStageManager.UpdateEnemyCount();
+        if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
 
         Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
         //Disable sprite renderer before deleting gameobject
