@@ -453,7 +453,6 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         float totalDamage = damageTaken - defense;
 
 
-
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);

@@ -26,9 +26,14 @@ public class CA_OnHit_OnKill : Base_ConditionalAugments
     {
         // base.Activate();
         if(!CanActivate()) return;
-        StartProcCooldown();
 
-        GameManager.Instance.AugmentInventory.OnKill(objectHitPos, onHitAddProcChance);   
+        Base_EnemyCombat enemyHit = objectHitPos.GetComponent<Base_EnemyCombat>();
+        Transform groundOffset;
+        if(enemyHit != null) groundOffset = enemyHit.GetGroundPosition();
+        else groundOffset = objectHitPos;
+
+        StartProcCooldown();
+        GameManager.Instance.AugmentInventory.OnKill(groundOffset, onHitAddProcChance);   
     }
 
     public override void SetConditionalAugmentStats()

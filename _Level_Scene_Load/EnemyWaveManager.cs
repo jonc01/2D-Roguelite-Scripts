@@ -24,13 +24,7 @@ public class EnemyWaveManager : MonoBehaviour
     {
         enemyCount = transform.childCount;
 
-        if(bossRoom)
-        {
-            var bossObj = transform.GetChild(0);
-            // bossObj.gameObject.SetActive(true);
-            // bossObj.GetComponent<Base_BossCombat>().StartSpawn();
-        }
-        else
+        if(!bossRoom)
         {
             //Toggle all enemies
             if(enemyCount > 0)
@@ -41,6 +35,13 @@ public class EnemyWaveManager : MonoBehaviour
                     enemyObj.SetActive(false);
                 }
             }
+        }
+        else
+        {
+            //do nothing
+            // var bossObj = transform.GetChild(0);
+            // bossObj.gameObject.SetActive(true);
+            // bossObj.GetComponent<Base_BossCombat>().StartSpawn();
         }
     }
 
