@@ -17,6 +17,7 @@ public class EnemyStageManager : MonoBehaviour
     [Space(20)]
     [Header("= SETUP =")]
     public bool isStartingRoom = false; //Manually set this in room Prefab
+    public bool normalRoom; //Allows room to count towards augment reward from clears
     public bool neutralRoom;
     public bool hasAugmentRewards = false;
     public bool bossRoom = false;

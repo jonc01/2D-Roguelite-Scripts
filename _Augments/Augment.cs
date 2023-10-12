@@ -20,8 +20,8 @@ public class Augment : ScriptableObject
     public _AugmentType AugmentType;
 
     // public enum _MaxLevel { Level1 = 1, Level2 = 2, Level3 = 3, Level4 = 5, Level5 = 5};
-    // public _MaxLevel MaxLevel; //TODO: might not use this system //FIX: Level5 can't be selected
-    public int MaxLevel = 5; //TODO: might not use this system
+    // public _MaxLevel MaxLevel;
+    public int MaxLevel = 5;
 
     public Sprite AugmentIcon;
     public string Name;

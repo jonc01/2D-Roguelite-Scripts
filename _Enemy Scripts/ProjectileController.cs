@@ -16,14 +16,14 @@ public class ProjectileController : MonoBehaviour
     [Header("References")]
     [SerializeField] Animator animator;
 
-    CircleCollider2D collider;
+    BoxCollider2D collider;
 
     protected virtual void Start()
     {
         if(animator == null) animator = GetComponent<Animator>();
         projectileHit = false;
         Invoke("DestroyProjectile", 3);
-        collider = GetComponent<CircleCollider2D>();
+        collider = GetComponent<BoxCollider2D>();
     }
 
     protected virtual void Update()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.Rendering;
 
 public class AugmentScript : MonoBehaviour
 {
@@ -183,30 +184,34 @@ public class AugmentScript : MonoBehaviour
 
         if(augmentScrObj != null)
         {
+            string tempDesc; //Initial description before setting as main
             if(random)
             {
                 string buffedDesc = "?" + divider;
-                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+                tempDesc = baseDescription.Replace('#'.ToString(), buffedDesc);
+
                 if(isConditional)
                 {
-                    string tempDesc = Description;
                     Description = tempDesc.Replace('$'.ToString(), '?'.ToString());
-
-                    // Description = Description.Replace('$', '?');
-                    Description = baseDescription.Replace('$'.ToString(), '?'.ToString());
+                }
+                else
+                {
+                    Description = tempDesc;
                 }
             }else{
                 string buffedDesc = stat.ToString() + divider;
-                Description = baseDescription.Replace('#'.ToString(), buffedDesc);
+                tempDesc = baseDescription.Replace('#'.ToString(), buffedDesc);
+
                 if(isConditional)
                 {
                     float procDesc = procChance*100f;
-                    // Description = Description.Replace('$', procStr);
-                    Description = baseDescription.Replace('$'.ToString(), procDesc.ToString("N0")); 
+                    Description = tempDesc.Replace('$'.ToString(), procDesc.ToString("N0")); 
+                }
+                else
+                {
+                    Description = tempDesc;
                 }
             }
-            // string conditionalDesc = conditionalBuffedAmount.ToString();
-            // Description = baseDescription.Replace('@'.ToString(), conditionalDesc);
         }
     }
 

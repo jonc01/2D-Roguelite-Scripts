@@ -27,6 +27,8 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySound(AudioClip clip)
     {
+        //Check if sound is already playing, stop current sound then play new one
+        if(sfxSource.isPlaying) sfxSource.Stop();
         sfxSource.PlayOneShot(clip);
     }
 

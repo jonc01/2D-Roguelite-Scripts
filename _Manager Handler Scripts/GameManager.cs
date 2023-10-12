@@ -25,6 +25,11 @@ public class GameManager : MonoBehaviour
     public AugmentInventory AugmentInventory;
     public Inventory Inventory;
     public AugmentPool AugmentPool;
+    public int normalRoomClearCount;
+    public int normalRoomClearRewardLimit = 3;
+    [Header("- Debugging -")]
+    public int roomAugmentRewardsGiven; //Total augments the player has received from Normal room rewards
+    // public int[] rewardRoomCounts;
 
     private void Awake()
     {
@@ -40,6 +45,8 @@ public class GameManager : MonoBehaviour
         shopOpen = false;
         rewardOpen = false;
         inputAllowed = true;
+        normalRoomClearCount = 0;
+        roomAugmentRewardsGiven = 0;
     }
 
     private void Update()
@@ -60,5 +67,19 @@ public class GameManager : MonoBehaviour
         inputAllowed = toggle; //Referenced by Shop and Pause menus
         PlayerMovement.allowInput = toggle; //Direct set in Player scripts
         PlayerCombat.allowInput = toggle;
+    }
+
+    public bool CheckPlayerAugmentReward()
+    {
+        //Give player augments after clearing a certain number of normal rooms (not including Trials, Boss, etc)
+        //Reached Normal reward count limit
+        if(roomAugmentRewardsGiven >= normalRoomClearRewardLimit) return false;
+
+        //Checking if the number of normal room clears has reached the miletones
+        if(normalRoomClearCount == 1 || normalRoomClearCount == 3 || normalRoomClearCount == 5)
+        {
+            return true;
+        }
+        else return false; //Player hasn't reached any threshold yet
     }
 }
