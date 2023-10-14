@@ -28,7 +28,7 @@ public class Burn_DamageOverTime : Base_DamageOverTime
         {
             Burn_DamageOverTime currBurn = transform.parent.GetChild(i).GetComponent<Burn_DamageOverTime>();
 
-            //Only longer duration if target is already poisoned
+            //Only longer duration if target is already burning
             if(currBurn != null)
             {
                 existingBurns.Add(currBurn);

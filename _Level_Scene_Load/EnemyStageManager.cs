@@ -7,7 +7,7 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    public GameObject minimapIcon;
+    public SpriteRenderer minimapIcon; //Only for Shops, Trials, Boss rooms with specific icons
     [SerializeField] Transform enemyParentObj;
     // [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] int totalWaves;
@@ -17,6 +17,7 @@ public class EnemyStageManager : MonoBehaviour
     [Space(20)]
     [Header("= SETUP =")]
     public bool isStartingRoom = false; //Manually set this in room Prefab
+    public bool normalRoom; //Allows room to count towards augment reward from clears
     public bool neutralRoom;
     public bool hasAugmentRewards = false;
     public bool bossRoom = false;
@@ -61,7 +62,7 @@ public class EnemyStageManager : MonoBehaviour
     public void ToggleMinimapIcon(bool toggle)
     {
         if(minimapIcon == null) return;
-        minimapIcon.SetActive(toggle);
+        minimapIcon.gameObject.SetActive(toggle);
     }
 
 #region Spawning
@@ -75,7 +76,7 @@ public class EnemyStageManager : MonoBehaviour
 
     public void StartTrial()
     {
-        //Separate call for Trials, manually called with interact
+        //Separate call for Trials, manually called when Player interacts with statue
         if(!trialRoom) return;
         SpawnCurrentWave();
     }
@@ -86,8 +87,8 @@ public class EnemyStageManager : MonoBehaviour
         SpawnWave();
         
         //Boss is already enabled, manually starting spawn
-        // if(bossRoom) 
-        SpawnWave();
+        // if(bossRoom)
+        // SpawnWave();
     }
 
     private void SpawnWave()
@@ -126,128 +127,4 @@ public class EnemyStageManager : MonoBehaviour
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//========================================================================
-//========================================================================
-//========================================================================
-//========================================================================
-//========================================================================
-//========================================================================
-
-    // public void EnemySetup1()
-    // {
-    //     // for(int i = 0; i < transform.childCount; i++)
-    //     // {
-    //     //     if(transform.GetChild(i).CompareTag("Enemy") || transform.GetChild(i).CompareTag("Boss"))
-    //     //     {
-    //     //         //Only need the one Enemy parent object, break when found
-    //     //         enemyParentObj = transform.GetChild(i).transform;
-    //     //         break;
-    //     //     }
-    //     // }
-    //     // if (enemyParentObj != null) enemyCount = enemyParentObj.childCount;
-
-    //     // //Toggle all enemies
-    //     // if(enemyCount > 0)
-    //     // {
-    //     //     for(int i = 0; i < enemyCount; i++)
-    //     //     {
-    //     //         var enemyObj = enemyParentObj.GetChild(i).gameObject;
-    //     //         enemyObj.SetActive(false);
-    //     //         // if(enemyObj.CompareTag("Enemy")) enemyObj.SetActive(false);
-    //     //     }
-    //     // }
-
-    //     // if(bossRoom)
-    //     // {
-    //     //     var bossObj = enemyParentObj.GetChild(0);
-    //     //     bossObj.gameObject.SetActive(true);
-    //     // } 
-    // }
-
-    private void SpawnWave1()
-    {
-        //Spawn all or remaining enemies
-        // for(int i = 0; i < enemyCount + 1; i++)
-        //     enemyParentObj.GetChild(i).gameObject.SetActive(true);
-    }
-
-    private void SpawnCurrentWave1()
-    {
-        // currWaveEnemyCount = waveThreshold[currentWave];
-        int numSpawns;
-        //Spawn next # of enemies
-        //Compare wave index to total number of Waves
-        // if((currentWave - 1) < waveThreshold.Length)
-        // {
-        //     numSpawns = waveThreshold[currentWave];
-        // }
-        // else numSpawns = enemyCount + 1;
-
-        // for(int i = 0; i < numSpawns; i++)
-        // {
-        //     enemyParentObj.GetChild(i).gameObject.SetActive(true);
-        // }
-        
-        //Boss is already enabled, manually starting spawn
-        if(bossRoom)
-            enemyParentObj.GetChild(0).GetComponent<Base_BossCombat>().StartSpawn();
-    }
-
-    // private void SpawnNextWave()
-    // {
-    //     if(enemyCount <= 0) return;
-    //     //Check if index is in bounds, if not, spawn remaining enemies
-    //     if((currentWave + 1) > waveThreshold.Length)
-    //     {
-    //         //Make sure everything else is spawned here
-    //         SpawnWave();
-    //     }
-    //     else Invoke("SpawnCurrentWave", .5f);
-    // }
-    
-    // public void UpdateEnemyCount() //TODO: remove
-    // {
-    //     // if (enemyCount > 0) enemyCount--;
-    //     // // CheckWaveCount();
-    //     // if (enemyCount <= 0)
-    //     // {
-    //     //     roomManager.Cleared();
-    //     //     SpawnClearRewards();
-    //     // }
-    // }
 }

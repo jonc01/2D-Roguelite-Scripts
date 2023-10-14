@@ -121,7 +121,6 @@ public class Base_PlayerCombat : MonoBehaviour
     Coroutine KnockupCO;
     Coroutine KnockbackResetCO;
 
-
     protected void Start()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
@@ -178,11 +177,6 @@ public class Base_PlayerCombat : MonoBehaviour
         timeSinceBlock += Time.deltaTime;
         ParryShieldCheck();
         if (isStunned) return;
-
-        if (Input.GetKeyDown(KeyCode.Y)) //TODO: temp testing
-        {
-            HealPlayer(20f);
-        }
 
         if (movement.isDashing)
         {

@@ -157,7 +157,7 @@ public class AugmentSelectMenu : MonoBehaviour
         augmentSelected = true;
 
         if(shopController != null)
-            shopController.oneTimePurchaseDone = true;
+            shopController.SetPurchaseDone();
 
         StartCoroutine(DisableSelectMenu(.5f));
     }

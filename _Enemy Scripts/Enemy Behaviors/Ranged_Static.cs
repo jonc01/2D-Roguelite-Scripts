@@ -10,7 +10,10 @@ public class Ranged_Static : Base_CombatBehavior
     [SerializeField] protected Transform attackPoint;
     [SerializeField] public float damage = 4;
     [SerializeField] public bool canFire;
-    
+    [SerializeField] protected float projectileFireDelay = .3f;
+
+    [Header("- Optional Indicator -")]
+    [SerializeField] protected GameObject indicator;
 
     protected override void Start()
     {
@@ -25,6 +28,12 @@ public class Ranged_Static : Base_CombatBehavior
         StartCoroutine(ShootCO());
     }
 
+    public virtual void PlayIndicator()
+    {
+        if(indicator == null) return;
+        indicator.SetActive(true);
+    }
+
     IEnumerator ShootCO()
     {
         combat.isAttacking = true;
@@ -35,9 +44,12 @@ public class Ranged_Static : Base_CombatBehavior
         combat.knockbackImmune = true;
         // movement.rb.velocity = Vector3.zero;
 
-        yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
+        // yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
 
+        PlayIndicator();
         combat.animator.PlayManualAnim(0, fullAnimTime);
+
+        yield return new WaitForSeconds(projectileFireDelay);
 
         //Instantiate projectile, set variables from this script
         GameObject projectileObj = Instantiate(projectile, attackPoint.position, transform.rotation);
@@ -45,7 +57,7 @@ public class Ranged_Static : Base_CombatBehavior
         script.damage = damage;
         script.playerToRight = raycast.playerToRight; //Knockback direction
 
-        yield return new WaitForSeconds(fullAnimTime - chargeUpAnimDelay);
+        yield return new WaitForSeconds(fullAnimTime - chargeUpAnimDelay - projectileFireDelay);
         combat.knockbackImmune = false;
         combat.isAttacking = false;
 

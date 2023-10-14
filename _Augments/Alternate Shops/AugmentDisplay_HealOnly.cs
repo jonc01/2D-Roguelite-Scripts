@@ -5,6 +5,7 @@ using UnityEngine;
 public class AugmentDisplay_HealOnly : AugmentDisplay
 {
     [Header("- Heal Shop Only -")]
+    [SerializeField] ShopController shopController;
     [SerializeField] protected float healAmountLower = 10;
     [SerializeField] protected float healAmountUpper = 30;
     [SerializeField] string healItemName = "";
@@ -84,6 +85,10 @@ public class AugmentDisplay_HealOnly : AugmentDisplay
         // selectMenu.SelectAugment(augmentScript, randomizeLevel);
         ToggleOverlay(true);
         selectMenu.CloseSelectMenu();
+
+        //Need to manually set purchase here, others are set through AugmentSelectMenu
+        if(shopController != null)
+            shopController.SetPurchaseDone();
     }
 
 }

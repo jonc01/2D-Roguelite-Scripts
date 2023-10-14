@@ -31,7 +31,12 @@ public class DEBUGGING_MODE : MonoBehaviour
             playerCombat.kbResist = 9999;
         }
 
-        if(Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            playerCombat.HealPlayer(20f);
+        }
+
+        if(Input.GetKey(KeyCode.RightShift))
         {
             if(Input.GetKeyDown(KeyCode.R))
             {
@@ -70,7 +75,7 @@ public class DEBUGGING_MODE : MonoBehaviour
         if (showGizmos)
         {
             Gizmos.DrawWireCube(transform.position, 
-                new Vector3((hitboxWidth),
+                new Vector3(hitboxWidth,
                 hitBoxHeight, 0));
         }
     }

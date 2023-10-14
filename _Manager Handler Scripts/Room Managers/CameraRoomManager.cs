@@ -39,6 +39,12 @@ public class CameraRoomManager : MonoBehaviour
             roomClear.ToggleMinimapIcon(true);
             doorManager.UpdateDoorState(.05f); //Open/Close doors if room has been cleared
         }
+
+        if(collision.CompareTag("RevealRoom"))
+        {
+            //Revealing border rooms to the Player's current room
+            roomClear.RevealRoomIconOnly();
+        }
     }
 
     void OnTriggerExit2D(Collider2D collision)

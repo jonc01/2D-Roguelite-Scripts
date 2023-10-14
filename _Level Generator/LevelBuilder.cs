@@ -77,7 +77,11 @@ public class LevelBuilder : MonoBehaviour
         if (DEBUGGING)
         {
             if (!builderRunning)
-                if (Input.GetKeyDown(KeyCode.U)) DeleteOrigins();
+                if (Input.GetKeyDown(KeyCode.U)) 
+                {
+                    DeleteOrigins();
+                    GameManager.Instance.RestartLevelCount();
+                }
         }
 
         if (WallGen.wallGenDone && !builderRunning) return; //Stop updating raycasts if not needed

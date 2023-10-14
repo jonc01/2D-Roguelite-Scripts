@@ -46,6 +46,12 @@ public class RoomClear : MonoBehaviour
         // DoorManager.DelayedRevealDoor();
     }
 
+    public void RevealRoomIconOnly()
+    {
+        if(stageManager.minimapIcon == null) return;
+        stageManager.minimapIcon.gameObject.SetActive(true);
+    }
+
     private void ToggleMinimapCleared(bool toggle)
     {
         if(minimapIcon == null) return;
@@ -72,21 +78,43 @@ public class RoomClear : MonoBehaviour
     IEnumerator DelayClear()
     {
         ToggleMinimapCleared(true);
+        if(trialRoom)
+        {
+            GameManager.Instance.totalTrialsCleared++;
+            stageManager.minimapIcon.color = new Color32(70, 70, 70, 200);
+            //464 6 46
+        }
+
+        if(stageManager.normalRoom) GameManager.Instance.normalRoomClearCount++;
         yield return new WaitForSeconds(1f);
         if(stageManager == null) augmentReward.ToggleRewardSelect(false);
         else
         {
-            if(!stageManager.neutralRoom && stageManager.hasAugmentRewards && augmentReward != null) augmentReward.ToggleRewardSelect(true);
-            else if(augmentReward != null) augmentReward.ToggleRewardSelect(false);
+            if(!stageManager.neutralRoom && stageManager.hasAugmentRewards && augmentReward != null)
+            {
+                //Give Augment for rooms with augment rewards (Trials and Boss)
+                augmentReward.ToggleRewardSelect(true);
+            }
+            else if(GameManager.Instance.CheckPlayerAugmentReward())
+            { 
+                //Normal room clear reward, give augment, then update counter
+                augmentReward.ToggleRewardSelect(true);
+                GameManager.Instance.roomAugmentRewardsGiven++;
+            }
+            else if(augmentReward != null)
+            {
+                augmentReward.ToggleRewardSelect(false);
+            }
         }
         yield return new WaitForSeconds(.5f);
         DoorManager.OpenAllDoors(true);
+
+        if(trialRoom) GameManager.Instance.UnlockBossDoor();
+
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;
     }
-
-    
 
     public void CheckSpawn()
     {
