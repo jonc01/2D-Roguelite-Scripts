@@ -7,7 +7,7 @@ public class EnemyStageManager : MonoBehaviour
 {
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
-    public GameObject minimapIcon;
+    public SpriteRenderer minimapIcon; //Only for Shops, Trials, Boss rooms with specific icons
     [SerializeField] Transform enemyParentObj;
     // [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] int totalWaves;
@@ -62,7 +62,7 @@ public class EnemyStageManager : MonoBehaviour
     public void ToggleMinimapIcon(bool toggle)
     {
         if(minimapIcon == null) return;
-        minimapIcon.SetActive(toggle);
+        minimapIcon.gameObject.SetActive(toggle);
     }
 
 #region Spawning

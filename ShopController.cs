@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ShopController : MonoBehaviour
 {
+    [Header("- Shop Minimap icon -")]
+    [SerializeField] SpriteRenderer shopMinimapIcon;
+
     [Header("Testing")]
     [SerializeField] private bool DEBUGGING = false;
     [Space(10)]
@@ -106,5 +109,12 @@ public class ShopController : MonoBehaviour
     {
         int totalOwnedAugments = augmentPool.ownedAugments.Count;
         return totalOwnedAugments < 3;
+    }
+
+    public void SetPurchaseDone()
+    {
+        oneTimePurchaseDone = true;
+        if(oneTimePurchaseDone && shopMinimapIcon != null)
+            shopMinimapIcon.color = new Color32(70, 70, 70, 200);
     }
 }

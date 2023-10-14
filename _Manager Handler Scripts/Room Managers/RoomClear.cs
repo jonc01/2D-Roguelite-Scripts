@@ -46,6 +46,12 @@ public class RoomClear : MonoBehaviour
         // DoorManager.DelayedRevealDoor();
     }
 
+    public void RevealRoomIconOnly()
+    {
+        if(stageManager.minimapIcon == null) return;
+        stageManager.minimapIcon.gameObject.SetActive(true);
+    }
+
     private void ToggleMinimapCleared(bool toggle)
     {
         if(minimapIcon == null) return;
@@ -72,6 +78,13 @@ public class RoomClear : MonoBehaviour
     IEnumerator DelayClear()
     {
         ToggleMinimapCleared(true);
+        if(trialRoom)
+        {
+            GameManager.Instance.totalTrialsCleared++;
+            stageManager.minimapIcon.color = new Color32(70, 70, 70, 200);
+            //464 6 46
+        }
+
         if(stageManager.normalRoom) GameManager.Instance.normalRoomClearCount++;
         yield return new WaitForSeconds(1f);
         if(stageManager == null) augmentReward.ToggleRewardSelect(false);
@@ -95,6 +108,9 @@ public class RoomClear : MonoBehaviour
         }
         yield return new WaitForSeconds(.5f);
         DoorManager.OpenAllDoors(true);
+
+        if(trialRoom) GameManager.Instance.UnlockBossDoor();
+
         StartCoroutine(DelaySlowMo());
         //TimeManager.Instance.DoSlowMotion();
         roomCleared = true;

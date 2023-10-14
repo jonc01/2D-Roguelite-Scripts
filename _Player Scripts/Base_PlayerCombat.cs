@@ -178,11 +178,6 @@ public class Base_PlayerCombat : MonoBehaviour
         ParryShieldCheck();
         if (isStunned) return;
 
-        if (Input.GetKeyDown(KeyCode.Y)) //TODO: temp testing
-        {
-            HealPlayer(20f);
-        }
-
         if (movement.isDashing)
         {
             dashImmune = true;

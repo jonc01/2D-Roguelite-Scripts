@@ -88,7 +88,7 @@ public class AugmentDisplay_HealOnly : AugmentDisplay
 
         //Need to manually set purchase here, others are set through AugmentSelectMenu
         if(shopController != null)
-            shopController.oneTimePurchaseDone = true; 
+            shopController.SetPurchaseDone();
     }
 
 }

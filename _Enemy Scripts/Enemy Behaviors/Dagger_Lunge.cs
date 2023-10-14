@@ -50,12 +50,7 @@ public class Dagger_Lunge : Base_CombatBehavior
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.N))
-        {
-            // TESTLUNGE();
-            combat.Lunge(movement.isFacingRight, 8);
-        }
-
+        //Timer keeps track of when to reset attack counter to first attack
         if(attackResetTimer > 0)
         {
             attackResetTimer -= Time.deltaTime;
@@ -75,11 +70,13 @@ public class Dagger_Lunge : Base_CombatBehavior
 
         movement.ToggleFlip(false);
 
-        //Attack 1
-        combat.animator.PlayManualAnim(0, fullAnimTimes[0]);
         // combat.Lunge(movement.isFacingRight, 8);
         combat.GetKnockback(movement.isFacingRight, 8); //TODO: no idea why Lunge doesn't work
-        yield return new WaitForSeconds(animDelayTimes[0]);
+        yield return new WaitForSeconds(.1f); //Lunge start before animation
+
+        //Attack 1
+        combat.animator.PlayManualAnim(0, fullAnimTimes[0]);
+        yield return new WaitForSeconds(animDelayTimes[0] - .1f);
         movement.canMove = false;
         CheckHit(0);
 

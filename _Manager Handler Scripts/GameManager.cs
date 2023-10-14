@@ -30,6 +30,11 @@ public class GameManager : MonoBehaviour
     [Header("- Debugging -")]
     public int roomAugmentRewardsGiven; //Total augments the player has received from Normal room rewards
     // public int[] rewardRoomCounts;
+    [Space(10)]
+    [Header("- Boss Unlock -")]
+    public int totalTrialsCleared;
+    public int totalTrialsNeeded = 2;
+    [SerializeField] private List<DoorController> bossDoors;
 
     private void Awake()
     {
@@ -47,6 +52,18 @@ public class GameManager : MonoBehaviour
         inputAllowed = true;
         normalRoomClearCount = 0;
         roomAugmentRewardsGiven = 0;
+
+        totalTrialsCleared = 0;
+        bossDoors = new List<DoorController>();
+    }
+
+    public void RestartLevelCount()
+    {
+        //Reset room counters and level specific references
+        normalRoomClearCount = 0;
+        roomAugmentRewardsGiven = 0;
+        totalTrialsCleared = 0;
+        bossDoors = new List<DoorController>();
     }
 
     private void Update()
@@ -81,5 +98,37 @@ public class GameManager : MonoBehaviour
             return true;
         }
         else return false; //Player hasn't reached any threshold yet
+    }
+
+    public bool CheckBossUnlock()
+    {
+        // public int totalTrialsCleared;
+        // public int totalTrialsNeeded = 2;
+
+        if(totalTrialsCleared >= totalTrialsNeeded)
+        {
+            return true;
+        }
+        else return false;
+    }
+
+    public void UnlockBossDoor()
+    {
+        for(int i=0; i<bossDoors.Count; i++)
+        {
+            bossDoors[i].DisplayLockIcons(true);
+        }
+
+        if(!CheckBossUnlock()) return;
+        for(int i=0; i<bossDoors.Count; i++)
+        {
+            bossDoors[i].ToggleDoor(true);
+            bossDoors[i].DisplayLockIcons(false);
+        }
+    }
+
+    public void AddBossDoor(DoorController door)
+    {
+        bossDoors.Add(door);
     }
 }
