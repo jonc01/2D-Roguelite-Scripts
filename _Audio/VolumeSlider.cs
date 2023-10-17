@@ -12,8 +12,20 @@ public class VolumeSlider : MonoBehaviour
 
     void Start()
     {
-        if(isMusic) MusicSlider();
-        else SFXSlider();
+        if(isMusic)
+        {
+            float volumeLevel = AudioManager.Instance.musicSource.volume;
+            slider.value = volumeLevel;
+            sliderTextDisplay.text = (volumeLevel * 100).ToString("N0");
+            MusicSlider();
+        }
+        else 
+        {
+            float volumeLevel = AudioManager.Instance.sfxSource.volume;
+            slider.value = volumeLevel;
+            sliderTextDisplay.text = (volumeLevel * 100).ToString("N0");
+            SFXSlider();
+        }
     }
 
     void MusicSlider()

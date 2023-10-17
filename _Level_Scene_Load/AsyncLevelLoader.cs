@@ -173,5 +173,7 @@ public class AsyncLevelLoader : MonoBehaviour
 
         SceneManager.UnloadSceneAsync(unloadStage); //Unload MainMenu
         LoadScene(startStage);
+
+        
     }
 }

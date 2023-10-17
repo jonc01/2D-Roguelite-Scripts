@@ -10,7 +10,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] public bool toggleSFX;
     [SerializeField] public bool toggleMusic;
     [Header("Audio Sources")]
-    [SerializeField] private AudioSource musicSource, sfxSource;
+    [SerializeField] public AudioSource musicSource, sfxSource;
 
     void Awake()
     {
@@ -40,11 +40,13 @@ public class AudioManager : MonoBehaviour
     public void ChangeMusicVolume(float value)
     {
         musicSource.volume = value;
+        // SettingsManager.Instance.musicVolume = value;
     }
 
     public void ChangeSFXVolume(float value)
     {
         sfxSource.volume = value;
+        // SettingsManager.Instance.sfxVolume = value;
     }
 
     public void ToggleSFX(bool toggle)

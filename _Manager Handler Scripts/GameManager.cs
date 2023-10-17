@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     public int totalTrialsCleared;
     public int totalTrialsNeeded = 2;
     [SerializeField] private List<DoorController> bossDoors;
+    [SerializeField] private EnemyStageManager bossStage;
 
     private void Awake()
     {
@@ -124,11 +125,18 @@ public class GameManager : MonoBehaviour
         {
             bossDoors[i].ToggleDoor(true);
             bossDoors[i].DisplayLockIcons(false);
+            //Animate icon when unlocked
+            bossStage.ToggleBossUnlockIcon(true);
         }
     }
 
     public void AddBossDoor(DoorController door)
     {
         bossDoors.Add(door);
+    }
+
+    public void AddBossStage(EnemyStageManager stage)
+    {
+        bossStage = stage;
     }
 }
