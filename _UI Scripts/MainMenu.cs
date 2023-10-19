@@ -11,13 +11,24 @@ public class MainMenu : MonoBehaviour
     public SettingsMenu settingsMenu;
     public GameObject gameSettings;
     public GameObject videoSettings;
+    public GameObject soundSettings;
 
     public GameObject creditsMenuUI;
-    
-    public void PlayDemo()
+    [SerializeField] string[] StartingScenes;
+
+    public void Play()
     {
         mainMenuUI.SetActive(false);
-        AsyncLevelLoader.asyncLevelLoader.StartGame("_Demo_Stage", "MainMenu");
+
+        if(StartingScenes.Length > 1)
+        {
+            int randIdx = Random.Range(0, StartingScenes.Length);
+            AsyncLevelLoader.asyncLevelLoader.StartGame(StartingScenes[randIdx], "MainMenu");
+        }
+        else
+        {
+            AsyncLevelLoader.asyncLevelLoader.StartGame(StartingScenes[0], "MainMenu");
+        }
     }
 
     /*public void Play()
@@ -55,6 +66,13 @@ public class MainMenu : MonoBehaviour
         settingsMenuObj.SetActive(true);
         videoSettings.SetActive(false);
         gameSettings.SetActive(false);
+        soundSettings.SetActive(false);
+    }
+
+    public void SettingsToSoundSettings()
+    {
+        settingsMenuObj.SetActive(false);
+        soundSettings.SetActive(true);
     }
 //
 

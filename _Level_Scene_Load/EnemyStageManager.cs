@@ -8,6 +8,12 @@ public class EnemyStageManager : MonoBehaviour
     //Attach this to Room Prefab that holds Platforms and Enemies parent objects
     [Header("References")]
     public SpriteRenderer minimapIcon; //Only for Shops, Trials, Boss rooms with specific icons
+    [SerializeField] string lockedAnimName;
+    [SerializeField] string unlockedAnimName;
+    [SerializeField] int hashedLockedAnim;
+    [SerializeField] int hashedUnlockedAnim;
+    [SerializeField] Animator anim;
+    [Space(5)]
     [SerializeField] Transform enemyParentObj;
     // [SerializeField] int enemyCount; //number of enemies in level
     [SerializeField] int totalWaves;
@@ -57,12 +63,26 @@ public class EnemyStageManager : MonoBehaviour
         currentWaveIdx = 0;
 
         if(!isStartingRoom) ToggleMinimapIcon(false);
+
+        if(bossRoom)
+        {
+            ToggleBossUnlockIcon(false);
+            GameManager.Instance.AddBossStage(this);
+        }
     }
 
     public void ToggleMinimapIcon(bool toggle)
     {
         if(minimapIcon == null) return;
         minimapIcon.gameObject.SetActive(toggle);
+    }
+
+    public void ToggleBossUnlockIcon(bool toggle)
+    {
+        if(!bossRoom) return;
+        
+        if(toggle) anim.Play(hashedUnlockedAnim);
+        else anim.Play(hashedLockedAnim);
     }
 
 #region Spawning

@@ -7,7 +7,7 @@ public class PauseMenu : MonoBehaviour
 {
     public static bool GameIsPaused = false;
 
-    [SerializeField] string currentStage;
+    [SerializeField] string currentStage = "Tileset1_LevelGen";
 
     public GameObject pauseMenuUI;
     public GameObject settingsMenuUI;
@@ -74,8 +74,6 @@ public class PauseMenu : MonoBehaviour
 
     public void RestartLevel() //For use with Demo level only //TODO: remove once stages are added
     {
-        //TODO: needs more testing
-
         //Load TutorialStage or FirstStage instead, Restart Run
         AsyncLevelLoader.asyncLevelLoader.StartGame("Tileset1_LevelGen", currentStage);
         //!TODO: doesn't work 
@@ -89,7 +87,15 @@ public class PauseMenu : MonoBehaviour
     {
         Time.timeScale = 1f;
         GameIsPaused = false;
-        SceneManager.LoadScene("MainMenu");
+        
+        // SceneManager.LoadScene("MainMenu"); //TODO; replace 
+
+        
+
+        //TODO: use this instead
+        AsyncLevelLoader.asyncLevelLoader.LoadMainMenu("Tileset1_LevelGen");
+
+
         //SceneManager.LoadScene(0);
     }
 

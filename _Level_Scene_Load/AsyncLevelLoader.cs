@@ -8,16 +8,33 @@ public class AsyncLevelLoader : MonoBehaviour
     public static AsyncLevelLoader asyncLevelLoader;
     bool playerLoaded;
 
+    [Header("Loading Screen")]
     [SerializeField] private GameObject LoadScreen;
+    [SerializeField] private GameObject LoadingText;
     [SerializeField] private Animator LoadScreenAnim;
+    [SerializeField] private string loadingStartAnim = "LoadingFadeStart";
+    [SerializeField] private float loadScreenFadeOutDuration;
+    [SerializeField] private string loadingEndAnim = "LoadingFadeEnd";
+    [SerializeField] private float loadScreenFadeInDuration;
+    
 
+    [Space(10)]
     [SerializeField] private GameObject playerObject;
     //TODO: needs testing with new transforms
     [SerializeField] private Vector3 spawnPosition = new Vector3(0f, -3.35f, 0f ); //default: 
 
     private void Awake()
     {
-        asyncLevelLoader = this;
+        if(asyncLevelLoader == null)
+        {
+            asyncLevelLoader = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        //
 
         if(playerObject == null)
             playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -40,9 +57,9 @@ public class AsyncLevelLoader : MonoBehaviour
 
     IEnumerator InitialLoadCO()
     {
-        LoadScreenAnim.SetTrigger("StartLoop");
+        // LoadScreenAnim.SetTrigger("StartLoop");
         yield return new WaitForSeconds(.1f);
-        LoadScreenAnim.SetTrigger("End");
+        yield return EndLoadingCO();
     }
 
     public void LoadScene(string sceneName, string sceneToUnload) //TODO: manual call from menu Play(), can combine this into one script (LevelLoader)
@@ -59,7 +76,7 @@ public class AsyncLevelLoader : MonoBehaviour
     IEnumerator LoadSceneCO(string sceneName, string sceneToUnload)
     {
         //LoadScreen.SetActive(true);
-        LoadScreenAnim.SetTrigger("Start");
+        yield return StartLoadingCO();
         yield return new WaitForSeconds(.1f); //short delay to allow fade out animation to fully fade to load screen 
         //Without this delay, the player would see scenes being moved around
 
@@ -76,11 +93,9 @@ public class AsyncLevelLoader : MonoBehaviour
                 playerObject.transform.position = spawnPosition; //moves player to spawnPlatform while stages unload
         }
 
-        //TODO: this isn't working, not moving player
-
         UnloadScene(sceneToUnload);
 
-        LoadScreenAnim.SetTrigger("End");
+        yield return EndLoadingCO();
     }
 
     public void LoadScene(string sceneName)
@@ -91,7 +106,7 @@ public class AsyncLevelLoader : MonoBehaviour
 
     IEnumerator LoadSceneCO(string sceneName)
     {
-        LoadScreenAnim.SetTrigger("StartLoop");
+        // LoadScreenAnim.SetTrigger("StartLoop");
         AsyncOperation sceneToLoad = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
         while (!sceneToLoad.isDone)
@@ -99,7 +114,7 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
-        LoadScreenAnim.SetTrigger("End");
+        yield return EndLoadingCO();
         //LoadScreen.SetActive(false);
     }
 
@@ -142,7 +157,6 @@ public class AsyncLevelLoader : MonoBehaviour
             Debug.Log("loading player");
             yield return null;
         }
-        LoadScreenAnim.SetTrigger("StartLoop");
 
         SceneManager.SetActiveScene(SceneManager.GetSceneByName("_PlayerScene"));
 
@@ -156,13 +170,18 @@ public class AsyncLevelLoader : MonoBehaviour
         //3) Unload MainMenu
         //4) Load TutorialStage
 
+        AudioManager.Instance.FadeOutAudio();
+
         StartCoroutine(StartGameCO(startStage, unloadStage));
     }
 
     IEnumerator StartGameCO(string startStage, string unloadStage)
     {
-        LoadScreenAnim.SetTrigger("Start");
-        yield return new WaitForSeconds(.3f); //TODO: placeholder, LevelLoader is being deleted when loading
+        // LoadScreenAnim.SetTrigger("Start");
+        yield return StartLoadingCO();
+        yield return new WaitForSeconds(.1f); //TODO: placeholder, LevelLoader is being deleted when loading
+        LoadingText.SetActive(true);
+
         LoadPlayer();
 
         while (!playerLoaded)
@@ -171,7 +190,73 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
+        GameManager.Instance.TogglePlayerInput(false);
+
         SceneManager.UnloadSceneAsync(unloadStage); //Unload MainMenu
         LoadScene(startStage);
+
+        yield return EndLoadingCO();
+        LoadingText.SetActive(false);
+
+        GameManager.Instance.TogglePlayerInput(true);
+        AudioManager.Instance.FadeInAudio();
+    }
+
+    //
+    public void LoadMainMenu(string sceneToUnload)
+    {
+        AudioManager.Instance.FadeOutAudio();
+        GameManager.Instance.TogglePlayerInput(false);
+        StartCoroutine(LoadMainMenuCO(sceneToUnload));
+    }
+
+    IEnumerator LoadMainMenuCO(string sceneToUnload)
+    {
+        yield return StartLoadingCO();
+        // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
+        LoadingText.SetActive(true);
+        // yield return Unload(sceneToUnload);
+        // yield return Unload("_PlayerScene");
+
+        //Loading in Single mode unloads all other scenes
+        var mainScene = SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
+        
+        while(!mainScene.isDone)
+        {
+            Debug.Log("Loading MainMenu...");
+            yield return null;
+        }
+
+        // SceneManager.LoadScene("MainMenu");
+
+        LoadingText.SetActive(false);
+        AudioManager.Instance.FadeInAudio();
+        GameManager.Instance.TogglePlayerInput(true);
+
+        yield return EndLoadingCO();
+        // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
+    }
+
+    //
+    // private void StartLoadingAnim()
+    // {
+    //     StartCoroutine(StartLoadingCO());
+    // }
+
+    IEnumerator StartLoadingCO()
+    {
+        LoadScreenAnim.Play(loadingStartAnim);
+        yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
+    }
+
+    // private void EndLoadingAnim()
+    // {
+    //     StartCoroutine(EndLoadingCO());
+    // }
+
+    IEnumerator EndLoadingCO()
+    {
+        LoadScreenAnim.Play(loadingEndAnim);
+        yield return new WaitForSecondsRealtime(loadScreenFadeInDuration);
     }
 }

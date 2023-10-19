@@ -25,10 +25,11 @@ public class CameraRoomManager : MonoBehaviour
         if(roomClear == null) roomClear = GetComponentInParent<RoomClear>();
     }
 
-    // void Update()
-    // {
-    //     //may need to add another check to see if camera is in the correct room
-    // }
+    void Update()
+    {
+        //may need to add another check to see if camera is in the correct room
+        if(CameraAnchor == null) CameraAnchor = GameObject.FindGameObjectWithTag("CameraAnchor").transform;
+    }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
