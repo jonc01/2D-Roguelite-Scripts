@@ -6,53 +6,49 @@ using TMPro;
 
 public class VideoSettingsMenu : MonoBehaviour
 {
-    // public static VideoSettingsMenu Instance { get; private set; }
+    //DISPLAY ONLY
+    //  Used for Settings Menu, actual settings are saved in VideoSettingsManager.cs
 
 
     // //Resolutions
     public int[] resWidth = { 960, 1280, 1920 };
     public int[] resHeight = { 540, 720, 1080 };
     public TextMeshProUGUI resolutionDisplayed;
-    public int currentResolution = 1; //TODO: TEMP, setting default to 720, should use savefile
+    public int currentResIdx = 1; //TODO: TEMP, setting default to 720, should use savefile
     
     [Space(10)]
     public bool fullscreenEnabled;
 
     [Header("Toggle Buttons")]
     public GameObject fullscreenOnButton;
-    public GameObject fullscreenOffButton;
+    // public GameObject fullscreenOffButton;
 
     // //Temp Variables
     public int selectedResolution;
     public bool selectedFullscreen;
-
-    private void Start()
-    {
-        if(VideoSettingsManager.Instance != null)
-        {
-            currentResolution = VideoSettingsManager.Instance.currentResIdx;
-            fullscreenEnabled = VideoSettingsManager.Instance.fullscreenEnabled;
-        }
-
-        UpdateResDisplayed(currentResolution);
-        
-        fullscreenOnButton.SetActive(fullscreenEnabled);
-        fullscreenOffButton.SetActive(!fullscreenEnabled);
-
-        selectedResolution = currentResolution;
-        selectedFullscreen = fullscreenEnabled;
-    }
+    
 
     void OnEnable()
     {
-        Debug.Log("Current Res: " + Screen.currentResolution); //TODO: remove
+        //refresh displayed settings
+        if(VideoSettingsManager.Instance != null)
+        {
+            //Getting saved settings
+            currentResIdx = VideoSettingsManager.Instance.GetSavedResIdx();
+            fullscreenEnabled = VideoSettingsManager.Instance.GetSavedFullscreen();
+        }
+
+        //Update displayed settings with saved settings
+        selectedResolution = currentResIdx;
+        selectedFullscreen = fullscreenEnabled;
+
         UpdateSettings();
     }
 
     public void UpdateSettings() //called on initial Player scene load
     {
-        fullscreenOnButton.SetActive(fullscreenEnabled);
-        UpdateResDisplayed(currentResolution);
+        fullscreenOnButton.SetActive(selectedFullscreen);
+        UpdateResDisplayed(selectedResolution);
     }
 
     void UpdateResDisplayed(int selected)
@@ -76,26 +72,35 @@ public class VideoSettingsMenu : MonoBehaviour
         UpdateResDisplayed(selectedResolution);
     }
 
-    public void ApplyRes() //On Apply button press
+    public void ApplySettings() //On Apply button press
     {
-        SetRes(selectedResolution);
+        //Update settings to the selected
+        fullscreenEnabled = selectedFullscreen;
+        SetRes();
 
+        //Save settings
         if(VideoSettingsManager.Instance != null)
         {
-            VideoSettingsManager.Instance.SaveResolution(selectedResolution);
+            VideoSettingsManager.Instance.SaveResolution(currentResIdx);
             VideoSettingsManager.Instance.SaveFullscreen(fullscreenEnabled);
         }
     }
 
-    void SetRes(int selectRes)
+    void SetRes()
     {
-        Screen.SetResolution(resWidth[selectRes], resHeight[selectRes], selectedFullscreen, 60);
-        currentResolution = selectRes;
-        // fullscreenEnabled = selectedFullscreen; //TODO: testing, set elsewhere
+        FullScreenMode fullscreenMode;
+        if(fullscreenEnabled) fullscreenMode = FullScreenMode.FullScreenWindow;
+        else fullscreenMode = FullScreenMode.Windowed;
+
+        Screen.SetResolution(resWidth[selectedResolution], resHeight[selectedResolution],
+        fullscreenMode, new RefreshRate(){numerator = 60, denominator = 1});
+
+        currentResIdx = selectedResolution;
     }
 
     public void ToggleFullscreenButton()
     {
+        //Called when button is pressed, will display the opposite of the previous selection
         if (selectedFullscreen)
         {
             selectedFullscreen = false;
@@ -106,6 +111,5 @@ public class VideoSettingsMenu : MonoBehaviour
         }
 
         fullscreenOnButton.SetActive(selectedFullscreen);
-        fullscreenOffButton.SetActive(!selectedFullscreen);
     }
 }

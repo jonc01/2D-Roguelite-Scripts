@@ -7,27 +7,47 @@ public class VideoSettingsManager : MonoBehaviour
 {
     public static VideoSettingsManager Instance { get; private set; }
 
-    public bool fullscreenEnabled;
+    [SerializeField] private bool fullscreenEnabledSaved;
 
     //Resolutions
     public int[] resWidth = { 960, 1280, 1920 };
     public int[] resHeight = { 540, 720, 1080 };
     // public TextMeshProUGUI resolutionDisplayed;
-    public int currentResIdx = 1; //TODO: TEMP, setting default to 720, should use savefile
+    [SerializeField] private int currentResIdxSaved = 1; //TODO: TEMP, setting default to 720, should use savefile
 
     private void Awake()
     {
-        Instance = this;
+        // Instance = this;
         // UpdateResDisplayed(currentResolution);
+
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void SaveFullscreen(bool fullscreen)
+    {
+        fullscreenEnabledSaved = fullscreen;
     }
 
     public void SaveResolution(int resIdx)
     {
-        currentResIdx = resIdx;
+        currentResIdxSaved = resIdx;
     }
     
-    public void SaveFullscreen(bool fullscreen)
+    public bool GetSavedFullscreen()
     {
-        fullscreenEnabled = fullscreen;
+        return fullscreenEnabledSaved;
+    }
+
+    public int GetSavedResIdx()
+    {
+        return currentResIdxSaved;
     }
 }

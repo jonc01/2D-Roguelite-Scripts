@@ -15,7 +15,7 @@ public class MainMenu : MonoBehaviour
 
     public GameObject creditsMenuUI;
     [SerializeField] string[] StartingScenes;
-    
+
     public void Play()
     {
         mainMenuUI.SetActive(false);
@@ -29,7 +29,6 @@ public class MainMenu : MonoBehaviour
         {
             AsyncLevelLoader.asyncLevelLoader.StartGame(StartingScenes[0], "MainMenu");
         }
-
     }
 
     /*public void Play()
