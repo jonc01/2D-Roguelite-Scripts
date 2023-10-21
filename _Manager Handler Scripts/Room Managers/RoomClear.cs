@@ -120,7 +120,7 @@ public class RoomClear : MonoBehaviour
     {
         //Delay added to stageManager reference get, Start() is called before Room instantiated
         if (stageManager == null) stageManager = GetComponentInChildren<EnemyStageManager>();
-        if (!roomCleared) Invoke("CheckSpawnDelay", 1f);
+        if (!roomCleared) Invoke("CheckSpawnDelay", 1.33f);
     }
 
     private void CheckSpawnDelay()

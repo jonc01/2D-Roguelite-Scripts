@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class VideoSettingsManager : MonoBehaviour
 {
@@ -27,6 +28,7 @@ public class VideoSettingsManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Destroyed " + name + " in " + SceneManager.GetActiveScene().name);
             Destroy(gameObject);
         }
     }

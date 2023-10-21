@@ -25,6 +25,7 @@ public class AsyncLevelLoader : MonoBehaviour
 
     private void Awake()
     {
+        //Create new Instance if no existing, otherwise delete this object
         if(asyncLevelLoader == null)
         {
             asyncLevelLoader = this;
@@ -49,6 +50,47 @@ public class AsyncLevelLoader : MonoBehaviour
         if (LoadScreenAnim != null)
             InitialLoadScene();
     }
+
+    void Update()
+    {
+        //TODO: TESTING LEVEL RESET
+        if(Input.GetKeyDown(KeyCode.N))
+        {
+            // StartCoroutine(ResetRun());
+            ResetRun();
+        }
+    }
+
+#region Reset Run
+    public void ResetRun()
+    {
+        AudioManager.Instance.FadeOutAudio();
+        GameManager.Instance.TogglePlayerInput(false);
+        StartCoroutine(ResetRunCO());
+    }
+
+    IEnumerator ResetRunCO()
+    {
+        yield return StartLoadingCO();
+        LoadingText.SetActive(true);
+
+        //Loading in Single mode unloads all other scenes
+        var mainScene = SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
+        
+        while(!mainScene.isDone)
+        {
+            Debug.Log("Loading MainMenu...");
+            yield return null;
+        }
+
+        LoadingText.SetActive(false);
+        AudioManager.Instance.FadeInAudio();
+        GameManager.Instance.TogglePlayerInput(true);
+
+        StartGame("Tileset1_LevelGen", "MainMenu");
+    }
+
+#endregion
 
     void InitialLoadScene()
     {

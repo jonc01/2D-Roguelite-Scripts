@@ -365,7 +365,6 @@ public class Base_PlayerCombat : MonoBehaviour
 
     void ParryShieldCheck()
     {
-
         if(parryShieldTimer > 0)
         {
             parryShieldTimer -= Time.deltaTime;

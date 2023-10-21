@@ -27,7 +27,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
     [SerializeField] bool showGizmos = false;
-    [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
+    [SerializeField] float spawnFXScaleX = 2.5f; //2.5f default 
+    [SerializeField] float spawnFXScaleY = 2.5f; //2.5f default 
     [Header("*Animation Times")]
     [SerializeField] float fullAttackAnimTime; //1f, 1.416667f
     [SerializeField] float attackDelayTime; //0.0834f, 0.834f
@@ -179,7 +180,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         isSpawning = true; //This prevents the enemy from attacking and taking damage
         healthBar.gameObject.SetActive(false);
         if(bottomOffset != null)
-            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 0, spawnFXScale);
+            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 0, spawnFXScaleX, spawnFXScaleY);
         //Toggle SR off
         sr.enabled = false;
         yield return new WaitForSeconds(0.1667f); //TODO: appear delay

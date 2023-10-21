@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Schema;
+using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -24,7 +26,6 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private bool fadingAudio;
     [SerializeField] private bool fadingInAudio;
     private float targetVolume;
-    
     private float startingSetVolumeMusic;
 
 
@@ -37,6 +38,7 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
+            Debug.Log("Destroyed " + name + " in " + SceneManager.GetActiveScene().name);
             Destroy(gameObject);
         }
 
