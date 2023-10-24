@@ -21,7 +21,7 @@ public class VolumeSlider : MonoBehaviour
         }
         else 
         {
-            float volumeLevel = AudioManager.Instance.sfxSource.volume;
+            float volumeLevel = AudioManager.Instance.generalSfxSource.volume;
             slider.value = volumeLevel;
             sliderTextDisplay.text = (volumeLevel * 100).ToString("N0");
             SFXSlider();

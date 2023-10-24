@@ -21,8 +21,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
     protected Base_EnemyController enemyController;
-    [Header("Audio References")]
-    [SerializeField] PlayAudioClips playAudioClips;
+    //Set at Start()
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
@@ -43,8 +42,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] protected HealthBar healthBar;
     public Transform healthbarTransform;
     [SerializeField] protected EnemyWaveManager enemyWaveManager;
+    protected AugmentInventory augmentInventory;
+    [SerializeField] protected PlayAudioClips playAudioClips;
 
-    [Space(10)]
+    [Space(15)]
 
     //HealthBar
 
@@ -101,6 +102,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //playerLayer = GameObject.FindGameObjectWithTag("Player").GetComponent<LayerMask>();
         if (movement == null) movement = GetComponent<Base_EnemyMovement>();
         if (enemyController == null) enemyController = GetComponent<Base_EnemyController>();
+        if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
         //Initiating base stats before modifiers
 
         if (character != null)
@@ -149,10 +151,27 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         chasePlayer = true;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
-        else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
-
         playerTransform = GameManager.Instance.playerTransform;
+        augmentInventory = GameManager.Instance.AugmentInventory;
+
+        Transform currObj = transform;
+        for(int i=0; i<3; i++) //Limiting check to 3 parents
+        {
+            EnemyWaveManager waveManagerCheck = currObj.GetComponent<EnemyWaveManager>();
+            if(waveManagerCheck != null)
+            {
+                enemyWaveManager = waveManagerCheck; //Wave Manager found
+                break;
+            }
+            else
+            {
+                currObj = currObj.parent;
+                if(currObj == null) break; //no more parent objects
+            }
+        }
+
+        // if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
+        // else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
     }
 
     protected virtual void OnEnable()
@@ -449,7 +468,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (damageImmune || damageTaken <= 0) return;
 
         HitFlash(); //Set material to white, short delay before resetting
-        if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(hitEffectsOffset);
+        if(procOnHit) augmentInventory.OnHit(hitEffectsOffset);
 
         float totalDamage = damageTaken - defense;
 
@@ -459,7 +478,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
-        if(playAudioClips != null) playAudioClips.PlayRandomClip();
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         if(knockback && !knockbackImmune)
         {
@@ -556,7 +575,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
         // GameManager.Instance.AugmentInventory.OnKill(hitEffectsOffset);
-        GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
+        augmentInventory.OnKill(GetGroundPosition());
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject

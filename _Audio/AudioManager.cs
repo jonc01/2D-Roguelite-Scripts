@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Schema;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,9 +11,18 @@ public class AudioManager : MonoBehaviour
     [SerializeField] public bool toggleSFX;
     [SerializeField] public bool toggleMusic;
     [Header("Audio Sources")]
-    [SerializeField] public AudioSource musicSource, ambientSource, sfxSource;
-    //TODO: add Ambient sound source
+    [SerializeField] public AudioSource musicSource, ambientSource, generalSfxSource;
+
     [Space(10)]
+    [Header("Player SFX")]
+    [SerializeField] public AudioSource source_PlayerAtkAudio;
+    [SerializeField] public AudioSource source_PlayerHitAudio, source_PlayerBlockAudio;
+    [Space(10)]
+    [Header("Enemy SFX")]
+    [SerializeField] public AudioSource source_EnemyAtkAudio;
+    [SerializeField] public AudioSource source_EnemyHitSound, source_EnemyBlock;
+    //TODO: add Ambient sound source
+    [Space(15)]
     [Header("Audio Fade Settings")]
     [SerializeField] float fadeDuration = 2f;
 
@@ -74,13 +81,55 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void PlaySound(AudioClip clip)
+    public void PlaySound()
     {
-        //Check if sound is already playing, stop current sound then play new one
-        if(sfxSource.isPlaying) sfxSource.Stop();
-        sfxSource.PlayOneShot(clip);
+        return; //TEMP until replaced
     }
 
+#region Player SFX
+    public void PlayAtkSound_Player(AudioClip clip)
+    {
+        //Check if sound is already playing, stop current sound then play new one
+        if(source_PlayerAtkAudio.isPlaying) source_PlayerAtkAudio.Stop();
+        source_PlayerAtkAudio.PlayOneShot(clip);
+    }
+    
+    public void PlayHitSound_Player(AudioClip clip)
+    {
+        if(source_PlayerHitAudio.isPlaying) source_PlayerHitAudio.Stop();
+        source_PlayerHitAudio.PlayOneShot(clip);
+    }
+
+    public void PlayBlockSound_Player(AudioClip clip)
+    {
+        if(source_PlayerBlockAudio.isPlaying) source_PlayerBlockAudio.Stop();
+        source_PlayerBlockAudio.PlayOneShot(clip);
+    }
+
+#endregion
+
+#region Enemy SFX
+    public void PlayAtkSound_Enemy(AudioClip clip)
+    {
+        if(source_EnemyAtkAudio.isPlaying) source_EnemyAtkAudio.Stop();
+        source_EnemyAtkAudio.PlayOneShot(clip);
+    }
+
+    public void PlayHitSound_Enemy(AudioClip clip)
+    {
+        if(source_EnemyHitSound.isPlaying) source_EnemyHitSound.Stop();
+        source_EnemyHitSound.PlayOneShot(clip);
+    }
+
+    public void PlayBlockSound_Enemy(AudioClip clip)
+    {
+        if(source_EnemyBlock.isPlaying) source_EnemyBlock.Stop();
+        source_EnemyBlock.PlayOneShot(clip);
+    }
+
+#endregion
+
+#region Audio Settings
     public void ChangeMasterVolume(float value)
     {
         AudioListener.volume = value; //Not currenty in-use, setting Music/Effects separately
@@ -95,13 +144,30 @@ public class AudioManager : MonoBehaviour
 
     public void ChangeSFXVolume(float value)
     {
-        sfxSource.volume = value;
+        // sfxSource.volume = value;
         // SettingsManager.Instance.sfxVolume = value;
+        generalSfxSource.volume = value;
+
+        source_PlayerAtkAudio.volume = value;
+        source_PlayerHitAudio.volume = value;
+        source_PlayerBlockAudio.volume = value;
+        source_EnemyAtkAudio.volume = value;
+        source_EnemyHitSound.volume = value;
+        source_EnemyBlock.volume = value;
     }
 
     public void ToggleSFX(bool toggle)
     {
-        sfxSource.mute = toggle;
+        // sfxSource.mute = toggle;
+
+        generalSfxSource.mute = toggle;
+
+        source_PlayerAtkAudio.mute = toggle;
+        source_PlayerHitAudio.mute = toggle;
+        source_PlayerBlockAudio.mute = toggle;
+        source_EnemyAtkAudio.mute = toggle;
+        source_EnemyHitSound.mute = toggle;
+        source_EnemyBlock.mute = toggle;
     }
 
     public void ToggleMusic(bool toggle)
@@ -138,4 +204,5 @@ public class AudioManager : MonoBehaviour
             FadeInAudio();
         }
     }
+#endregion
 }

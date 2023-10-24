@@ -56,6 +56,7 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         if ((transform.position.x < xPos && movement.isFacingRight) 
         || (transform.position.x > xPos && !movement.isFacingRight))
         {
+            if(playAudioClips != null) playAudioClips.PlayBlockedAudio();
             InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
             InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
             // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO

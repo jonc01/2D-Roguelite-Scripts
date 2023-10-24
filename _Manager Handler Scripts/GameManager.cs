@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
     public PauseMenu Pause;
 
     [Space(10)]
-    [Header("- Player References -")]
+    [Header("- Player/Enemy References -")]
     public Transform playerTransform;
     public Base_PlayerMovement PlayerMovement;
     public Base_PlayerCombat PlayerCombat;

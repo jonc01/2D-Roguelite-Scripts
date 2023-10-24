@@ -10,6 +10,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public Base_Character character;
     public Base_PlayerMovement movement;
     public AnimatorManager animator;
+    [SerializeField] private PlayAudioClips playAudioClips;
     [SerializeField] private AugmentInventory augmentInventory;
     [SerializeField] private LayerMask enemyLayer;
     //[SerializeField] private Transform attackPoint;
@@ -126,6 +127,7 @@ public class Base_PlayerCombat : MonoBehaviour
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
+        if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
 
         isAlive = true;
         isStunned = false;
@@ -266,6 +268,7 @@ public class Base_PlayerCombat : MonoBehaviour
         float attackAnimEnd = attackAnimFull - attackDelay;
 
         animator.PlayAttackAnim(currentAttack, attackAnimFull);
+        playAudioClips.PlayAttackSwing();
         //Movement is being toggled in Update when isAttacking is toggled
 
         yield return new WaitForSeconds(attackDelay);
@@ -286,6 +289,7 @@ public class Base_PlayerCombat : MonoBehaviour
         float attackAnimEnd = attackAnimFull - attackDelay;
 
         animator.PlayAirAttackAnim(currentAirAttack, attackAnimFull);
+        playAudioClips.PlayAttackSwing();
 
         yield return new WaitForSeconds(attackDelay);
         CheckAttack(airAttackDamageMultipliers[currIndex], attackAnimFull, false);
