@@ -57,8 +57,11 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         || (transform.position.x > xPos && !movement.isFacingRight))
         {
             if(playAudioClips != null) playAudioClips.PlayBlockedAudio();
-            InstantiateManager.Instance.TextPopups.ShowBlocked(textPopupOffset.position);
-            InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+            if(instantiateManager != null)
+            {
+                instantiateManager.TextPopups.ShowBlocked(textPopupOffset.position);
+                instantiateManager.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+            }
             // base.TakeDamage(0, knockback, 0); //TODO: if blocked damage is 0, may just reduce flip during attackCO
             CheckCounterHit();
         }
@@ -78,10 +81,19 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         movement.rb.simulated = false;
         GetComponent<CapsuleCollider2D>().enabled = false;
 
+        playAudioClips.PlayDeathSound();
+
         isAlive = false;
-        GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
-        ScreenShakeListener.Instance.Shake(2);
+
+        if(augmentInventory != null) augmentInventory.OnKill(GetGroundPosition());
+        if(screenShakeListener != null) screenShakeListener.Shake(2);
         //InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+            instantiateManager.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        }
 
         StartCoroutine(DelayDeath());
     }
@@ -91,10 +103,13 @@ public class Shielder_EnemyCombat : Base_EnemyCombat
         //Delay screenshake and XP orb spawns to line up with death animation
         yield return new WaitForSeconds(deathDelayTime);
 
-        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+        if(screenShakeListener != null) screenShakeListener.Shake(2);
 
-        ScreenShakeListener.Instance.Shake(2);
-        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        // if(instantiateManager != null) //Moved to Die(), delay not needed
+        // {
+        //     instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+        //     instantiateManager.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        // }
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();

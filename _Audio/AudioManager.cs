@@ -16,11 +16,11 @@ public class AudioManager : MonoBehaviour
     [Space(10)]
     [Header("Player SFX")]
     [SerializeField] public AudioSource source_PlayerAtkAudio;
-    [SerializeField] public AudioSource source_PlayerHitAudio, source_PlayerBlockAudio;
+    [SerializeField] public AudioSource source_PlayerHitAudio, source_PlayerBlockAudio, source_PlayerDeath;
     [Space(10)]
     [Header("Enemy SFX")]
     [SerializeField] public AudioSource source_EnemyAtkAudio;
-    [SerializeField] public AudioSource source_EnemyHitSound, source_EnemyBlock;
+    [SerializeField] public AudioSource source_EnemyHitSound, source_EnemyBlock, source_EnemyDeath;
     //TODO: add Ambient sound source
     [Space(15)]
     [Header("Audio Fade Settings")]
@@ -106,6 +106,12 @@ public class AudioManager : MonoBehaviour
         source_PlayerBlockAudio.PlayOneShot(clip);
     }
 
+    public void PlayDeathSound_Player(AudioClip clip)
+    {
+        if(source_PlayerDeath.isPlaying) source_PlayerDeath.Stop();
+        source_PlayerDeath.PlayOneShot(clip);
+    }
+
 #endregion
 
 #region Enemy SFX
@@ -125,6 +131,12 @@ public class AudioManager : MonoBehaviour
     {
         if(source_EnemyBlock.isPlaying) source_EnemyBlock.Stop();
         source_EnemyBlock.PlayOneShot(clip);
+    }
+
+    public void PlayDeathSound_Enemy(AudioClip clip)
+    {
+        if(source_EnemyDeath.isPlaying) source_EnemyDeath.Stop();
+        source_EnemyDeath.PlayOneShot(clip);
     }
 
 #endregion
@@ -151,9 +163,12 @@ public class AudioManager : MonoBehaviour
         source_PlayerAtkAudio.volume = value;
         source_PlayerHitAudio.volume = value;
         source_PlayerBlockAudio.volume = value;
+        source_PlayerDeath.volume = value;
+
         source_EnemyAtkAudio.volume = value;
         source_EnemyHitSound.volume = value;
         source_EnemyBlock.volume = value;
+        source_EnemyDeath.volume = value;
     }
 
     public void ToggleSFX(bool toggle)
@@ -165,9 +180,12 @@ public class AudioManager : MonoBehaviour
         source_PlayerAtkAudio.mute = toggle;
         source_PlayerHitAudio.mute = toggle;
         source_PlayerBlockAudio.mute = toggle;
+        source_PlayerDeath.mute = toggle;
+
         source_EnemyAtkAudio.mute = toggle;
         source_EnemyHitSound.mute = toggle;
         source_EnemyBlock.mute = toggle;
+        source_EnemyDeath.mute = toggle;
     }
 
     public void ToggleMusic(bool toggle)

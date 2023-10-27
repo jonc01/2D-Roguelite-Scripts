@@ -122,7 +122,8 @@ public class Base_EnemyController : MonoBehaviour
         // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
         if (playerDetected)
         {
-            // playerDetected = true; //-
+            // combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+
             StopPatrolling();
 
             if (isIdling)
@@ -133,7 +134,6 @@ public class Base_EnemyController : MonoBehaviour
             // movement.MoveRight(raycast.playerDetectedToRight);
             movement.MoveRight(raycast.playerToRight);
         }
-        // else playerDetected = false; //-
     }
 
     protected void MoveCheck()

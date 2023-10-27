@@ -659,7 +659,9 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
         //Show death effects then spawn XP Orbs
         ScreenShakeListener.Instance.Shake(3);
-        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+
+        if(instantiateManager != null)
+            instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         // InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
 
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
@@ -675,8 +677,12 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         offset.y -= .35f;
 
         ScreenShakeListener.Instance.Shake(3);
-        InstantiateManager.Instance.HitEffects.ShowKillEffect(offset);
-        InstantiateManager.Instance.XPOrbs.SpawnOrbs(offset, totalXPOrbs);
-        InstantiateManager.Instance.HealOrbs.SpawnOrbs(offset, totalHealOrbs);
+
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowKillEffect(offset);
+            instantiateManager.XPOrbs.SpawnOrbs(offset, totalXPOrbs);
+            instantiateManager.HealOrbs.SpawnOrbs(offset, totalHealOrbs);
+        }
     }
 }

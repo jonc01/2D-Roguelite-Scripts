@@ -20,6 +20,7 @@ public class PlayAudioClips : MonoBehaviour
     [Header("- Character Audio -")]
     [SerializeField] private AudioClip[] charAttackSwing;
     [SerializeField] private AudioClip[] charFootsteps;
+    [SerializeField] private AudioClip[] deathSound;
 
 
     void Start()
@@ -65,21 +66,29 @@ public class PlayAudioClips : MonoBehaviour
     {
         if(hitAudio.Length == 0) return;
         int randIndex = Random.Range(0, hitAudio.Length);
-        audioManager.PlayAtkSound_Player(hitAudio[randIndex]);
 
-        if(isPlayer) audioManager.PlayAtkSound_Player(hitAudio[randIndex]);
-        else audioManager.PlayAtkSound_Enemy(hitAudio[randIndex]);
+        if(isPlayer) audioManager.PlayHitSound_Player(hitAudio[randIndex]);
+        else audioManager.PlayHitSound_Enemy(hitAudio[randIndex]);
     }
 
     public void PlayBlockedAudio()
     {
         if(blockedHit.Length == 0) return;
         int randIndex = Random.Range(0, blockedHit.Length);
-        audioManager.PlayBlockSound_Player(blockedHit[randIndex]);
 
-        if(isPlayer) audioManager.PlayAtkSound_Player(blockedHit[randIndex]);
-        else audioManager.PlayAtkSound_Enemy(blockedHit[randIndex]);
+        if(isPlayer) audioManager.PlayBlockSound_Player(blockedHit[randIndex]);
+        else audioManager.PlayBlockSound_Enemy(blockedHit[randIndex]);
     }
+
+    public void PlayDeathSound()
+    {
+        if(deathSound.Length == 0) return;
+        int randIndex = Random.Range(0, deathSound.Length);
+
+        if(isPlayer) audioManager.PlayDeathSound_Player(deathSound[randIndex]);
+        else audioManager.PlayDeathSound_Enemy(deathSound[randIndex]);
+    }
+
 
 #endregion
 

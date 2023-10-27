@@ -33,6 +33,7 @@ public class Ranged_Global : Ranged_Horizontal
         combat.isAttacking = true;
         combat.knockbackImmune = true;
 
+        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
 
         combat.PlayIndicator(); //---------------------------
         
