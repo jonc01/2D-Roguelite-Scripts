@@ -14,7 +14,6 @@ public class Ranged_Global : Ranged_Horizontal
     {
         base.Start();
         canFire = true;
-        //damage = combat.attackDamage; //! Manually setting damage
     }
 
     public override void Attack()

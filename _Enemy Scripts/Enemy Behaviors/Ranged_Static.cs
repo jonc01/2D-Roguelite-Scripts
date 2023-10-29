@@ -46,7 +46,6 @@ public class Ranged_Static : Base_CombatBehavior
 
         // yield return new WaitForSeconds(chargeUpAnimDelay); //Charge up anim
 
-        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
         PlayIndicator();
         combat.animator.PlayManualAnim(0, fullAnimTime);
 

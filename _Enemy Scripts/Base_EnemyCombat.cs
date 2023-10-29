@@ -178,6 +178,9 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         // if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
         // else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
+
+        if(initialEnable) return;
+        StartCoroutine(SpawnCO(.75f));
     }
 
     protected virtual void OnEnable()

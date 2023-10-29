@@ -112,12 +112,15 @@ public class Base_EnemyController : MonoBehaviour
         else return false;
     }
 
-    protected void ChasePlayer()
+    protected virtual void ChasePlayer()
     {
-        if (!combat.chasePlayer) return;
-        if (!movement.canMove) return;
-        if (raycast.currPlatform != currPlayerPlatform) return;
-        if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
+        if (!isRangedAttack)
+        {
+            if (!combat.chasePlayer) return;
+            if (!movement.canMove) return;
+            if (raycast.currPlatform != currPlayerPlatform) return;
+            if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
+        }
         
         // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
         if (playerDetected)

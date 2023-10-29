@@ -500,7 +500,7 @@ public class Base_PlayerCombat : MonoBehaviour
     {
         movement.StopVelocityX();
         yield return new WaitForSeconds(.02f); //need delay for physics to update
-        float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        float temp = kbToRight != true ? -1 : 1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
