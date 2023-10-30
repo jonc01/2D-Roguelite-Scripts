@@ -103,16 +103,16 @@ public class GrenadeController : MonoBehaviour
         }
     }
 
-    public void TempAllowDropThrough()
+    public void TempAllowDropThrough(float duration = .5f)
     {
         canDropThrough = true;
-        StartCoroutine(TempAllowDropThroughCO());
+        StartCoroutine(TempAllowDropThroughCO(duration));
     }
 
-    IEnumerator TempAllowDropThroughCO()
+    IEnumerator TempAllowDropThroughCO(float duration = .5f)
     {
         //Timer to prevent dropping through the Player's platform if the drone is on a ledge
-        yield return new WaitForSeconds(.5f); 
+        yield return new WaitForSeconds(duration); 
         canDropThrough = false;
     }
 
