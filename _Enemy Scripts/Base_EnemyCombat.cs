@@ -107,8 +107,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (movement == null) movement = GetComponent<Base_EnemyMovement>();
         if (enemyController == null) enemyController = GetComponent<Base_EnemyController>();
         if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
-        //Initiating base stats before modifiers
+        
+        instantiateManager = InstantiateManager.Instance;
 
+        //Initiating base stats before modifiers
         if (character != null)
         {
             defense = character.Base_Defense;
@@ -131,6 +133,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             healthBar.SetHealth(maxHP);
             healthbarTransform = healthBar.GetComponent<Transform>();
         }
+
 
         //Defaults
         // fullAttackAnimTime = 1f;
@@ -157,7 +160,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         playerTransform = GameManager.Instance.playerTransform;
         augmentInventory = GameManager.Instance.AugmentInventory;
-        instantiateManager = InstantiateManager.Instance;
+        // instantiateManager = InstantiateManager.Instance;
         screenShakeListener = ScreenShakeListener.Instance;
 
         Transform currObj = transform;
@@ -179,15 +182,15 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         // if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
         // else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
 
-        if(initialEnable) return;
-        StartCoroutine(SpawnCO(.75f));
+        // if(initialEnable) return;
+        // StartCoroutine(SpawnCO(.75f));
     }
 
     protected virtual void OnEnable()
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
-        if(initialEnable) return;
+        // if(initialEnable) return;
         StartCoroutine(SpawnCO(.75f));
     }
 

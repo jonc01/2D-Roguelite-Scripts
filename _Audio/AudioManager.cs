@@ -90,25 +90,22 @@ public class AudioManager : MonoBehaviour
     public void PlayAtkSound_Player(AudioClip clip)
     {
         //Check if sound is already playing, stop current sound then play new one
-        if(source_PlayerAtkAudio.isPlaying) source_PlayerAtkAudio.Stop();
+        // if(source_PlayerAtkAudio.isPlaying) source_PlayerAtkAudio.Stop();
         source_PlayerAtkAudio.PlayOneShot(clip);
     }
     
     public void PlayHitSound_Player(AudioClip clip)
     {
-        if(source_PlayerHitAudio.isPlaying) source_PlayerHitAudio.Stop();
         source_PlayerHitAudio.PlayOneShot(clip);
     }
 
     public void PlayBlockSound_Player(AudioClip clip)
     {
-        if(source_PlayerBlockAudio.isPlaying) source_PlayerBlockAudio.Stop();
         source_PlayerBlockAudio.PlayOneShot(clip);
     }
 
     public void PlayDeathSound_Player(AudioClip clip)
     {
-        if(source_PlayerDeath.isPlaying) source_PlayerDeath.Stop();
         source_PlayerDeath.PlayOneShot(clip);
     }
 
@@ -117,25 +114,21 @@ public class AudioManager : MonoBehaviour
 #region Enemy SFX
     public void PlayAtkSound_Enemy(AudioClip clip)
     {
-        if(source_EnemyAtkAudio.isPlaying) source_EnemyAtkAudio.Stop();
         source_EnemyAtkAudio.PlayOneShot(clip);
     }
 
     public void PlayHitSound_Enemy(AudioClip clip)
     {
-        if(source_EnemyHitSound.isPlaying) source_EnemyHitSound.Stop();
         source_EnemyHitSound.PlayOneShot(clip);
     }
 
     public void PlayBlockSound_Enemy(AudioClip clip)
     {
-        if(source_EnemyBlock.isPlaying) source_EnemyBlock.Stop();
         source_EnemyBlock.PlayOneShot(clip);
     }
 
     public void PlayDeathSound_Enemy(AudioClip clip)
     {
-        if(source_EnemyDeath.isPlaying) source_EnemyDeath.Stop();
         source_EnemyDeath.PlayOneShot(clip);
     }
 
