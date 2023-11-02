@@ -588,6 +588,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 ScreenShakeListener.Instance.Shake(3);
                 InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
                 ParryCounter();
+                if(playAudioClips != null) playAudioClips.PlayBlockedAudio();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
             }
@@ -619,6 +620,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
         InstantiateManager.Instance.HitEffects.ShowHitEffect(textPopupOffset.position);
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         //Shake screen based on how much damage is taken (% of max HP)
         float damageToHealth = damageTaken/maxHP;

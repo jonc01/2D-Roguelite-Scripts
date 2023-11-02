@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro.EditorUtilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -22,7 +23,20 @@ public class AudioManager : MonoBehaviour
     [SerializeField] public AudioSource source_EnemyAtkAudio;
     [SerializeField] public AudioSource source_EnemyHitSound, source_EnemyBlock, source_EnemyDeath;
     //TODO: add Ambient sound source
-    [Space(15)]
+    [SerializeField] private float player_hitAudioCD = .1f;
+    [SerializeField] private float player_blockAudioCD = .1f;
+    [SerializeField] private float hitAudioCD = .1f;
+    [SerializeField] private float deathAudioCD = .1f;
+    [SerializeField] private float blockAudioCD = .1f;
+    // [Space(5)]
+    // [Header("Debugging SFX")]
+    private float player_hitAudioCDTimer;
+    private float player_blockAudioCDTimer;
+    private float hitAudioCDTimer;
+    private float deathAudioCDTimer;
+    private float blockAudioCDTimer;
+
+    [Space(20)]
     [Header("Audio Fade Settings")]
     [SerializeField] float fadeDuration = 2f;
 
@@ -61,10 +75,19 @@ public class AudioManager : MonoBehaviour
         startingSetVolumeMusic = startVolumeMusic;
 
         fadeTimer = 0;
+
+        player_hitAudioCDTimer = 0;
+        player_blockAudioCDTimer = 0;
+
+        hitAudioCDTimer = 0;
+        deathAudioCDTimer = 0;
+        blockAudioCDTimer = 0;
     }
 
     void Update()
-    {   
+    {
+        AudioTimers();
+
         if (fadingAudio)
         {
             if (fadeTimer < fadeDuration)
@@ -79,6 +102,16 @@ public class AudioManager : MonoBehaviour
                 fadeTimer = 0f;
             }
         }
+    }
+
+    private void AudioTimers()
+    {
+        //Added cooldown timers to prevent audio from stacking
+        if(player_hitAudioCDTimer > 0) player_hitAudioCDTimer -= Time.deltaTime;
+        if(player_blockAudioCDTimer > 0) player_blockAudioCDTimer -= Time.deltaTime;
+        if(hitAudioCDTimer > 0) hitAudioCDTimer -= Time.deltaTime;
+        if(deathAudioCDTimer > 0) deathAudioCDTimer -= Time.deltaTime;
+        if(blockAudioCDTimer > 0) blockAudioCDTimer -= Time.deltaTime;
     }
 
     public void PlaySound()
@@ -96,11 +129,15 @@ public class AudioManager : MonoBehaviour
     
     public void PlayHitSound_Player(AudioClip clip)
     {
+        if(player_hitAudioCDTimer > 0) return;
+        player_hitAudioCDTimer = player_hitAudioCD;
         source_PlayerHitAudio.PlayOneShot(clip);
     }
 
     public void PlayBlockSound_Player(AudioClip clip)
     {
+        if(player_blockAudioCDTimer > 0) return;
+        player_blockAudioCDTimer = player_blockAudioCD;
         source_PlayerBlockAudio.PlayOneShot(clip);
     }
 
@@ -119,16 +156,22 @@ public class AudioManager : MonoBehaviour
 
     public void PlayHitSound_Enemy(AudioClip clip)
     {
+        if(hitAudioCDTimer > 0) return;
+        hitAudioCDTimer = hitAudioCD;
         source_EnemyHitSound.PlayOneShot(clip);
     }
 
     public void PlayBlockSound_Enemy(AudioClip clip)
     {
+        if(blockAudioCDTimer > 0) return;
+        blockAudioCDTimer = blockAudioCD;
         source_EnemyBlock.PlayOneShot(clip);
     }
 
     public void PlayDeathSound_Enemy(AudioClip clip)
     {
+        if(deathAudioCDTimer > 0) return;
+        deathAudioCDTimer = deathAudioCD;
         source_EnemyDeath.PlayOneShot(clip);
     }
 
