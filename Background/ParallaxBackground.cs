@@ -23,6 +23,11 @@ public class ParallaxBackground : MonoBehaviour
 
     private void Update() //FixedUpdate prevents jittery effect in editor, but Update fixes in build
     {
+        if(cameraTransform == null)
+        {
+            cameraTransform = Camera.main.transform;
+        }
+
         Vector3 deltaMovement = cameraTransform.position - lastCameraPosition;
         // transform.position += deltaMovement * parallaxEffectMultiplier;
         transform.position += new Vector3(deltaMovement.x * parallaxEffectMultiplier, deltaMovement.y *parallaxEffectMultiplierY, 0);

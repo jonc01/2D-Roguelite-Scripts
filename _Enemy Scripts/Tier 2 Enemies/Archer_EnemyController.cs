@@ -55,12 +55,14 @@ public class Archer_EnemyController : Base_EnemyController
 
     IEnumerator LungeAttack()
     {
+        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
         combat.altAttacking = true;
         combat.chasePlayer = false;
         combat.isAttacking = true;
-        combat.animator.PlayManualAnim(1, 0.75f); //Vanish
         combat.ToggleHealthbar(false);
         combat.ToggleDamageImmune(true);
+        yield return new WaitForSeconds(0.1f);
+        combat.animator.PlayManualAnim(1, 0.75f); //Vanish
         yield return new WaitForSeconds(0.2f);
         movement.canMove = false;
 

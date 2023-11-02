@@ -21,13 +21,13 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
     protected Base_EnemyController enemyController;
-    [Header("Audio References")]
-    [SerializeField] PlayAudioClips playAudioClips;
+    //Set at Start()
 
     [Space(10)]
     [SerializeField] public bool DEBUGMODE = false;
     [SerializeField] bool showGizmos = false;
-    [SerializeField] float spawnFXScale = 2.5f; //2.5f default 
+    [SerializeField] float spawnFXScaleX = 2.5f; //2.5f default 
+    [SerializeField] float spawnFXScaleY = 2.5f; //2.5f default 
     [Header("*Animation Times")]
     [SerializeField] float fullAttackAnimTime; //1f, 1.416667f
     [SerializeField] float attackDelayTime; //0.0834f, 0.834f
@@ -42,8 +42,12 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] protected HealthBar healthBar;
     public Transform healthbarTransform;
     [SerializeField] protected EnemyWaveManager enemyWaveManager;
+    protected AugmentInventory augmentInventory;
+    public InstantiateManager instantiateManager;
+    protected ScreenShakeListener screenShakeListener;
+    [SerializeField] protected PlayAudioClips playAudioClips;
 
-    [Space(10)]
+    [Space(15)]
 
     //HealthBar
 
@@ -52,7 +56,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [Header("--- Health ---")]
     public Base_Character character;
     [SerializeField] float maxHP = 8;
-    [SerializeField] float currentHP;
+    [SerializeField] protected float currentHP;
     [SerializeField] float defense = 0;
     [SerializeField] protected int totalXPOrbs = 3;
     
@@ -61,6 +65,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     [SerializeField] float attackSpeed = .1f;
     [SerializeField] float attackEndDelay = 0;
     [SerializeField] float startAttackDelay = 0;
+    [SerializeField] protected float optionalAttackDelay = 0;
+    [SerializeField] protected float indicatorOffset = 0;
     public float attackRange;
     public bool allowFlipBeforeAttack = false;
     [SerializeField] public float knockbackStrength = 0; //4 is moderate
@@ -100,8 +106,11 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         //playerLayer = GameObject.FindGameObjectWithTag("Player").GetComponent<LayerMask>();
         if (movement == null) movement = GetComponent<Base_EnemyMovement>();
         if (enemyController == null) enemyController = GetComponent<Base_EnemyController>();
-        //Initiating base stats before modifiers
+        if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
+        
+        instantiateManager = InstantiateManager.Instance;
 
+        //Initiating base stats before modifiers
         if (character != null)
         {
             defense = character.Base_Defense;
@@ -124,6 +133,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
             healthBar.SetHealth(maxHP);
             healthbarTransform = healthBar.GetComponent<Transform>();
         }
+
 
         //Defaults
         // fullAttackAnimTime = 1f;
@@ -148,17 +158,39 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         chasePlayer = true;
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
-        if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
-        else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
-
         playerTransform = GameManager.Instance.playerTransform;
+        augmentInventory = GameManager.Instance.AugmentInventory;
+        // instantiateManager = InstantiateManager.Instance;
+        screenShakeListener = ScreenShakeListener.Instance;
+
+        Transform currObj = transform;
+        for(int i=0; i<3; i++) //Limiting check to 3 parents
+        {
+            EnemyWaveManager waveManagerCheck = currObj.GetComponent<EnemyWaveManager>();
+            if(waveManagerCheck != null)
+            {
+                enemyWaveManager = waveManagerCheck; //Wave Manager found
+                break;
+            }
+            else
+            {
+                currObj = currObj.parent;
+                if(currObj == null) break; //no more parent objects
+            }
+        }
+
+        // if(transform.parent.parent == null) Debug.Log("No Enemy StageManager");
+        // else enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
+
+        // if(initialEnable) return;
+        // StartCoroutine(SpawnCO(.75f));
     }
 
     protected virtual void OnEnable()
     {
         //Manual set, duration of SpawnIndicator SpawnIn
         //Toggle enemy before spawning in
-        if(initialEnable) return;
+        // if(initialEnable) return;
         StartCoroutine(SpawnCO(.75f));
     }
 
@@ -178,8 +210,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         isSpawning = true; //This prevents the enemy from attacking and taking damage
         healthBar.gameObject.SetActive(false);
-        if(bottomOffset != null)
-            InstantiateManager.Instance.Indicator.PlayIndicator(bottomOffset.position, 0, spawnFXScale);
+        if(bottomOffset != null && instantiateManager != null)
+            instantiateManager.Indicator.PlayIndicator(bottomOffset.position, 0, spawnFXScaleX, spawnFXScaleY);
         //Toggle SR off
         sr.enabled = false;
         yield return new WaitForSeconds(0.1667f); //TODO: appear delay
@@ -249,12 +281,15 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
     protected virtual IEnumerator Attacking()
     {
-        //Allow flip for a little longer
         isAttacking = true;
         // knockbackImmune = true;
 
         movement.canMove = false;
         movement.ToggleFlip(false);
+
+        instantiateManager.TextPopups.ShowIndicator(hitEffectsOffset.position, indicatorOffset);
+        yield return new WaitForSeconds(optionalAttackDelay);
+        FacePlayer();
         
         animator.PlayAttackAnim(fullAttackAnimTime);
 
@@ -448,17 +483,17 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if (damageImmune || damageTaken <= 0) return;
 
         HitFlash(); //Set material to white, short delay before resetting
-        if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(hitEffectsOffset);
+        if(procOnHit) augmentInventory.OnHit(hitEffectsOffset);
 
         float totalDamage = damageTaken - defense;
 
 
         //Damage can never be lower than 1
         if (totalDamage <= 0) totalDamage = 1;
-        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        if(instantiateManager != null) instantiateManager.HitEffects.ShowHitEffect(hitEffectsOffset.position);
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
-        if(playAudioClips != null) playAudioClips.PlayRandomClip();
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         if(knockback && !knockbackImmune)
         {
@@ -469,7 +504,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         }
 
         //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        if(instantiateManager != null)
+            instantiateManager.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
 
         if (currentHP <= 0)
         {
@@ -487,13 +523,16 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
 
         HitFlash(); //Set material to white, short delay before resetting
 
-        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        if(instantiateManager != null)
+            instantiateManager.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+
         currentHP -= damageTaken;
         healthBar.UpdateHealth(currentHP);
-        if(playAudioClips != null) playAudioClips.PlayRandomClip();
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowStatusDamage(damageTaken, textPopupOffset.position, colorIdx);
+        if(instantiateManager != null)
+            instantiateManager.TextPopups.ShowStatusDamage(damageTaken, textPopupOffset.position, colorIdx);
 
         if (currentHP <= 0)
         {
@@ -545,17 +584,23 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         ToggleHealthbar(false);
         if(AttackingCO != null) StopCoroutine(AttackingCO);
 
-        ScreenShakeListener.Instance.Shake(3);
+        if(screenShakeListener != null) screenShakeListener.Shake(3);
+
         movement.rb.simulated = false;
         GetComponent<CapsuleCollider2D>().enabled = false;
 
-        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
-        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+            instantiateManager.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        }
+
+        if(playAudioClips != null) playAudioClips.PlayDeathSound();
 
         //Base_EnemyAnimator checks for isAlive to play Death animation
         isAlive = false;
         // GameManager.Instance.AugmentInventory.OnKill(hitEffectsOffset);
-        GameManager.Instance.AugmentInventory.OnKill(GetGroundPosition());
+        augmentInventory.OnKill(GetGroundPosition());
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
 
         //Disable sprite renderer before deleting gameobject

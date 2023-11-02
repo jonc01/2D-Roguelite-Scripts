@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -20,5 +21,11 @@ public class IndicatorManager : MonoBehaviour
     {
         if (Prefabs.Length == 0) return;
         Prefabs[index].PlayAttachedAnim(position, 1);
+    }
+
+    public void PlayIndicator(Vector3 position, int index = 0, float scaleX = 2f, float scaleY = 2f)
+    {
+        if (Prefabs.Length == 0) return;
+        Prefabs[index].PlayAttachedAnimWide(position, scaleX, scaleY);
     }
 }

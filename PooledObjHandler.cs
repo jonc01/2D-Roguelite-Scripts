@@ -35,4 +35,15 @@ public class PooledObjHandler : MonoBehaviour
 
         effect.SetActive(true);
     }
+
+    public void PlayAttachedAnimWide(Vector3 pos, float scaleX = 2.5f, float scaleY = 2.5f)
+    {
+        GameObject effect = IndicatorPool.GetObject();
+        // effect.transform.SetParent(parentObj);
+        effect.transform.position = pos;
+        //Setting parent and scale
+        effect.transform.localScale = new Vector3(scaleX, scaleY, 1);
+
+        effect.SetActive(true);
+    }
 }

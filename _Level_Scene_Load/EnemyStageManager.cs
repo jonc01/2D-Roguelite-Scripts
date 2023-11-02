@@ -43,6 +43,9 @@ public class EnemyStageManager : MonoBehaviour
     [SerializeField] GameObject[] clearRewardPrefabs;
     [SerializeField] int[] clearRewardsQuantity;
     [SerializeField] Transform rewardSpawnPoint;
+    [Space(5)]
+    [Header("- Clear Platforms -")]
+    [SerializeField] GameObject platformsParent;
 
     void Start()
     {
@@ -136,6 +139,7 @@ public class EnemyStageManager : MonoBehaviour
 
     private void SpawnClearRewards()
     {
+        Invoke("DelayPlatformSpawn", 1.2f);
         if(clearRewardPrefabs.Length == 0) return;
         if(rewardSpawnPoint == null) rewardSpawnPoint = transform;
 
@@ -145,6 +149,14 @@ public class EnemyStageManager : MonoBehaviour
             {
                 Instantiate(clearRewardPrefabs[i], rewardSpawnPoint.position, Quaternion.identity);
             }
+        }
+    }
+
+    private void DelayPlatformSpawn()
+    {
+        if(platformsParent != null)
+        {
+            platformsParent.SetActive(true);
         }
     }
 }

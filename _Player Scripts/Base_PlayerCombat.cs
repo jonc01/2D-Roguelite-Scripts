@@ -10,6 +10,7 @@ public class Base_PlayerCombat : MonoBehaviour
     public Base_Character character;
     public Base_PlayerMovement movement;
     public AnimatorManager animator;
+    [SerializeField] private PlayAudioClips playAudioClips;
     [SerializeField] private AugmentInventory augmentInventory;
     [SerializeField] private LayerMask enemyLayer;
     //[SerializeField] private Transform attackPoint;
@@ -126,6 +127,7 @@ public class Base_PlayerCombat : MonoBehaviour
         sr = GetComponentInChildren<SpriteRenderer>();
         mDefault = sr.material;
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
+        if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
 
         isAlive = true;
         isStunned = false;
@@ -266,6 +268,7 @@ public class Base_PlayerCombat : MonoBehaviour
         float attackAnimEnd = attackAnimFull - attackDelay;
 
         animator.PlayAttackAnim(currentAttack, attackAnimFull);
+        playAudioClips.PlayAttackSwing();
         //Movement is being toggled in Update when isAttacking is toggled
 
         yield return new WaitForSeconds(attackDelay);
@@ -286,6 +289,7 @@ public class Base_PlayerCombat : MonoBehaviour
         float attackAnimEnd = attackAnimFull - attackDelay;
 
         animator.PlayAirAttackAnim(currentAirAttack, attackAnimFull);
+        playAudioClips.PlayAttackSwing();
 
         yield return new WaitForSeconds(attackDelay);
         CheckAttack(airAttackDamageMultipliers[currIndex], attackAnimFull, false);
@@ -365,7 +369,6 @@ public class Base_PlayerCombat : MonoBehaviour
 
     void ParryShieldCheck()
     {
-
         if(parryShieldTimer > 0)
         {
             parryShieldTimer -= Time.deltaTime;
@@ -497,7 +500,7 @@ public class Base_PlayerCombat : MonoBehaviour
     {
         movement.StopVelocityX();
         yield return new WaitForSeconds(.02f); //need delay for physics to update
-        float temp = kbToRight != true ? 1 : -1; //get knocked back in opposite direction of player
+        float temp = kbToRight != true ? -1 : 1; //get knocked back in opposite direction of player
         Vector2 direction = new Vector2(temp, .3f);
         movement.rb.AddForce(direction * strength, ForceMode2D.Impulse);
 
@@ -585,6 +588,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 ScreenShakeListener.Instance.Shake(3);
                 InstantiateManager.Instance.ParryEffects.ShowHitEffect(parryPoint.position, transform.localScale.x);
                 ParryCounter();
+                if(playAudioClips != null) playAudioClips.PlayBlockedAudio();
                 InstantiateManager.Instance.TextPopups.ShowParry(textPopupOffset.position);
                 return;
             }
@@ -616,6 +620,7 @@ public class Base_PlayerCombat : MonoBehaviour
 
         InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
         InstantiateManager.Instance.HitEffects.ShowHitEffect(textPopupOffset.position);
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         //Shake screen based on how much damage is taken (% of max HP)
         float damageToHealth = damageTaken/maxHP;

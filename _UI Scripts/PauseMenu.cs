@@ -91,8 +91,6 @@ public class PauseMenu : MonoBehaviour
         // SceneManager.LoadScene("MainMenu"); //TODO; replace 
 
         
-
-        //TODO: use this instead
         AsyncLevelLoader.asyncLevelLoader.LoadMainMenu("Tileset1_LevelGen");
 
 

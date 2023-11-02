@@ -10,6 +10,7 @@ public class Dagger_Lunge : Base_CombatBehavior
     [SerializeField] Animator anim;
     // [SerializeField] bool canLunge;
     [SerializeField] int currAttack;
+    [SerializeField] float lungeDelay = .2f;
     [SerializeField] float attackResetDelay = 2f;
     [SerializeField] float attackResetTimer;
     [Space(10)]
@@ -60,22 +61,25 @@ public class Dagger_Lunge : Base_CombatBehavior
 
     IEnumerator LungeAttackCO()
     {
+        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
         combat.isAttacking = true;
         combat.altAttacking = true;
         combat.chasePlayer = false;
 
-        // combat.knockbackImmune = true;
+        yield return new WaitForSeconds(lungeDelay);
 
+        // combat.knockbackImmune = true;
+        
         yield return new WaitForSeconds(chargeUpAnimDelay);
 
         movement.ToggleFlip(false);
 
-        // combat.Lunge(movement.isFacingRight, 8);
-        combat.GetKnockback(movement.isFacingRight, 8); //TODO: no idea why Lunge doesn't work
-        yield return new WaitForSeconds(.1f); //Lunge start before animation
+        // combat.Lunge(movement.isFacingRight, 8); //Doesn't work, using GetKnockback()
+        combat.animator.PlayManualAnim(0, fullAnimTimes[0]); //Start animation just before lunge
+        yield return new WaitForSeconds(.1f); //Lunge start
 
+        combat.GetKnockback(movement.isFacingRight, 8); //TODO: no idea why Lunge() doesn't work
         //Attack 1
-        combat.animator.PlayManualAnim(0, fullAnimTimes[0]);
         yield return new WaitForSeconds(animDelayTimes[0] - .1f);
         movement.canMove = false;
         CheckHit(0);

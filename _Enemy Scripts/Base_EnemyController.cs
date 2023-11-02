@@ -112,17 +112,21 @@ public class Base_EnemyController : MonoBehaviour
         else return false;
     }
 
-    protected void ChasePlayer()
+    protected virtual void ChasePlayer()
     {
-        if (!combat.chasePlayer) return;
-        if (!movement.canMove) return;
-        if (raycast.currPlatform != currPlayerPlatform) return;
-        if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
+        if (!isRangedAttack)
+        {
+            if (!combat.chasePlayer) return;
+            if (!movement.canMove) return;
+            if (raycast.currPlatform != currPlayerPlatform) return;
+            if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
+        }
         
         // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
         if (playerDetected)
         {
-            // playerDetected = true; //-
+            // combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+
             StopPatrolling();
 
             if (isIdling)
@@ -133,7 +137,6 @@ public class Base_EnemyController : MonoBehaviour
             // movement.MoveRight(raycast.playerDetectedToRight);
             movement.MoveRight(raycast.playerToRight);
         }
-        // else playerDetected = false; //-
     }
 
     protected void MoveCheck()

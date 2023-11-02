@@ -46,6 +46,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] protected HealthBar healthBar;
     [SerializeField] protected EnemyWaveManager enemyWaveManager;
     [SerializeField] protected float spawnDelay = 1f;
+    protected InstantiateManager instantiateManager;
 
     [Space(10)]
 
@@ -104,6 +105,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool backToWall;
     public float distanceToPlayer;
     public bool chasePlayer; //override to prevent Boss from chasing Player
+    
 
 
     protected virtual void Awake()
@@ -164,6 +166,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         //Must be in Start(), because of player scene loading.
         //Awake() might work during actual build with player scene always being active before enemy scenes.
         enemyWaveManager = transform.parent.GetComponent<EnemyWaveManager>();
+        instantiateManager = InstantiateManager.Instance;
     }
 
     protected virtual void OnEnable()
@@ -453,13 +456,16 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         HitFlash(); //Set material to white, short delay before resetting
         if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(transform);
-        //Play hit effect, reduce hp
-        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        //reduce hp
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
 
-        //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        //Play hit effect, display Damage number
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+            instantiateManager.TextPopups.ShowDamage(totalDamage, textPopupOffset.position);
+        }
 
         //Check Boss HP
         HealthPhaseCheck();
@@ -488,12 +494,15 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
             else totalDamage = 1;
         }
 
-        InstantiateManager.Instance.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+        //Display Damage number
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowHitEffect(hitEffectsOffset.position);
+            instantiateManager.TextPopups.ShowStatusDamage(totalDamage, textPopupOffset.position, colorIdx);
+        }
+
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
-
-        //Display Damage number
-        InstantiateManager.Instance.TextPopups.ShowStatusDamage(totalDamage, textPopupOffset.position, colorIdx);
 
         if (currentHP <= 0)
         {
@@ -539,8 +548,11 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         GetComponent<BoxCollider2D>().enabled = false;
 
         //Show death effects then spawn XP Orbs
-        InstantiateManager.Instance.HitEffects.ShowKillEffect(hitEffectsOffset.position);
-        InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        if(instantiateManager != null)
+        {
+            instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
+            instantiateManager.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+        }
 
         //Base_EnemyAnimator checks for playDeathAnim to play Death animation
         playDeathAnim = true;

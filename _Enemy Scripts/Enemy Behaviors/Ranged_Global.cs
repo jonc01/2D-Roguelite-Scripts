@@ -14,7 +14,6 @@ public class Ranged_Global : Ranged_Horizontal
     {
         base.Start();
         canFire = true;
-        //damage = combat.attackDamage; //! Manually setting damage
     }
 
     public override void Attack()
@@ -33,6 +32,7 @@ public class Ranged_Global : Ranged_Horizontal
         combat.isAttacking = true;
         combat.knockbackImmune = true;
 
+        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
 
         combat.PlayIndicator(); //---------------------------
         

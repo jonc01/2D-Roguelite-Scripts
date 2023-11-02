@@ -49,4 +49,32 @@ public class BombDrone_EnemyController : Base_EnemyController
             combat.AttackFar();
         }
     }
+
+    protected override void ChasePlayer()
+    {
+        // base.ChasePlayer();
+        if (!isRangedAttack)
+        {
+            if (!combat.chasePlayer) return;
+            if (!movement.canMove) return;
+            if (raycast.currPlatform != currPlayerPlatform) return;
+            if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
+        }
+        
+        // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
+        if (playerDetected)
+        {
+            // combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+
+            StopPatrolling();
+
+            if (isIdling)
+            {
+                StopIdling();
+                movement.canMove = true;
+            }
+            // movement.MoveRight(raycast.playerDetectedToRight);
+            movement.MoveRight(raycast.playerToRight);
+        }
+    }
 }

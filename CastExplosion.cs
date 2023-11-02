@@ -21,7 +21,7 @@ public class CastExplosion : MonoBehaviour
     [SerializeField] float startDelay = 0;
 
     [Header("(optional) Move to Ground")]
-    [SerializeField] bool moveToGround = false;
+    [SerializeField] public bool moveToGround = false;
     [SerializeField] Transform optionalRaycast;
     [SerializeField] float groundCheckDist = 1;
     [SerializeField] LayerMask groundLayer;
@@ -31,12 +31,12 @@ public class CastExplosion : MonoBehaviour
 
     [Header("Knockback")]
     public bool hasKnockBack = true;
-    [SerializeField] float knockbackStrength = 2f;
+    [SerializeField] public float knockbackStrength = 2f;
     [SerializeField] float knockbackDuration = .5f;
 
     [Header("KnockUp")]
     public bool hasKnockUp = false;
-    [SerializeField] float knockupStrength = 4f;
+    [SerializeField] public float knockupStrength = 4f;
     [SerializeField] float knockupDuration = .5f;
     [SerializeField] bool directionalKnockback = true;
 
@@ -84,6 +84,7 @@ public class CastExplosion : MonoBehaviour
 
     private void GetGround()
     {
+        //Point raycast down to get ground, then move explosion to ground
         RaycastHit2D hit = Physics2D.Raycast(optionalRaycast.position, Vector2.down, groundCheckDist, groundLayer);
         if(hit.collider != null)
         {
