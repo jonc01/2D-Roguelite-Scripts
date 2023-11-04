@@ -45,7 +45,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     protected AugmentInventory augmentInventory;
     public InstantiateManager instantiateManager;
     protected ScreenShakeListener screenShakeListener;
-    [SerializeField] protected PlayAudioClips playAudioClips;
+    [SerializeField] public PlayAudioClips playAudioClips;
 
     [Space(15)]
 
@@ -298,7 +298,10 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         if(allowFlipBeforeAttack) FacePlayer(); //Flip to faceplayer before attacking
         
         yield return new WaitForSeconds(attackDelayTime - startAttackDelay);
+
+        if(playAudioClips != null) playAudioClips.PlayAttackSwing();
         CheckHit();
+        
         yield return new WaitForSeconds(fullAttackAnimTime - attackDelayTime);
         knockbackImmune = false;
         isAttacking = false;

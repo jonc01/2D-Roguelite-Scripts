@@ -8,6 +8,7 @@ public class Base_PlayerMovement : MonoBehaviour
     public Base_Character character;
     public AnimatorManager animator;
     public Base_PlayerCombat combat;
+    [SerializeField] protected PlayAudioClips playAudioClips;
     [SerializeField] Transform vfxOffset;
     [SerializeField] public Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
@@ -96,6 +97,8 @@ public class Base_PlayerMovement : MonoBehaviour
             jumpHeight = character.Base_JumpHeight;
         }
 
+        if(playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
+
         canDoubleJump = false;
         doubleJumped = false;
         allowInput = true;
@@ -166,6 +169,7 @@ public class Base_PlayerMovement : MonoBehaviour
                 doubleJumped = true;
                 canDoubleJump = false;
                 PlayJumpVFX();
+                if(playAudioClips != null) playAudioClips.PlayJump();
             }
         }
 
@@ -444,6 +448,8 @@ public class Base_PlayerMovement : MonoBehaviour
     {
         combat.CancelAttack();
 
+        if(playAudioClips != null) playAudioClips.PlayJump();
+        
         canDash = false;
         isDashing = true;
         rb.gravityScale = 0f;

@@ -30,6 +30,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     [SerializeField] private Material mWhiteFlash;
     private Material mDefault;
     protected Base_BossController bossController;
+    [SerializeField] protected PlayAudioClips playAudioClips;
 
     [Space(10)]
     [SerializeField] protected float spawnFXScale = 2.5f; //2.5f default 
@@ -117,6 +118,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         //playerLayer = GameObject.FindGameObjectWithTag("Player").GetComponent<LayerMask>();
         if (movement == null) movement = GetComponent<Base_BossMovement>();
         if (bossController == null) bossController = GetComponent<Base_BossController>();
+        if (playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
         //Initiating base stats before modifiers
 
         if (character != null)
@@ -452,13 +454,19 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         {
             if(changingPhase) totalDamage = 0;
             else totalDamage = 1;
-        } 
+        }
 
         HitFlash(); //Set material to white, short delay before resetting
         if(procOnHit) GameManager.Instance.AugmentInventory.OnHit(transform);
         //reduce hp
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
+
+        if(playAudioClips != null)
+        {
+            if (totalDamage == 0) playAudioClips.PlayBlockedAudio();
+            else playAudioClips.PlayHitAudio();
+        }
 
         //Play hit effect, display Damage number
         if(instantiateManager != null)
@@ -503,6 +511,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
         currentHP -= totalDamage;
         healthBar.UpdateHealth(currentHP);
+        if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
         if (currentHP <= 0)
         {
@@ -553,6 +562,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
             instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
             instantiateManager.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
         }
+
+        if(playAudioClips != null) playAudioClips.PlayDeathSound();
 
         //Base_EnemyAnimator checks for playDeathAnim to play Death animation
         playDeathAnim = true;

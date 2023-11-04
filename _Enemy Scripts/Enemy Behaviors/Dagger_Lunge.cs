@@ -82,6 +82,8 @@ public class Dagger_Lunge : Base_CombatBehavior
         //Attack 1
         yield return new WaitForSeconds(animDelayTimes[0] - .1f);
         movement.canMove = false;
+
+        combat.playAudioClips.PlayAttackSwing();
         CheckHit(0);
 
         yield return new WaitForSeconds(fullAnimTimes[0] - animDelayTimes[0]);
@@ -91,6 +93,8 @@ public class Dagger_Lunge : Base_CombatBehavior
         //Attack 2
         combat.animator.PlayManualAnim(1, fullAnimTimes[1]);
         yield return new WaitForSeconds(animDelayTimes[1]);
+
+        combat.playAudioClips.PlayAttackSwing();
         CheckHit(1);
 
         yield return new WaitForSeconds(fullAnimTimes[1] - animDelayTimes[1]);
@@ -117,7 +121,10 @@ public class Dagger_Lunge : Base_CombatBehavior
         movement.ToggleFlip(false);
         combat.animator.PlayManualAnim(2, fullAnimTimes[2]);
         yield return new WaitForSeconds(animDelayTimes[2]);
+
+        combat.playAudioClips.PlayAttackSwing();
         CheckHit(2);
+
         yield return new WaitForSeconds(fullAnimTimes[2] - animDelayTimes[2]);
 
         yield return new WaitForSeconds(attackSpeed);

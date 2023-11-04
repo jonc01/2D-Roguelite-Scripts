@@ -21,6 +21,7 @@ public class PlayAudioClips : MonoBehaviour
     [SerializeField] private AudioClip[] charAttackSwing;
     [SerializeField] private AudioClip[] charFootsteps;
     [SerializeField] private AudioClip[] deathSound;
+    [SerializeField] private AudioClip[] jumpSound;
 
 
     void Start()
@@ -56,6 +57,13 @@ public class PlayAudioClips : MonoBehaviour
         if(charFootsteps.Length == 0) return;
         int randIndex = Random.Range(0, charFootsteps.Length);
         audioManager.PlayAtkSound_Player(charFootsteps[randIndex]);
+    }
+
+    public void PlayJump()
+    {
+        if(jumpSound.Length == 0) return;
+        int randIndex = Random.Range(0, jumpSound.Length);
+        audioManager.PlayAtkSound_Player(jumpSound[randIndex]);
     }
 
 #endregion
