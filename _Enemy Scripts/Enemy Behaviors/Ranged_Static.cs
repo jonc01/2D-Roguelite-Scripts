@@ -51,6 +51,7 @@ public class Ranged_Static : Base_CombatBehavior
 
         yield return new WaitForSeconds(projectileFireDelay);
 
+        combat.playAudioClips.PlayAttackSwing();
         //Instantiate projectile, set variables from this script
         GameObject projectileObj = Instantiate(projectile, attackPoint.position, transform.rotation);
         ProjectileController script = projectileObj.GetComponent<ProjectileController>();

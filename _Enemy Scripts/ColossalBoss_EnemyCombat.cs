@@ -52,7 +52,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         flyingOffsetPos = transform.position;
         flyingOffsetPos.y += flyingOffsetY;
 
-        animator.PlayManualAnim(5, 1f); 
+        animator.PlayManualAnim(5, 1f);
         //Starts the Boss on the Sleep animation, prevents Idle to Sleep animation
     }
 
@@ -138,6 +138,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 currAttack = 1;
             }
             currAttackIndex = Phase1AtkPool[currAttack-1];
+            attackSpeed = 0.3f;
+            // attackEndDelay = .3f;
         }
         else if(currentPhase == 1){
             if(currAttack-1 >= Phase2AtkPool.Length)
@@ -146,6 +148,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 currAttack = 1;
             }
             currAttackIndex = Phase2AtkPool[currAttack-1];
+            attackSpeed = 0.15f;
+            // attackEndDelay = .2f;
         }
         else{
             if(currAttack-1 >= Phase3AtkPool.Length)
@@ -154,6 +158,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
                 currAttack = 1;
             }
             currAttackIndex = Phase3AtkPool[currAttack-1];
+            attackSpeed = 0.1f;
+            // attackEndDelay = .1f;
         }
 
         // currAttackIndex = currAttack - 1;
@@ -228,6 +234,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         LungeCheck(3f);
         yield return new WaitForSeconds(attackDelayTime[0]);// - startAttackDelay);
         movement.ToggleFlip(false);
+        if (playAudioClips != null) playAudioClips.PlayAttackSwing();
         Instantiate(RangeAttackExplosionPrefab, transform.position, transform.rotation);
         // yield return new WaitForSeconds(fullAttackAnimTime[0] - attackDelayTime[0]);
         yield return new WaitForSeconds(.3f);
@@ -238,6 +245,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         LungeCheck(2.5f);
         yield return new WaitForSeconds(attackDelayTime[5]);
         movement.ToggleFlip(false);
+        if (playAudioClips != null) playAudioClips.PlayAttackSwing();
         Instantiate(RangeAttackExplosionPrefab, transform.position, transform.rotation);
         yield return new WaitForSeconds(fullAttackAnimTime[5] - attackDelayTime[5]);
         isAttacking = false;
@@ -260,6 +268,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
 
         yield return new WaitForSeconds(attackDelayTime[1]);// - startAttackDelay);
         if (MeleePrefab != null) MeleePrefab.SetActive(true);
+        if (playAudioClips != null) playAudioClips.PlayAttackSwing();
         CheckHit(true, true); //Check Melee hit
 
         StartCoroutine(MeleeExplosionOnly(numExplosions));
@@ -345,6 +354,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         LungeCheck(3f);
         yield return new WaitForSeconds(attackDelayTime[2]);
         movement.ToggleFlip(false);
+        if (playAudioClips != null) playAudioClips.PlayAttackSwing();
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
         yield return new WaitForSeconds(.35f);
 
@@ -353,6 +363,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         LungeCheck(3f);
         yield return new WaitForSeconds(attackDelayTime[6]);
         movement.ToggleFlip(false);
+        if (playAudioClips != null) playAudioClips.PlayAttackSwing();
         Instantiate(SuperAttackExplosionPrefab, transform.position, transform.rotation);
         yield return new WaitForSeconds(fullAttackAnimTime[6] - attackDelayTime[6]);
         isAttacking = false;
@@ -636,7 +647,6 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         healthBar.gameObject.SetActive(false);
         isAlive = false;
 
-
         //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
         StopAllCoroutines();
@@ -663,6 +673,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         if(instantiateManager != null)
             instantiateManager.HitEffects.ShowKillEffect(hitEffectsOffset.position);
         // InstantiateManager.Instance.XPOrbs.SpawnOrbs(transform.position, totalXPOrbs);
+
+        if(playAudioClips != null) playAudioClips.PlayDeathSound();
 
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
         GameManager.Instance.AugmentInventory.OnKill(transform);

@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class CastExplosion : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] PlayAudioClips playAudioClips;
+
     [Header("Animation Variables")]
     //Separate animators to play at different scales
     [SerializeField] private Animator animChargeUp;
@@ -55,8 +58,10 @@ public class CastExplosion : MonoBehaviour
     {
         if (animChargeUp == null) animChargeUp = GetComponentInChildren<Animator>();
         if (animExplosion == null) animExplosion = GetComponent<Animator>();
+        if (playAudioClips == null) playAudioClips = GetComponentInChildren<PlayAudioClips>();
         if (TOGGLE) gameObject.SetActive(false);
         checkForGround = false;
+
     }
 
     void Start()
@@ -101,7 +106,7 @@ public class CastExplosion : MonoBehaviour
 
     IEnumerator PlayAnims()
     {
-        if(moveToGround) 
+        if(moveToGround)
         {
             yield return new WaitForSeconds(.02f);
             checkForGround = true;
@@ -116,8 +121,10 @@ public class CastExplosion : MonoBehaviour
         }
 
         animExplosion.Play(explosionHashedInt);//"Explosion");
+
         yield return new WaitForSeconds(animDelay);
         CheckHit();
+        if(playAudioClips) playAudioClips.PlayAttackSwing();
 
         ScreenShakeListener.Instance.Shake(screenshakeIntensity);
         yield return new WaitForSeconds(explosionDuration);
