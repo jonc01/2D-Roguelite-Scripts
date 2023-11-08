@@ -714,5 +714,12 @@ public class Base_PlayerCombat : MonoBehaviour
         movement.ToggleCanMove(false);
         
         isAlive = false;
+        
+        Invoke("DisplayRespawnPrompt", 1f);
+    }
+
+    void DisplayRespawnPrompt()
+    {
+        GameManager.Instance.ToggleRespawnScreen(true);
     }
 }
