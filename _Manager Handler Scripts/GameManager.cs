@@ -37,6 +37,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private List<DoorController> bossDoors;
     [SerializeField] private EnemyStageManager bossStage;
 
+    [Space(20)]
+    [Header("- Prompt Overlays -")]
+    [SerializeField] GameObject respawnPrompt;
+
     private void Awake()
     {
         Instance = this;
@@ -139,4 +143,33 @@ public class GameManager : MonoBehaviour
     {
         bossStage = stage;
     }
+
+    public void ToggleRespawnScreen(bool toggle)
+    {
+        if(respawnPrompt == null) return;
+        respawnPrompt.SetActive(toggle);
+    }
+
+#region Button Functions
+
+    public void ResetRun()
+    {
+        StartCoroutine(ResetRunCO());
+    }
+
+    IEnumerator ResetRunCO()
+    {
+        ToggleRespawnScreen(false);
+        AudioManager.Instance.FadeOutAudio();
+        yield return new WaitForSecondsRealtime(1f);
+        AsyncLevelLoader.asyncLevelLoader.ResetRun();
+    }
+
+    public void BackToMenu()
+    {
+        AsyncLevelLoader.asyncLevelLoader.LoadMainMenu("");
+    }
+
+
+#endregion
 }

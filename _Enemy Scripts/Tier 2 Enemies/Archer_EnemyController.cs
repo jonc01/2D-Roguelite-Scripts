@@ -23,8 +23,10 @@ public class Archer_EnemyController : Base_EnemyController
 
     protected override void AttackCheckClose()
     {
+        // return; //TODO: TESTING //=========1
         if(combat.altAttacking) return; //Check if attack is already started, this prevents Manualflip being called during attack coroutine
-        if (!PlatformCheck() || isRangedAttack) return;
+        // if (!PlatformCheck() || isRangedAttack) return; //========1
+        if (!PlatformCheck() && !isRangedAttack) return;
 
         if (raycast.playerInRangeClose)
         {
@@ -42,6 +44,7 @@ public class Archer_EnemyController : Base_EnemyController
 
         if (raycast.playerInRangeFar && combat.CanAttackFar())
         {
+            // PlayerDistCheck(); //------------------2 , trying to add, should dash from player 
             // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
         }
@@ -55,7 +58,9 @@ public class Archer_EnemyController : Base_EnemyController
 
     IEnumerator LungeAttack()
     {
-        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+        if(combat.instantiateManager != null)
+            combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+
         combat.altAttacking = true;
         combat.chasePlayer = false;
         combat.isAttacking = true;

@@ -245,7 +245,7 @@ public class AsyncLevelLoader : MonoBehaviour
     }
 
     //
-    public void LoadMainMenu(string sceneToUnload)
+    public void LoadMainMenu(string sceneToUnload) //String param not needed
     {
         AudioManager.Instance.FadeOutAudio();
         GameManager.Instance.TogglePlayerInput(false);

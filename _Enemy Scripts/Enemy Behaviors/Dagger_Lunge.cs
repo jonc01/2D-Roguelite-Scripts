@@ -61,7 +61,9 @@ public class Dagger_Lunge : Base_CombatBehavior
 
     IEnumerator LungeAttackCO()
     {
-        combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+        if(combat.instantiateManager != null)
+            combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);
+        
         combat.isAttacking = true;
         combat.altAttacking = true;
         combat.chasePlayer = false;
