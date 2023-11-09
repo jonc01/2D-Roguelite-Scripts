@@ -114,6 +114,8 @@ public class Base_EnemyController : MonoBehaviour
 
     protected virtual void ChasePlayer()
     {
+        if(combat.isAttacking) return;
+        
         if (!isRangedAttack)
         {
             if (!combat.chasePlayer) return;

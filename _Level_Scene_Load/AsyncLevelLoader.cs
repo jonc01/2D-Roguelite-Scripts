@@ -16,6 +16,7 @@ public class AsyncLevelLoader : MonoBehaviour
     [SerializeField] private float loadScreenFadeOutDuration;
     [SerializeField] private string loadingEndAnim = "LoadingFadeEnd";
     [SerializeField] private float loadScreenFadeInDuration;
+    public bool allowLoad;
     
 
     [Space(10)]
@@ -83,7 +84,7 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
-        LoadingText.SetActive(false);
+        // LoadingText.SetActive(false);
         AudioManager.Instance.FadeInAudio();
         GameManager.Instance.TogglePlayerInput(true);
 
@@ -225,6 +226,7 @@ public class AsyncLevelLoader : MonoBehaviour
         LoadingText.SetActive(true);
 
         LoadPlayer();
+        allowLoad = false;
 
         while (!playerLoaded)
         {
@@ -236,11 +238,19 @@ public class AsyncLevelLoader : MonoBehaviour
 
         SceneManager.UnloadSceneAsync(unloadStage); //Unload MainMenu
         LoadScene(startStage);
+        // allowLoad = true;
+
+        while(!allowLoad)
+        {
+            //allowLoad set to true once level generation is done
+            Debug.Log("Building Level...");
+            yield return null;
+        }
 
         yield return EndLoadingCO();
-        LoadingText.SetActive(false);
+        // LoadingText.SetActive(false);
 
-        GameManager.Instance.TogglePlayerInput(true);
+        // GameManager.Instance.TogglePlayerInput(true);
         AudioManager.Instance.FadeInAudio();
     }
 
@@ -271,11 +281,11 @@ public class AsyncLevelLoader : MonoBehaviour
 
         // SceneManager.LoadScene("MainMenu");
 
-        LoadingText.SetActive(false);
+        // LoadingText.SetActive(false); //toggled in EndLoadingCO
         AudioManager.Instance.FadeInAudio();
-        GameManager.Instance.TogglePlayerInput(true);
 
         yield return EndLoadingCO();
+        GameManager.Instance.TogglePlayerInput(true);
         // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
     }
 
@@ -288,6 +298,7 @@ public class AsyncLevelLoader : MonoBehaviour
     IEnumerator StartLoadingCO()
     {
         LoadScreenAnim.Play(loadingStartAnim);
+        LoadingText.SetActive(true);
         yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
     }
 
@@ -298,7 +309,10 @@ public class AsyncLevelLoader : MonoBehaviour
 
     IEnumerator EndLoadingCO()
     {
+        // yield return new WaitForSecondsRealtime(1.5f);
         LoadScreenAnim.Play(loadingEndAnim);
+        LoadingText.SetActive(false);
+        GameManager.Instance.TogglePlayerInput(true);
         yield return new WaitForSecondsRealtime(loadScreenFadeInDuration);
     }
 }

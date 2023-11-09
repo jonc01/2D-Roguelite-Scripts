@@ -5,6 +5,11 @@ using UnityEngine.UI;
 
 public class MenuEventSystemSwap : MonoBehaviour
 {
+    //! - Use ButtonSelect.cs instead
+
+
+
+
     //The start Selected button enabled Keyboard menu navigation
     [SerializeField] Button startSelectedButton;
 
