@@ -84,8 +84,8 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
-        // LoadingText.SetActive(false);
-        AudioManager.Instance.FadeInAudio();
+        AudioManager.Instance.playMusic.AudioIngameSetup();
+        // AudioManager.Instance.FadeInAudio();
         GameManager.Instance.TogglePlayerInput(true);
 
         StartGame("Tileset1_LevelGen", "MainMenu");
@@ -282,6 +282,7 @@ public class AsyncLevelLoader : MonoBehaviour
         // SceneManager.LoadScene("MainMenu");
 
         // LoadingText.SetActive(false); //toggled in EndLoadingCO
+        AudioManager.Instance.playMusic.PlayMenuMusic();
         AudioManager.Instance.FadeInAudio();
 
         yield return EndLoadingCO();

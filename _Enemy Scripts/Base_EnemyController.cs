@@ -115,7 +115,7 @@ public class Base_EnemyController : MonoBehaviour
     protected virtual void ChasePlayer()
     {
         if(combat.isAttacking) return;
-        
+
         if (!isRangedAttack)
         {
             if (!combat.chasePlayer) return;
@@ -124,7 +124,7 @@ public class Base_EnemyController : MonoBehaviour
             if (raycast.wallDetect || !raycast.ledgeDetect) return; //May not be needed with platform check
         }
         
-        // if (raycast.playerDetectFront || raycast.playerDetectBack) //-
+        //Range units can still aggro towards the Player if on different platforms
         if (playerDetected)
         {
             // combat.instantiateManager.TextPopups.ShowIndicator(combat.hitEffectsOffset.position);

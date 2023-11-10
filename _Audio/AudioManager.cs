@@ -11,6 +11,7 @@ public class AudioManager : MonoBehaviour
     [Header("Audio Settings")]
     [SerializeField] public bool toggleSFX;
     [SerializeField] public bool toggleMusic;
+    [SerializeField] public PlayMusic playMusic;
     [Header("Audio Sources")]
     [SerializeField] public AudioSource musicSource, ambientSource, generalSfxSource;
 
@@ -38,7 +39,7 @@ public class AudioManager : MonoBehaviour
 
     [Space(20)]
     [Header("Audio Fade Settings")]
-    [SerializeField] float fadeDuration = 2f;
+    [SerializeField] public float fadeDuration = 2f;
 
     [Header("Debugging")]
     [SerializeField] private float startVolumeMusic;
