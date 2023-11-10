@@ -59,7 +59,7 @@ public class LevelBuilder : MonoBehaviour
 
     //Player and Camera transforms
     private Transform player;
-    private Vector3 playerStartingPos;
+    [SerializeField] private Vector3 playerStartingPos;
     private CameraRoomManager cameraManager;
 
     private void Start()
@@ -67,13 +67,18 @@ public class LevelBuilder : MonoBehaviour
         WallGen = GetComponent<WallGenerator>();
         RoomGen = GetComponent<RoomGenerator>();
         GeneratedOrigins = new GameObject[totalRooms];
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        playerStartingPos = player.position;
+        // player = GameObject.FindGameObjectWithTag("Player").transform;
+        player = GameManager.Instance.playerTransform;
+        // playerStartingPos = player.position;
         cameraManager = GameObject.FindGameObjectWithTag("GameManager").GetComponentInChildren<CameraRoomManager>();
+
+        DeleteOrigins();
+        GameManager.Instance.RestartLevelCount();
     }
 
     void Update()
     {
+        #if UNITY_EDITOR
         if (DEBUGGING)
         {
             if (!builderRunning)
@@ -83,6 +88,7 @@ public class LevelBuilder : MonoBehaviour
                     GameManager.Instance.RestartLevelCount();
                 }
         }
+        #endif
 
         if (WallGen.wallGenDone && !builderRunning) return; //Stop updating raycasts if not needed
         OriginConnectCheck(); //Raycasts
@@ -126,6 +132,9 @@ public class LevelBuilder : MonoBehaviour
         while (!RoomGen.roomGenDone) yield return null;
 
         Time.timeScale = 1;
+        player.position = playerStartingPos;
+
+        AsyncLevelLoader.asyncLevelLoader.allowLoad = true;
     }
 
     IEnumerator GenerateOriginsCO()

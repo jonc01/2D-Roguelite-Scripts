@@ -23,15 +23,12 @@ public class Archer_EnemyController : Base_EnemyController
 
     protected override void AttackCheckClose()
     {
-        // return; //TODO: TESTING //=========1
         if(combat.altAttacking) return; //Check if attack is already started, this prevents Manualflip being called during attack coroutine
-        // if (!PlatformCheck() || isRangedAttack) return; //========1
         if (!PlatformCheck() && !isRangedAttack) return;
 
         if (raycast.playerInRangeClose)
         {
             PlayerDistCheck();
-            // combat.altAttacking = true;
             StartCoroutine(LungeAttack());
         }
     }
@@ -44,8 +41,7 @@ public class Archer_EnemyController : Base_EnemyController
 
         if (raycast.playerInRangeFar && combat.CanAttackFar())
         {
-            // PlayerDistCheck(); //------------------2 , trying to add, should dash from player 
-            // combat.altAttacking = true;
+            PlayerDistCheck();
             StartCoroutine(LungeAttack());
         }
     }
@@ -65,18 +61,25 @@ public class Archer_EnemyController : Base_EnemyController
         combat.chasePlayer = false;
         combat.isAttacking = true;
         combat.ToggleHealthbar(false);
-        combat.ToggleDamageImmune(true);
+
         yield return new WaitForSeconds(0.1f);
+
+        bool playerInfront = raycast.playerDetectedToRight;
+        if(!raycast.backToLedge) playerInfront = false;
+        // playerDetected = false;
+        
         combat.animator.PlayManualAnim(1, 0.75f); //Vanish
+        combat.ToggleDamageImmune(true);
+
         yield return new WaitForSeconds(0.2f);
+        combat.ToggleDamageImmune(false);
         movement.canMove = false;
 
         //Lunge then flip towards the Player and start Attack
-        if(PlayerDistCheck() <= raycast.attackRangeClose) LungeCheck(9);
-        else LungeCheck(0);
+        if(PlayerDistCheck() <= raycast.attackRangeClose) LungeCheck(playerInfront, 9);
+        else LungeCheck(playerInfront, 0);
 
         yield return new WaitForSeconds(0.55f);
-        combat.ToggleDamageImmune(false);
         combat.ToggleHealthbar(true);
         // yield return new WaitForSeconds(.35f);
         
@@ -87,25 +90,25 @@ public class Archer_EnemyController : Base_EnemyController
         combat.AttackFar();
     }
 
-    public void LungeCheck(float lungeStrength = 4f, float duration = .3f)
+    public void LungeCheck(bool playerInfront, float lungeStrength = 4f, float duration = .3f)
     {
         // movement.ToggleFlip(false);
-        
+
         if(raycast.playerInRangeClose) //Player too close
         {
             if(raycast.backToWall || !raycast.backToLedge)
             {
                 //Lunge forwards
-                combat.Lunge(!raycast.playerDetectedToRight, lungeStrength, duration);
+                combat.Lunge(!playerInfront, lungeStrength, duration);
             }
             else
             {
                 //Lunge backwards
-                combat.Lunge(raycast.playerDetectedToRight, lungeStrength, duration);
+                combat.Lunge(playerInfront, lungeStrength, duration);
             }
         }else
         {
-            combat.Lunge(!raycast.playerDetectedToRight, lungeStrength, duration);
+            combat.Lunge(!playerInfront, lungeStrength, duration);
         }
     }
 

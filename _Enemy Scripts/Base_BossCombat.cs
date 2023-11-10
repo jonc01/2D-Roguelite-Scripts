@@ -182,6 +182,7 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
     public virtual void StartSpawn() //Manual call on 
     {
+        AudioManager.Instance.playMusic.PlayBossMusic();
         StartCoroutine(SpawnCO(spawnDelay));
     }
 
@@ -547,6 +548,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         healthBar.gameObject.SetActive(false);
         canAttack = false;
         isAlive = false;
+
+        AudioManager.Instance.playMusic.TransitionBossMusicToNormal();
 
         //Attack Coroutine checks
         StopAttack();

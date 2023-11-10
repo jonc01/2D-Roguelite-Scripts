@@ -34,6 +34,11 @@ public class AugmentDisplay_HealOnly : AugmentDisplay
             }
         }
 
+        if(Price > GameManager.Instance.Inventory.goldAmount)
+            UpdateColor(false);
+        else
+            UpdateColor(true);
+
         // GetBorderColor();
         Border_Image.color = Color.green;
     }
