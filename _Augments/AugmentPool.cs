@@ -112,6 +112,7 @@ public class AugmentPool : MonoBehaviour
         else
         {
             // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
+            // TODO: rare bug here
             SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
             augmentInventory.AddAugment(chosenAugment);
             augmentInventory.AddConditionalAugment(chosenAugment);

@@ -66,6 +66,7 @@ public class Dagger_Lunge : Base_CombatBehavior
         
         combat.isAttacking = true;
         combat.altAttacking = true;
+        canAttack = false;
         combat.chasePlayer = false;
 
         yield return new WaitForSeconds(lungeDelay);
@@ -74,7 +75,7 @@ public class Dagger_Lunge : Base_CombatBehavior
         
         yield return new WaitForSeconds(chargeUpAnimDelay);
 
-        movement.ToggleFlip(false);
+        // movement.ToggleFlip(false);
 
         // combat.Lunge(movement.isFacingRight, 8); //Doesn't work, using GetKnockback()
         combat.animator.PlayManualAnim(0, fullAnimTimes[0]); //Start animation just before lunge
@@ -105,6 +106,7 @@ public class Dagger_Lunge : Base_CombatBehavior
 
         combat.isAttacking = false;
         combat.altAttacking = false;
+        canAttack = true;
         movement.canMove = true;
         combat.chasePlayer = true;
 
@@ -117,6 +119,7 @@ public class Dagger_Lunge : Base_CombatBehavior
     {
         combat.isAttacking = true;
         combat.altAttacking = true;
+        canAttack = false;
         movement.canMove = false;
         combat.chasePlayer = false;
 
@@ -134,6 +137,7 @@ public class Dagger_Lunge : Base_CombatBehavior
 
         combat.isAttacking = false;
         combat.altAttacking = false;
+        canAttack = true;
         movement.canMove = true;
         combat.chasePlayer = true;
 

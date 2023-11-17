@@ -55,6 +55,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         GameManager.Instance.TogglePlayerInput(true);
+        AudioManager.Instance.musicSource.UnPause();
     }
 
     void Pause()
@@ -63,6 +64,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
         GameManager.Instance.TogglePlayerInput(false);
+        AudioManager.Instance.musicSource.Pause();
     }
 
     public void PauseTimeOnly()

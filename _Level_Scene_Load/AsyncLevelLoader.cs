@@ -84,7 +84,7 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
-        AudioManager.Instance.playMusic.AudioIngameSetup();
+        AudioManager.Instance.playMusic.AudioIngameSetup(false);
         // AudioManager.Instance.FadeInAudio();
         GameManager.Instance.TogglePlayerInput(true);
 
@@ -251,7 +251,10 @@ public class AsyncLevelLoader : MonoBehaviour
         // LoadingText.SetActive(false);
 
         // GameManager.Instance.TogglePlayerInput(true);
-        AudioManager.Instance.FadeInAudio();
+
+        yield return new WaitForSeconds(.3f);
+        AudioManager.Instance.playMusic.PlayStageMusic();
+        // AudioManager.Instance.FadeInAudio();
     }
 
     //
