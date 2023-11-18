@@ -32,7 +32,7 @@ public class PauseMenu : MonoBehaviour
                 if(!pauseMenuUI.activeSelf)
                 {
                     // if(!GameManager.Instance.shopOpen) return;
-                    if(GameManager.Instance.rewardOpen) return;
+                    if(GameManager.Instance.rewardOpen || GameManager.Instance.respawnPromptOpen) return;
                 }
             }
             if (GameIsPaused)
@@ -55,6 +55,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         GameManager.Instance.TogglePlayerInput(true);
+        AudioManager.Instance.musicSource.UnPause();
     }
 
     void Pause()
@@ -63,6 +64,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
         GameManager.Instance.TogglePlayerInput(false);
+        AudioManager.Instance.musicSource.Pause();
     }
 
     public void PauseTimeOnly()
@@ -76,9 +78,7 @@ public class PauseMenu : MonoBehaviour
     {
         //Load TutorialStage or FirstStage instead, Restart Run
         AsyncLevelLoader.asyncLevelLoader.StartGame("Tileset1_LevelGen", currentStage);
-        //!TODO: doesn't work 
-
-        //!!TODO: use same approach as LoadPlayer, isn't working now because it doesn't load the duplicate stage
+        //! doesn't work, use AsyncLevelLoader.ResetRun();
         
         Resume();
     }
@@ -88,11 +88,7 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         
-        // SceneManager.LoadScene("MainMenu"); //TODO; replace 
-
-        
         AsyncLevelLoader.asyncLevelLoader.LoadMainMenu("Tileset1_LevelGen");
-
 
         //SceneManager.LoadScene(0);
     }

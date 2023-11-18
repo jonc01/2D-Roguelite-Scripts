@@ -112,6 +112,12 @@ public class AugmentPool : MonoBehaviour
         else
         {
             // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
+            // TODO: rare bug here, missing reference to augment? or ownedAugments
+            if(chosenAugment == null) Debug.Log("ChooseAugment - chosenAugment is null");
+            if(ownedAugments == null) Debug.Log("ChooseAugment - ownedAugments is null");
+            if(GetAugmentList(chosenAugment) == null) Debug.Log("ChooseAugment - GetAugmentList is null");
+            // bug testing ----------------
+
             SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
             augmentInventory.AddAugment(chosenAugment);
             augmentInventory.AddConditionalAugment(chosenAugment);
@@ -146,7 +152,6 @@ public class AugmentPool : MonoBehaviour
         //'sellingDuplicates' allow multiple shops to list the same unowned Augment
         if(sellingDuplicates) SwapAugmentList(augment, GetAugmentList(augment), listedAugmentsTEMP);
         else SwapAugmentList(augment, ownedAugments, listedAugmentsTEMP);
-        
     }
 
     private List<AugmentScript> GetAugmentList(AugmentScript augment)

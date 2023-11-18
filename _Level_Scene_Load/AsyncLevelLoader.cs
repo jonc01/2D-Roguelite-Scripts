@@ -52,15 +52,15 @@ public class AsyncLevelLoader : MonoBehaviour
             InitialLoadScene();
     }
 
-    void Update()
-    {
-        //TODO: TESTING LEVEL RESET
-        if(Input.GetKeyDown(KeyCode.N))
-        {
-            // StartCoroutine(ResetRun());
-            ResetRun();
-        }
-    }
+    // void Update()
+    // {
+    //     //TODO: TESTING LEVEL RESET
+    //     if(Input.GetKeyDown(KeyCode.N))
+    //     {
+    //         // StartCoroutine(ResetRun());
+    //         ResetRun();
+    //     }
+    // }
 
 #region Reset Run
     public void ResetRun()
@@ -84,7 +84,6 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
-        AudioManager.Instance.playMusic.AudioIngameSetup();
         // AudioManager.Instance.FadeInAudio();
         GameManager.Instance.TogglePlayerInput(true);
 
@@ -100,7 +99,6 @@ public class AsyncLevelLoader : MonoBehaviour
 
     IEnumerator InitialLoadCO()
     {
-        // LoadScreenAnim.SetTrigger("StartLoop");
         yield return new WaitForSeconds(.1f);
         yield return EndLoadingCO();
     }
@@ -251,14 +249,17 @@ public class AsyncLevelLoader : MonoBehaviour
         // LoadingText.SetActive(false);
 
         // GameManager.Instance.TogglePlayerInput(true);
-        AudioManager.Instance.FadeInAudio();
+
+        yield return new WaitForSeconds(.3f);
+        AudioManager.Instance.playMusic.PlayStageMusic();
+        // AudioManager.Instance.FadeInAudio();
     }
 
     //
     public void LoadMainMenu(string sceneToUnload) //String param not needed
     {
         AudioManager.Instance.FadeOutAudio();
-        GameManager.Instance.TogglePlayerInput(false);
+        if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(false);
         StartCoroutine(LoadMainMenuCO(sceneToUnload));
     }
 
@@ -313,7 +314,7 @@ public class AsyncLevelLoader : MonoBehaviour
         // yield return new WaitForSecondsRealtime(1.5f);
         LoadScreenAnim.Play(loadingEndAnim);
         LoadingText.SetActive(false);
-        GameManager.Instance.TogglePlayerInput(true);
+        if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(true);
         yield return new WaitForSecondsRealtime(loadScreenFadeInDuration);
     }
 }

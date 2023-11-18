@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public bool inputAllowed;
     public bool shopOpen;
     public bool rewardOpen;
+    public bool respawnPromptOpen;
     public PauseMenu Pause;
 
     [Space(10)]
@@ -54,6 +55,7 @@ public class GameManager : MonoBehaviour
 
         shopOpen = false;
         rewardOpen = false;
+        respawnPromptOpen = false;
         inputAllowed = true;
         normalRoomClearCount = 0;
         roomAugmentRewardsGiven = 0;
@@ -148,6 +150,8 @@ public class GameManager : MonoBehaviour
     {
         if(respawnPrompt == null) return;
         respawnPrompt.SetActive(toggle);
+        respawnPromptOpen = toggle;
+        TogglePlayerInput(!toggle); //Screen enabled, disable input
     }
 
 #region Button Functions

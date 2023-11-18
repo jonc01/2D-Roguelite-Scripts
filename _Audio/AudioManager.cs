@@ -13,7 +13,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] public bool toggleMusic;
     [SerializeField] public PlayMusic playMusic;
     [Header("Audio Sources")]
-    [SerializeField] public AudioSource musicSource, ambientSource, generalSfxSource;
+    [SerializeField] public AudioSource musicSource, musicSource2, ambientSource, generalSfxSource;
 
     [Space(10)]
     [Header("Player SFX")]
@@ -71,6 +71,7 @@ public class AudioManager : MonoBehaviour
     void Start()
     {
         startVolumeMusic = musicSource.volume;
+        musicSource2.volume = musicSource.volume;
         startVolumeAmbient = ambientSource.volume;
 
         startingSetVolumeMusic = startVolumeMusic;
@@ -94,11 +95,13 @@ public class AudioManager : MonoBehaviour
             if (fadeTimer < fadeDuration)
             {
                 musicSource.volume = Mathf.Lerp(startVolumeMusic, targetVolume, fadeTimer / fadeDuration);
+                musicSource2.volume = Mathf.Lerp(startVolumeMusic, targetVolume, fadeTimer / fadeDuration);
                 fadeTimer += Time.unscaledDeltaTime;
             }
             else
             {
                 musicSource.volume = targetVolume;
+                musicSource2.volume = targetVolume;
                 fadingAudio = false;
                 fadeTimer = 0f;
             }
@@ -187,6 +190,7 @@ public class AudioManager : MonoBehaviour
     public void ChangeMusicVolume(float value)
     {
         musicSource.volume = value;
+        musicSource2.volume = value;
         startingSetVolumeMusic = value;
         // SettingsManager.Instance.musicVolume = value;
     }
@@ -228,11 +232,11 @@ public class AudioManager : MonoBehaviour
     public void ToggleMusic(bool toggle)
     {
         musicSource.mute = toggle;
+        musicSource2.mute = toggle;
     }
 
     public void FadeOutAudio()
     {
-        // musicSource.
         // ambientSource
         if(!fadingAudio)
         {
