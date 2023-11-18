@@ -514,6 +514,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         healthBar.UpdateHealth(currentHP);
         if(playAudioClips != null) playAudioClips.PlayHitAudio();
 
+        HealthPhaseCheck();
+
         if (currentHP <= 0)
         {
             isAlive = false;

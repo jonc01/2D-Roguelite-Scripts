@@ -14,6 +14,7 @@ public class DEBUGGING_MODE : MonoBehaviour
     [SerializeField] float hitboxWidth;
     [SerializeField] float hitBoxHeight;
     [SerializeField] bool showGizmos = false;
+    
 
     void Start()
     {
