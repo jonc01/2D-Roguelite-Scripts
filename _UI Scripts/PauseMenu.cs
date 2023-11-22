@@ -20,10 +20,12 @@ public class PauseMenu : MonoBehaviour
     private void Start()
     {
         currentStage = gameObject.scene.name;
+        AudioListener.pause = false; //1
     }
 
     void Update()
     {
+        if(!AsyncLevelLoader.asyncLevelLoader.allowMenuInput) return;
         if(Input.GetKeyDown(KeyCode.Escape))
         {
             //Only allow Esc if the AugmentSelect isn't open and pauseMenu isn't open
@@ -55,7 +57,9 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         GameManager.Instance.TogglePlayerInput(true);
-        AudioManager.Instance.musicSource.UnPause();
+        AudioManager.Instance.musicSource.UnPause(); //1
+        AudioManager.Instance.musicSource2.UnPause(); //1
+        AudioListener.pause = false; //1
     }
 
     void Pause()
@@ -64,7 +68,9 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
         GameManager.Instance.TogglePlayerInput(false);
-        AudioManager.Instance.musicSource.Pause();
+        AudioManager.Instance.musicSource.Pause(); //1
+        AudioManager.Instance.musicSource2.Pause(); //1
+        AudioListener.pause = true; //1
     }
 
     public void PauseTimeOnly()

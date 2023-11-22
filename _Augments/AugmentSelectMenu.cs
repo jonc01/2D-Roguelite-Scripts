@@ -266,9 +266,9 @@ public class AugmentSelectMenu : MonoBehaviour
             case 0: totalPrice += 5; break;
             case 1: totalPrice += 10; break;
             case 2: totalPrice += 20; break;
-            case 3: totalPrice += 40; break;
-            case 4: totalPrice += 80; break;
-            case 5: totalPrice += 160; break;
+            case 3: totalPrice += 30; break;
+            case 4: totalPrice += 50; break;
+            case 5: totalPrice += 60; break;
             default: break;
         }
 

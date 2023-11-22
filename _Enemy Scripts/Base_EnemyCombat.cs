@@ -395,14 +395,14 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(delay);
         movement.rb.velocity = Vector3.zero;
-        movement.canMove = false;
+        // movement.canMove = false; //TEST knockback check in movement
         movement.ToggleFlip(false);
         yield return new WaitForSeconds(recoveryDelay); //delay before allowing move again
         isKnockedback = false;
 
         if(!isAttacking) {
             movement.ToggleFlip(true); //if Attacking coroutine is running, don't reset
-            movement.canMove = true;
+            // movement.canMove = true; //TEST
         }
     }
 
@@ -410,10 +410,8 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
     {
         if (KnockbackCO == null) return;
         StopCoroutine(KnockbackCO);
-        
-        // if(isAttacking) return; //TODO: might be issue, just remove
 
-        movement.canMove = true;
+        // movement.canMove = true; //TEST
         movement.ToggleFlip(true);
         isKnockedback = false;
     }
@@ -423,7 +421,7 @@ public class Base_EnemyCombat : MonoBehaviour, IDamageable
         // KnockbackNullCheckCO();
         LungeNullCheckCO();
         // if(strength <= 0) return;
-        Debug.Log("lunge called");
+        // Debug.Log("lunge called");
         // isKnockedback = true;
         isLunging = true;
         movement.ToggleFlip(false);

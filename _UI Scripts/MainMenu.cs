@@ -16,8 +16,12 @@ public class MainMenu : MonoBehaviour
     public GameObject creditsMenuUI;
     [SerializeField] string[] StartingScenes;
 
+
     public void Play()
     {
+        if(!AsyncLevelLoader.asyncLevelLoader.allowMenuInput) return;
+
+        AsyncLevelLoader.asyncLevelLoader.allowMenuInput = false;
         mainMenuUI.SetActive(false);
 
         if(StartingScenes.Length > 1)

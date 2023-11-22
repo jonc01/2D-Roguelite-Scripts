@@ -62,7 +62,8 @@ public class Base_EnemyMovement : MonoBehaviour
 
     public void MoveRight(bool moveRight)
     {
-        if (!canMove) return;
+        // if (!canMove) return; //1
+        if (!canMove || combat.isKnockedback) return; //2
 
         if (moveRight) rb.velocity = new Vector2(moveSpeed, rb.velocity.y);
         else rb.velocity = new Vector2(-moveSpeed, rb.velocity.y); 
