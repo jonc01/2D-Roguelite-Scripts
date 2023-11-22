@@ -7,6 +7,7 @@ public class AsyncLevelLoader : MonoBehaviour
 {
     public static AsyncLevelLoader asyncLevelLoader;
     bool playerLoaded;
+    public bool allowMenuInput;
 
     [Header("Loading Screen")]
     [SerializeField] private GameObject LoadScreen;
@@ -101,6 +102,7 @@ public class AsyncLevelLoader : MonoBehaviour
     {
         yield return new WaitForSeconds(.1f);
         yield return EndLoadingCO();
+        allowMenuInput = true;
     }
 
     public void LoadScene(string sceneName, string sceneToUnload) //TODO: manual call from menu Play(), can combine this into one script (LevelLoader)
@@ -220,8 +222,9 @@ public class AsyncLevelLoader : MonoBehaviour
     {
         // LoadScreenAnim.SetTrigger("Start");
         yield return StartLoadingCO();
-        yield return new WaitForSeconds(.1f); //TODO: placeholder, LevelLoader is being deleted when loading
-        LoadingText.SetActive(true);
+        // yield return new WaitForSeconds(.1f); //needed delay, LevelLoader is being deleted when loading
+        // LoadingText.SetActive(true);
+        yield return new WaitForSeconds(1.5f); //Audiomanager audio fade duration
 
         LoadPlayer();
         allowLoad = false;
@@ -245,19 +248,19 @@ public class AsyncLevelLoader : MonoBehaviour
             yield return null;
         }
 
+        Debug.Log("Build is done, start loading end");
+        yield return new WaitForSeconds(.5f);
         yield return EndLoadingCO();
-        // LoadingText.SetActive(false);
-
-        // GameManager.Instance.TogglePlayerInput(true);
-
-        yield return new WaitForSeconds(.3f);
         AudioManager.Instance.playMusic.PlayStageMusic();
+        allowMenuInput = true;
+        // GameManager.Instance.TogglePlayerInput(true);
         // AudioManager.Instance.FadeInAudio();
     }
 
     //
     public void LoadMainMenu(string sceneToUnload) //String param not needed
     {
+        allowMenuInput = false;
         AudioManager.Instance.FadeOutAudio();
         if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(false);
         StartCoroutine(LoadMainMenuCO(sceneToUnload));
@@ -267,9 +270,9 @@ public class AsyncLevelLoader : MonoBehaviour
     {
         yield return StartLoadingCO();
         // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
-        LoadingText.SetActive(true);
         // yield return Unload(sceneToUnload);
         // yield return Unload("_PlayerScene");
+        yield return new WaitForSecondsRealtime(1.5f); //Audiomanager audio fade duration
 
         //Loading in Single mode unloads all other scenes
         var mainScene = SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
@@ -287,6 +290,7 @@ public class AsyncLevelLoader : MonoBehaviour
         AudioManager.Instance.FadeInAudio();
 
         yield return EndLoadingCO();
+        allowMenuInput = true;
         GameManager.Instance.TogglePlayerInput(true);
         // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
     }
@@ -299,9 +303,11 @@ public class AsyncLevelLoader : MonoBehaviour
 
     IEnumerator StartLoadingCO()
     {
+        //Display black screen overlay, display "Loading..." text
         LoadScreenAnim.Play(loadingStartAnim);
         LoadingText.SetActive(true);
-        yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration);
+        // yield return new WaitForSecondsRealtime(loadScreenFadeOutDuration); //1
+        yield return new WaitForSeconds(loadScreenFadeOutDuration);
     }
 
     // private void EndLoadingAnim()
@@ -315,6 +321,7 @@ public class AsyncLevelLoader : MonoBehaviour
         LoadScreenAnim.Play(loadingEndAnim);
         LoadingText.SetActive(false);
         if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(true);
-        yield return new WaitForSecondsRealtime(loadScreenFadeInDuration);
+        // yield return new WaitForSecondsRealtime(loadScreenFadeInDuration); //1
+        yield return new WaitForSeconds(loadScreenFadeInDuration);
     }
 }

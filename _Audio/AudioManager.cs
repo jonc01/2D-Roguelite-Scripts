@@ -39,7 +39,7 @@ public class AudioManager : MonoBehaviour
 
     [Space(20)]
     [Header("Audio Fade Settings")]
-    [SerializeField] public float fadeDuration = 2f;
+    [SerializeField] public float fadeDuration = 2f; //1.5
 
     [Header("Debugging")]
     [SerializeField] private float startVolumeMusic;
@@ -251,8 +251,8 @@ public class AudioManager : MonoBehaviour
     {
         if(!fadingAudio)
         {
-            startVolumeMusic = musicSource.volume;
-            targetVolume = startingSetVolumeMusic;
+            startVolumeMusic = 0f;
+            targetVolume = startingSetVolumeMusic; //setVolume is set in volume settings
             fadingAudio = true;
             fadingInAudio = true;
         }
@@ -262,6 +262,13 @@ public class AudioManager : MonoBehaviour
             fadingAudio = false;
             FadeInAudio();
         }
+    }
+
+    public void ResetAudioFade()
+    {
+        // fadingAudio = false;
+        // startVolumeMusic = 0;
+        // fadeTimer = 0f;
     }
 #endregion
 }

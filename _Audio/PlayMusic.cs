@@ -95,11 +95,13 @@ public class PlayMusic : MonoBehaviour
         musicIntroAudioSource.PlayScheduled(0);//Starting intro clip
         scheduledTime = AudioSettings.dspTime + musicDuration; //Get current time + duration
         
-        audioManager.FadeInAudio();
 
         musicAudioSource.clip = loopClip; //load loop clip
         musicAudioSource.PlayScheduled(scheduledTime); //wait for intro to end to play
         musicAudioSource.loop = true;
+
+        yield return new WaitForSeconds(.1f);
+        audioManager.FadeInAudio();
     }
 #endregion
 
@@ -117,13 +119,14 @@ public class PlayMusic : MonoBehaviour
     public void PlayMenuMusic()
     {
         // musicIntroAudioSource.Stop();
-
+        AudioListener.pause = false;
         if(TransitionCoroutine != null) StopCoroutine(TransitionCoroutine);
         SwapMusic(MenuMusic);
     }
 
     public void PlayStageMusic()
     {
+        AudioListener.pause = false;
         SwapIntroLoopMusic(StageMusicIntro[0], StageMusicIntroLength[0], StageMusicLoop[0]);
     }
 
