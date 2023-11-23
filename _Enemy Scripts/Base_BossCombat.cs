@@ -574,6 +574,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         playDeathAnim = true;
         if(enemyWaveManager != null) enemyWaveManager.UpdateEnemyCount();
 
+        GameManager.Instance.BossCleared();
+
         Invoke("ToggleHitbox", 1f); //Delay rb and collider toggle
         //Disable sprite renderer before deleting gameobject
         //sr.enabled = false;

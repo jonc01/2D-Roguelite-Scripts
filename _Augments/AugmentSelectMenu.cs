@@ -247,7 +247,7 @@ public class AugmentSelectMenu : MonoBehaviour
 
     protected virtual int GetPrice(AugmentScript augment)
     {
-        //TODO: None of these values are balanced, just placeholders
+        //TODO: placeholder values
         int totalPrice = 0;
 
         switch(augment.Tier)

@@ -647,6 +647,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         healthBar.gameObject.SetActive(false);
         isAlive = false;
         AudioManager.Instance.playMusic.TransitionBossMusicToNormal();
+        GameManager.Instance.BossCleared();
 
         //Attack Coroutine checks
         if(AttackingCO != null) StopCoroutine(AttackingCO);
