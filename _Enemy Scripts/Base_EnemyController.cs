@@ -194,6 +194,8 @@ public class Base_EnemyController : MonoBehaviour
         if (switchDir)
             FlipDir();
 
+        //Instant stop, no deceleration
+        movement.rb.velocity = new Vector2(0, movement.rb.velocity.y);
         yield return new WaitForSeconds(duration);
         isIdling = false;
         movement.canMove = true;

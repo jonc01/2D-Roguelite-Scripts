@@ -18,6 +18,8 @@ public class AsyncLevelLoader : MonoBehaviour
     [SerializeField] private string loadingEndAnim = "LoadingFadeEnd";
     [SerializeField] private float loadScreenFadeInDuration;
     public bool allowLoad;
+
+    [SerializeField] private bool loadingInProgress;
     
 
     [Space(10)]
@@ -66,6 +68,8 @@ public class AsyncLevelLoader : MonoBehaviour
 #region Reset Run
     public void ResetRun()
     {
+        if(loadingInProgress) return;
+        loadingInProgress = true;
         AudioManager.Instance.FadeOutAudio();
         GameManager.Instance.TogglePlayerInput(false);
         StartCoroutine(ResetRunCO());
@@ -87,6 +91,7 @@ public class AsyncLevelLoader : MonoBehaviour
 
         // AudioManager.Instance.FadeInAudio();
         GameManager.Instance.TogglePlayerInput(true);
+        loadingInProgress = false;
 
         StartGame("Tileset1_LevelGen", "MainMenu");
     }
@@ -95,6 +100,9 @@ public class AsyncLevelLoader : MonoBehaviour
 
     void InitialLoadScene()
     {
+        if(loadingInProgress) return;
+        loadingInProgress = true;
+
         StartCoroutine("InitialLoadCO");
     }
 
@@ -213,6 +221,9 @@ public class AsyncLevelLoader : MonoBehaviour
         //3) Unload MainMenu
         //4) Load TutorialStage
 
+        if(loadingInProgress) return;
+        loadingInProgress = true;
+
         AudioManager.Instance.FadeOutAudio();
 
         StartCoroutine(StartGameCO(startStage, unloadStage));
@@ -260,6 +271,9 @@ public class AsyncLevelLoader : MonoBehaviour
     //
     public void LoadMainMenu(string sceneToUnload) //String param not needed
     {
+        if(loadingInProgress) return;
+        loadingInProgress = true;
+
         allowMenuInput = false;
         AudioManager.Instance.FadeOutAudio();
         if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(false);
@@ -310,18 +324,14 @@ public class AsyncLevelLoader : MonoBehaviour
         yield return new WaitForSeconds(loadScreenFadeOutDuration);
     }
 
-    // private void EndLoadingAnim()
-    // {
-    //     StartCoroutine(EndLoadingCO());
-    // }
-
     IEnumerator EndLoadingCO()
     {
         // yield return new WaitForSecondsRealtime(1.5f);
         LoadScreenAnim.Play(loadingEndAnim);
-        LoadingText.SetActive(false);
         if(GameManager.Instance != null) GameManager.Instance.TogglePlayerInput(true);
         // yield return new WaitForSecondsRealtime(loadScreenFadeInDuration); //1
         yield return new WaitForSeconds(loadScreenFadeInDuration);
+        LoadingText.SetActive(false);
+        loadingInProgress = false;
     }
 }

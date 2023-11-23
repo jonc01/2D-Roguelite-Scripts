@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -37,6 +38,10 @@ public class GameManager : MonoBehaviour
     public int totalTrialsNeeded = 2;
     [SerializeField] private List<DoorController> bossDoors;
     [SerializeField] private EnemyStageManager bossStage;
+    
+    [Space(10)]
+    [SerializeField] private TextMeshProUGUI trialObjCount;
+    [SerializeField] private TextMeshProUGUI bossObjCount;
 
     [Space(20)]
     [Header("- Prompt Overlays -")]
@@ -61,6 +66,10 @@ public class GameManager : MonoBehaviour
         roomAugmentRewardsGiven = 0;
 
         totalTrialsCleared = 0;
+
+        bossObjCount.text = "0/1";
+        trialObjCount.text = totalTrialsCleared + "/" + totalTrialsNeeded;
+
         bossDoors = new List<DoorController>();
     }
 
@@ -70,6 +79,10 @@ public class GameManager : MonoBehaviour
         normalRoomClearCount = 0;
         roomAugmentRewardsGiven = 0;
         totalTrialsCleared = 0;
+        
+        bossObjCount.text = "0/1";
+        trialObjCount.text = totalTrialsCleared + "/" + totalTrialsNeeded;
+
         bossDoors = new List<DoorController>();
     }
 
@@ -111,6 +124,7 @@ public class GameManager : MonoBehaviour
     {
         // public int totalTrialsCleared;
         // public int totalTrialsNeeded = 2;
+        trialObjCount.text = totalTrialsCleared + "/" + totalTrialsNeeded;
 
         if(totalTrialsCleared >= totalTrialsNeeded)
         {
@@ -134,6 +148,11 @@ public class GameManager : MonoBehaviour
             //Animate icon when unlocked
             bossStage.ToggleBossUnlockIcon(true);
         }
+    }
+
+    public void BossCleared()
+    {
+        bossObjCount.text = "1/1";
     }
 
     public void AddBossDoor(DoorController door)

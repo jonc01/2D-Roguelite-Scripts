@@ -20,8 +20,8 @@ public class MainMenu : MonoBehaviour
     public void Play()
     {
         if(!AsyncLevelLoader.asyncLevelLoader.allowMenuInput) return;
-
         AsyncLevelLoader.asyncLevelLoader.allowMenuInput = false;
+
         mainMenuUI.SetActive(false);
 
         if(StartingScenes.Length > 1)

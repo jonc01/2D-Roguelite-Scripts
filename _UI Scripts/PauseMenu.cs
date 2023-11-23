@@ -20,7 +20,7 @@ public class PauseMenu : MonoBehaviour
     private void Start()
     {
         currentStage = gameObject.scene.name;
-        AudioListener.pause = false; //1
+        AudioListener.pause = false;
     }
 
     void Update()
@@ -57,9 +57,9 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         GameManager.Instance.TogglePlayerInput(true);
-        AudioManager.Instance.musicSource.UnPause(); //1
-        AudioManager.Instance.musicSource2.UnPause(); //1
-        AudioListener.pause = false; //1
+        AudioManager.Instance.musicSource.UnPause();
+        AudioManager.Instance.musicSource2.UnPause();
+        AudioListener.pause = false;
     }
 
     void Pause()
@@ -68,9 +68,9 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
         GameManager.Instance.TogglePlayerInput(false);
-        AudioManager.Instance.musicSource.Pause(); //1
-        AudioManager.Instance.musicSource2.Pause(); //1
-        AudioListener.pause = true; //1
+        AudioManager.Instance.musicSource.Pause();
+        AudioManager.Instance.musicSource2.Pause();
+        AudioListener.pause = true;
     }
 
     public void PauseTimeOnly()
@@ -139,7 +139,6 @@ public class PauseMenu : MonoBehaviour
         Debug.Log("Quitting...");
         Application.Quit();
     }
-
 
     public void SettingsToPauseMenu()
     {
