@@ -25,7 +25,7 @@ public class CA_Parry_OnHit : Base_ConditionalAugments
 
     protected override void Activate(Transform objectHitPos)
     {
-        Debug.Log(name + " Augment activated");
+        // Debug.Log(name + " Augment activated");
         // base.Activate();
         if(!CanActivate()) return;
         StartProcCooldown();

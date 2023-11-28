@@ -51,7 +51,7 @@ public class AugmentDisplay : MonoBehaviour
         randomizeLevel = false;
         if(augmentScript == null)
         {
-            Debug.Log("No Augment Scriptable Object referenced!");
+            // Debug.Log("No Augment Scriptable Object referenced!");
             return;
         }
         allowInput = false;

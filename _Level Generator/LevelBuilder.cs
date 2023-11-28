@@ -72,6 +72,8 @@ public class LevelBuilder : MonoBehaviour
         // playerStartingPos = player.position;
         cameraManager = GameObject.FindGameObjectWithTag("GameManager").GetComponentInChildren<CameraRoomManager>();
 
+        // cameraManager = GameManager.Instance.cameraRoomManager;
+
         DeleteOrigins();
         GameManager.Instance.RestartLevelCount();
     }
@@ -169,7 +171,7 @@ public class LevelBuilder : MonoBehaviour
         if(LevelGenBoundaries != null) LevelGenBoundaries.SetActive(false);
 
         yield return new WaitForSecondsRealtime(.1f);
-        Debug.Log("Origins Generated");
+        // Debug.Log("Origins Generated");
     }
 
     private void Move()

@@ -61,7 +61,7 @@ public class AugmentInventory : MonoBehaviour
     public void OnKill(Transform enemyPosition, float addProcChance = 0)
     {
         //Currently being called in Base_EnemyCombat
-        Debug.Log("OnKill");
+        // Debug.Log("OnKill");
         if(onKillAugments.Count <= 0) return;
         for(int i=0; i<onKillAugments.Count; i++)
         {
@@ -71,7 +71,7 @@ public class AugmentInventory : MonoBehaviour
 
     public void OnDamageTaken()
     {
-        Debug.Log("OnDamageTaken");
+        // Debug.Log("OnDamageTaken");
         if(onDamageTakenAugments.Count <= 0) return;
         for(int i=0; i<onDamageTakenAugments.Count; i++)
         {
@@ -81,7 +81,7 @@ public class AugmentInventory : MonoBehaviour
 
     public void OnHit(float addProcChance = 0)
     {
-        Debug.Log("OnHit");
+        // Debug.Log("OnHit");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
@@ -91,7 +91,7 @@ public class AugmentInventory : MonoBehaviour
 
     public void OnHit(Transform objectHitPos, float addProcChance = 0)
     {
-        Debug.Log("OnHit position");
+        // Debug.Log("OnHit position");
         if(onHitAugments.Count <= 0) return;
         for(int i=0; i<onHitAugments.Count; i++)
         {
@@ -103,7 +103,7 @@ public class AugmentInventory : MonoBehaviour
 
     public void OnParry(Transform objectHitPos, float addProcChance = 0)
     {
-        Debug.Log("On Parry");
+        // Debug.Log("On Parry");
         if(onParryAugments.Count <= 0) return;
         for(int i=0; i<onParryAugments.Count; i++)
         {
@@ -113,7 +113,7 @@ public class AugmentInventory : MonoBehaviour
 
     public void OnRoomClear()
     {
-        Debug.Log("OnRoomClear");
+        // Debug.Log("OnRoomClear");
         if(onRoomClearAugments.Count <= 0) return;
         for(int i=0; i<onRoomClearAugments.Count; i++)
         {

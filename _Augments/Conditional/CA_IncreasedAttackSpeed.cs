@@ -60,7 +60,7 @@ public class CA_IncreasedAttackSpeed : Base_ConditionalAugments
     protected virtual void StopBuff()
     {
         active = false;
-        Debug.Log("ATTACKSPEED STOPPED");
+        // Debug.Log("ATTACKSPEED STOPPED");
         playerCombat.attackSpeed = baseAttackSpeed;
     }
 }

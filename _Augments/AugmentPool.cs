@@ -113,9 +113,10 @@ public class AugmentPool : MonoBehaviour
         {
             // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
             // TODO: rare bug here, missing reference to augment? or ownedAugments
-            if(chosenAugment == null) Debug.Log("ChooseAugment - chosenAugment is null");
-            if(ownedAugments == null) Debug.Log("ChooseAugment - ownedAugments is null");
-            if(GetAugmentList(chosenAugment) == null) Debug.Log("ChooseAugment - GetAugmentList is null");
+            // - 11/27: chosenAugment null ref
+            if(chosenAugment == null) Debug.Log("AugmentPool.ChooseAugment ERROR - chosenAugment is null");
+            if(ownedAugments == null) Debug.Log("AugmentPool.ChooseAugment ERROR - ownedAugments is null");
+            if(GetAugmentList(chosenAugment) == null) Debug.Log("AugmentPool.ChooseAugment ERROR - GetAugmentList is null");
             // bug testing ----------------
 
             SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);

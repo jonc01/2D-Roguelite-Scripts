@@ -15,6 +15,9 @@ public class GameManager : MonoBehaviour
     public PauseMenu Pause;
 
     [Space(10)]
+    public CameraRoomManager cameraRoomManager;
+
+    [Space(10)]
     [Header("- Player/Enemy References -")]
     public Transform playerTransform;
     public Base_PlayerMovement PlayerMovement;
@@ -57,6 +60,7 @@ public class GameManager : MonoBehaviour
         PlayerCombat = playerTransform.GetComponent<Base_PlayerCombat>();
         playerTargetOffset = GameObject.FindGameObjectWithTag("PlayerTargetOffset").transform;
         if (Inventory == null) Inventory = GetComponent<Inventory>();
+        if (cameraRoomManager == null) cameraRoomManager = GetComponentInChildren<CameraRoomManager>();
 
         shopOpen = false;
         rewardOpen = false;

@@ -91,7 +91,7 @@ public class EnemyStageManager : MonoBehaviour
 #region Spawning
     public void SpawnEnemies()
     {
-        Debug.Log("Player entered room " + name);
+        // Debug.Log("Player entered room " + name);
         //Called by default, when Player enters room
         if(trialRoom) return;
         SpawnCurrentWave();
