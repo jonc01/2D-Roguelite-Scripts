@@ -90,6 +90,9 @@ public class AugmentPool : MonoBehaviour
     public void SwapAugmentList(AugmentScript addedAugment, List<AugmentScript> currList, List<AugmentScript> newList)
     {
         //Moves an Augment from one list to another
+
+        //TODO: is Add/Remove bad practice ???, maybe reference is lost with Remove?
+            //could add a copy here: AugmentScript temp = addedAugment
         newList.Add(addedAugment);
         currList.Remove(addedAugment);
 
@@ -114,10 +117,17 @@ public class AugmentPool : MonoBehaviour
             // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
             // TODO: rare bug here, missing reference to augment? or ownedAugments
             // - 11/27: chosenAugment null ref
-            if(chosenAugment == null) Debug.Log("AugmentPool.ChooseAugment ERROR - chosenAugment is null");
+            // if(chosenAugment == null) Debug.Log("AugmentPool.ChooseAugment ERROR - chosenAugment is null");
+            if(chosenAugment == null)
+            {
+                Debug.Log("AugmentPool.chosenAugment NULL ref: " + gameObject.name);
+                return;
+            }
+            
             if(ownedAugments == null) Debug.Log("AugmentPool.ChooseAugment ERROR - ownedAugments is null");
             if(GetAugmentList(chosenAugment) == null) Debug.Log("AugmentPool.ChooseAugment ERROR - GetAugmentList is null");
             // bug testing ----------------
+
 
             SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
             augmentInventory.AddAugment(chosenAugment);

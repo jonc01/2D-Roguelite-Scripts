@@ -84,8 +84,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     {
         isSpawning = true; //This prevents the enemy from attacking and taking damage
         
-        yield return new WaitForSeconds(delay);
         ExplosionInit(4);
+        yield return new WaitForSeconds(delay);
         
         animator.PlayManualAnim(4, 1f);
         yield return new WaitForSeconds(1f); //Wake animation
@@ -331,6 +331,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         {
             ExplosionHandler.SpawnPrefab(castPos);
         }
+
         Invoke("ShakeEvent", .33f);
     }
 
@@ -595,7 +596,7 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
     
         changingPhase = true;
         //Stop Attack and AttackEnd Coroutines
-        StopAttack();        
+        StopAttack();
 
         //Toggle Shield gameobject and increase defenses
         PhaseShieldBreak.PlayAnim(0);
@@ -608,6 +609,9 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         canAttack = false;
 
         CleanseDebuffs();
+
+        //Spawn Adds
+        SpawnAddsWave();
         
         yield return new WaitForSeconds(1.5f);
         animator.PlayManualAnim(6, 1.083f); //Buff anim
@@ -654,6 +658,8 @@ public class ColossalBoss_EnemyCombat : Base_BossCombat
         StopAllCoroutines();
         canAttack = false;
         // StopAllCoroutines();
+
+        ClearAdds();
 
         //Boomerang/Melee Spin attack cancel
         if(BoomerangArms.activeInHierarchy) BoomerangArms.SetActive(false);
