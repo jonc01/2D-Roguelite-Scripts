@@ -14,10 +14,14 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     public bool canAttackFar;
     public bool canAttack;
 
+    [Space(10)]
+
     [Header("== Attack Phases ==")]
     [SerializeField] protected int[] Phase1AtkPool;
     [SerializeField] protected int[] Phase2AtkPool;
     [SerializeField] protected int[] Phase3AtkPool;
+
+    [Space(10)]
 
     [Header("=== References/Setup ===")]
     public LayerMask playerLayer;
@@ -97,6 +101,13 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
     protected bool changingPhase;
     [SerializeField] protected GameObject PhaseShield;
     [SerializeField] protected ToggleEffectAnimator PhaseShieldBreak;
+
+    [Space(10)]
+
+    [Header("=== Health Phase Adds ===")]
+    [SerializeField] protected GameObject[] AddWave;
+
+    [Space(10)]
 
     [Header("--- Attack Logic variables ---")]
     public bool attackClose;
@@ -413,6 +424,9 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         canAttack = false;
 
         CleanseDebuffs();
+
+        //Spawn Additionals
+        SpawnAddsWave();
         
         yield return new WaitForSeconds(1.5f);
         animator.PlayManualAnim(6, 1.083f); //Buff anim
@@ -439,6 +453,25 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
 
             if(currDebuff != null) currDebuff.CleanseDebuff();
             //make sure index is correct
+        }
+    }
+
+    protected void SpawnAddsWave()
+    {
+        if(AddWave[currentPhase-1] == null) return;
+        AddWave[currentPhase-1].SetActive(true);
+    }
+
+    protected void ClearAdds()
+    {
+        for(int i=0; i<AddWave.Length; i++)
+        {
+            int waveLength = AddWave[i].transform.childCount;
+            for(int j=0; j<waveLength; j++)
+            {
+                Base_EnemyCombat add = AddWave[i].transform.GetChild(j).GetComponent<Base_EnemyCombat>();
+                if(add != null) add.TakeDamageStatus(999, 3);
+            }
         }
     }
 
@@ -550,6 +583,8 @@ public class Base_BossCombat : MonoBehaviour, IDamageable
         healthBar.gameObject.SetActive(false);
         canAttack = false;
         isAlive = false;
+
+        ClearAdds();
 
         AudioManager.Instance.playMusic.TransitionBossMusicToNormal();
 

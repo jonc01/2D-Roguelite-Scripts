@@ -96,7 +96,7 @@ public class AugmentScript : MonoBehaviour
         UpdateLevel(AugmentLevel);
         UpdateConditional();
         UpdateDescription();
-        Debug.Log("Augment Stats loaded");
+        // Debug.Log("Augment Stats loaded");
     }
 //
     private void UpdateConditional()

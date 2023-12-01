@@ -57,9 +57,15 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         GameIsPaused = false;
         GameManager.Instance.TogglePlayerInput(true);
-        AudioManager.Instance.musicSource.UnPause();
-        AudioManager.Instance.musicSource2.UnPause();
-        AudioListener.pause = false;
+
+        #if UNITY_WEBGL
+            AudioManager.Instance.musicSource.mute = false;
+            AudioManager.Instance.musicSource2.mute = false;
+        #else
+            AudioManager.Instance.musicSource.UnPause();
+            AudioManager.Instance.musicSource2.UnPause();
+            AudioListener.pause = false;
+        #endif
     }
 
     void Pause()
@@ -68,9 +74,15 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 0f;
         GameIsPaused = true;
         GameManager.Instance.TogglePlayerInput(false);
-        AudioManager.Instance.musicSource.Pause();
-        AudioManager.Instance.musicSource2.Pause();
-        AudioListener.pause = true;
+
+        #if UNITY_WEBGL
+            AudioManager.Instance.musicSource.mute = true;
+            AudioManager.Instance.musicSource2.mute = true;
+        #else
+            AudioManager.Instance.musicSource.Pause();
+            AudioManager.Instance.musicSource2.Pause();
+            AudioListener.pause = true;
+        #endif
     }
 
     public void PauseTimeOnly()

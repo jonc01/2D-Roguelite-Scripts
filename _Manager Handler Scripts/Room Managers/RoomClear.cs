@@ -63,7 +63,7 @@ public class RoomClear : MonoBehaviour
     public void Cleared()
     {
         //TimeManager.Instance.DoFreezeTime(.15f, .05f);
-        Debug.Log("Room Cleared");
+        // Debug.Log("Room Cleared");
         GameManager.Instance.AugmentInventory.OnRoomClear();
         StartCoroutine(DelayClear());
         //if this breaks, update enemyCount with enemyCount = EnemyList.transform.childCount

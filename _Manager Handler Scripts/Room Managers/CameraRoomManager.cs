@@ -6,6 +6,9 @@ public class CameraRoomManager : MonoBehaviour
 {
     //Moves Camera to the Player's current room
     //! - Attach to Origin Child object with collider
+    [Header("- Player Scene Only -")]
+    [SerializeField] bool inPlayerScene = false;
+    [Space(20)]
 
     [Header("References")]
     [SerializeField] public Transform CameraAnchor;
@@ -17,18 +20,27 @@ public class CameraRoomManager : MonoBehaviour
 
     void Start()
     {
-        CameraAnchor = GameObject.FindGameObjectWithTag("CameraAnchor").transform;
+        if(!inPlayerScene)
+        {
+            SetCameraAnchor();
+        }
+
         originPosition = GetComponentInParent<Transform>().position;
-        yOffset = CameraAnchor.position.y; //This is the offset since camera starts at 0
         
         if(doorManager == null) doorManager = GetComponentInParent<DoorManager>();
         if(roomClear == null) roomClear = GetComponentInParent<RoomClear>();
     }
 
-    void Update()
+    // void FixedUpdate()
+    // {
+    //     //may need to add another check to see if camera is in the correct room
+    //     // if(CameraAnchor == null) CameraAnchor = GameObject.FindGameObjectWithTag("CameraAnchor").transform; //TODO: gamemanager test
+    // }
+
+    public void SetCameraAnchor()
     {
-        //may need to add another check to see if camera is in the correct room
-        if(CameraAnchor == null) CameraAnchor = GameObject.FindGameObjectWithTag("CameraAnchor").transform;
+        CameraAnchor = GameObject.FindGameObjectWithTag("CameraAnchor").transform;
+        yOffset = CameraAnchor.position.y;
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -36,7 +48,7 @@ public class CameraRoomManager : MonoBehaviour
         if(collision.CompareTag("Player"))
         {
             RelocateCamera();
-            playerIsHere = true; //TODO: may have a use, currently debugging
+            playerIsHere = true; //Debugging
             roomClear.ToggleMinimapIcon(true);
             doorManager.UpdateDoorState(.05f); //Open/Close doors if room has been cleared
         }
@@ -50,7 +62,6 @@ public class CameraRoomManager : MonoBehaviour
 
     void OnTriggerExit2D(Collider2D collision)
     {
-        //
         playerIsHere = false;
     }
 

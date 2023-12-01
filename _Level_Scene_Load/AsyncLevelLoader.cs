@@ -83,9 +83,9 @@ public class AsyncLevelLoader : MonoBehaviour
         //Loading in Single mode unloads all other scenes
         var mainScene = SceneManager.LoadSceneAsync("MainMenu", LoadSceneMode.Single);
         
+        Debug.Log("Loading MainMenu...");
         while(!mainScene.isDone)
         {
-            Debug.Log("Loading MainMenu...");
             yield return null;
         }
 
@@ -205,7 +205,6 @@ public class AsyncLevelLoader : MonoBehaviour
 
         while (!playerScene.isDone)
         {
-            Debug.Log("loading player");
             yield return null;
         }
 
@@ -240,9 +239,9 @@ public class AsyncLevelLoader : MonoBehaviour
         LoadPlayer();
         allowLoad = false;
 
+        Debug.Log("Loading Player...");
         while (!playerLoaded)
         {
-            Debug.Log("loading player");
             yield return null;
         }
 
@@ -252,10 +251,10 @@ public class AsyncLevelLoader : MonoBehaviour
         LoadScene(startStage);
         // allowLoad = true;
 
+        Debug.Log("Building Level...");
         while(!allowLoad)
         {
             //allowLoad set to true once level generation is done
-            Debug.Log("Building Level...");
             yield return null;
         }
 

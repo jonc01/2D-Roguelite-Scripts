@@ -64,7 +64,7 @@ public class Base_ConditionalAugments : MonoBehaviour
 
     protected virtual void Activate()
     {
-        Debug.Log(name + " Augment Activated");
+        // Debug.Log(name + " Augment Activated");
         if(!CanActivate()) return;
         StartProcCooldown();
 

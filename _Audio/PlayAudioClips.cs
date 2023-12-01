@@ -45,7 +45,7 @@ public class PlayAudioClips : MonoBehaviour
 
     public void PlayAttackSwing()
     {
-        if(charAttackSwing.Length == 0) return;
+        if(charAttackSwing.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, charAttackSwing.Length);
 
         if(isPlayer) audioManager.PlayAtkSound_Player(charAttackSwing[randIndex]);
@@ -54,14 +54,14 @@ public class PlayAudioClips : MonoBehaviour
 
     public void PlayFootsteps()
     {
-        if(charFootsteps.Length == 0) return;
+        if(charFootsteps.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, charFootsteps.Length);
         audioManager.PlayAtkSound_Player(charFootsteps[randIndex]);
     }
 
     public void PlayJump()
     {
-        if(jumpSound.Length == 0) return;
+        if(jumpSound.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, jumpSound.Length);
         audioManager.PlayAtkSound_Player(jumpSound[randIndex]);
     }
@@ -72,7 +72,7 @@ public class PlayAudioClips : MonoBehaviour
 
     public void PlayHitAudio()
     {
-        if(hitAudio.Length == 0) return;
+        if(hitAudio.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, hitAudio.Length);
 
         if(isPlayer) audioManager.PlayHitSound_Player(hitAudio[randIndex]);
@@ -81,7 +81,7 @@ public class PlayAudioClips : MonoBehaviour
 
     public void PlayBlockedAudio()
     {
-        if(blockedHit.Length == 0) return;
+        if(blockedHit.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, blockedHit.Length);
 
         if(isPlayer) audioManager.PlayBlockSound_Player(blockedHit[randIndex]);
@@ -90,7 +90,7 @@ public class PlayAudioClips : MonoBehaviour
 
     public void PlayDeathSound()
     {
-        if(deathSound.Length == 0) return;
+        if(deathSound.Length == 0 || audioManager == null) return;
         int randIndex = Random.Range(0, deathSound.Length);
 
         if(isPlayer) audioManager.PlayDeathSound_Player(deathSound[randIndex]);

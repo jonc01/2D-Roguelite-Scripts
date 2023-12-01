@@ -236,7 +236,7 @@ public class Base_EnemyController : MonoBehaviour
     {
         if (combat.isAttacking)
         {
-            if (!raycast.isGrounded) //TODO: testing, no issues yet
+            if (!raycast.isGrounded)
                 if(movement.rb.velocity.y != 0) combat.StopAttack();
             return;
         } 
