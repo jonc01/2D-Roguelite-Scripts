@@ -319,7 +319,7 @@ public class Base_PlayerCombat : MonoBehaviour
                 // augmentInventory.OnHit(enemyPos); //Calling from Enemy TakeDamage
                 HitStopAnim(attackAnimFull, groundAttack);
 
-                if(isAirAttacking) movement.Float(.3f);
+                if(isAirAttacking) movement.Float(.2f);
                 //ScreenShakeListener.Instance.Shake(1); //TODO: if Crit
                 //hitStop.Stop(.1f); //Successful hit
             }
