@@ -90,9 +90,6 @@ public class AugmentPool : MonoBehaviour
     public void SwapAugmentList(AugmentScript addedAugment, List<AugmentScript> currList, List<AugmentScript> newList)
     {
         //Moves an Augment from one list to another
-
-        //TODO: is Add/Remove bad practice ???, maybe reference is lost with Remove?
-            //could add a copy here: AugmentScript temp = addedAugment
         newList.Add(addedAugment);
         currList.Remove(addedAugment);
 
@@ -120,10 +117,10 @@ public class AugmentPool : MonoBehaviour
             // if(chosenAugment == null) Debug.Log("AugmentPool.ChooseAugment ERROR - chosenAugment is null");
             if(chosenAugment == null)
             {
-                Debug.Log("AugmentPool.chosenAugment NULL ref: " + gameObject.name);
-                return;
+                Debug.Log("AugmentPool.chosenAugment NULL ref");
+                // return;
             }
-            
+
             if(ownedAugments == null) Debug.Log("AugmentPool.ChooseAugment ERROR - ownedAugments is null");
             if(GetAugmentList(chosenAugment) == null) Debug.Log("AugmentPool.ChooseAugment ERROR - GetAugmentList is null");
             // bug testing ----------------
@@ -167,6 +164,12 @@ public class AugmentPool : MonoBehaviour
 
     private List<AugmentScript> GetAugmentList(AugmentScript augment)
     {
+        if(augment == null) 
+        {
+            Debug.Log("chosenAugment list not found" + augment.Tier);
+            return null;
+        }
+        
         return augmentPoolHelpers[augment.Tier].augmentsList;
     }
 
@@ -286,6 +289,8 @@ public class AugmentPool : MonoBehaviour
 
     public IEnumerator EmptyStockCO(List<AugmentScript> augmentsInStock)
     {
+        //currentListedAugments is updated with listed Augments
+        //Purchased shops will be removed from this, not-purchased shop augments remain
         for(int i=0; i<augmentsInStock.Count; i++)
         {
             currentListedAugments.Remove(augmentsInStock[i]);
@@ -293,6 +298,35 @@ public class AugmentPool : MonoBehaviour
         }
         UpdatePoolSizes();
         yield return new WaitForSecondsRealtime(.1f);
+    }
+
+    public void StartClearPurchasedStock(List<AugmentScript> augmentsInStock)
+    {
+        //Temp not using
+        StartCoroutine(ClearPurchasedStock(augmentsInStock));
+    }
+
+    private IEnumerator ClearPurchasedStock(List<AugmentScript> augmentsInStock)
+    {
+        //After a Shop or Reward augment is selected, remove augments from 'currentListedAugments'
+            //Shops that are closed, but not purchased from yet will keep Augments in ^ list
+        yield return new WaitForSecondsRealtime(.1f);
+
+        currentListedAugments.RemoveAll(aug => augmentsInStock.Contains(aug));
+
+        // currentlyListedItems.RemoveAll(item => listedItemsTemp.Contains(item));
+
+
+        // for(int i=0; i<augmentsInStock.Count; i++)
+        // {
+        //     //Remove augment from augmentsInStock passed list
+        //     Debug.Log("Removing " + augmentsInStock[i].name);
+        //     currentListedAugments.Remove(augmentsInStock[i]);
+        //     yield return new WaitForSecondsRealtime(.1f); //Delay needed to prevent missing references
+        // }
+
+        yield return new WaitForSecondsRealtime(.1f);
+        UpdatePoolSizes();
     }
 
     public bool CheckIfListed(AugmentScript augment)

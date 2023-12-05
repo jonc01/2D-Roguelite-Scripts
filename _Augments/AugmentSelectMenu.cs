@@ -30,6 +30,7 @@ public class AugmentSelectMenu : MonoBehaviour
     [SerializeField] protected AugmentDisplay[] menuSlots;
     [SerializeField] protected int[] augmentLevels;
     [SerializeField] public List<AugmentScript> augmentsInStock;
+    [SerializeField] protected List<AugmentScript> augmentsInStockCOPY;
 
     [Header("=== Shop ===")]
     [SerializeField] protected int[] prices; //Includes prices for all augments based on Tier
@@ -111,6 +112,7 @@ public class AugmentSelectMenu : MonoBehaviour
         augmentsInStock.Clear();
 
         yield return pool.FillStock(augmentsInStock, upgradeShop);
+        augmentsInStockCOPY = new List<AugmentScript>(augmentsInStock);
 
         for(int i=0; i<totalAugments; i++)
         {
@@ -145,9 +147,10 @@ public class AugmentSelectMenu : MonoBehaviour
         //Get Random level if it is a duplicate Augment
         if(randomizeLevel) pool.RandomizeAugmentStats(augment, true);
         
+        //TODO: rare bug with missing reference
         pool.ChooseAugment(augment); //Randomize augment before adding
 
-        //Disable input for selecting Augments
+        //Disable button input for selecting Augments
         for(int i=0; i<totalAugments; i++) menuSlots[i].allowInput = false;
 
         // UpdateDisplay(true); //Updates price colors if player buys something //*Only need this if allowing multiple purchases
@@ -159,6 +162,7 @@ public class AugmentSelectMenu : MonoBehaviour
         if(shopController != null)
             shopController.SetPurchaseDone();
 
+        //TODO: if rare bug occurs, menu shouldn't close
         StartCoroutine(DisableSelectMenu(.5f));
     }
 
@@ -170,8 +174,11 @@ public class AugmentSelectMenu : MonoBehaviour
 
     protected IEnumerator DisableSelectMenu(float delay)
     {
+        // Debug.Log("Disabling menu window??");
         yield return new WaitForSecondsRealtime(delay);
         transform.parent.gameObject.SetActive(false);
+        // pool.StartClearPurchasedStock(augmentsInStockCOPY);
+        // pool.EmptyStockCO(augmentsInStockCOPY);
     }
 
     protected void UpdateDisplay(bool purchased = false)
@@ -218,6 +225,7 @@ public class AugmentSelectMenu : MonoBehaviour
             {
                 if(IsMaxLevel(currOwnedAugment))
                 {
+                    //Prevent player from selecting augment
                     currAugSlot.allowInput = false;
                 }
             }
