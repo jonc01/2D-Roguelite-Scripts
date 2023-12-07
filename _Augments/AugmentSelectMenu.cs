@@ -138,16 +138,17 @@ public class AugmentSelectMenu : MonoBehaviour
     {
         if(!allowInput) return;
 
+        if(augment == null) Debug.Log("AugmentSelectMenu: augment missing");
+
         //Check references
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
-        int chosenIndex = augmentsInStock.IndexOf(augment);
+        // int chosenIndex = augmentsInStock.IndexOf(augment);
 
         if(pool == null) pool = GameManager.Instance.AugmentPool;
 
         //Get Random level if it is a duplicate Augment
         if(randomizeLevel) pool.RandomizeAugmentStats(augment, true);
         
-        //TODO: rare bug with missing reference
         pool.ChooseAugment(augment); //Randomize augment before adding
 
         //Disable button input for selecting Augments

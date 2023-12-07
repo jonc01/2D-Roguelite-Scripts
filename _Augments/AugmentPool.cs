@@ -18,6 +18,7 @@ public class AugmentPool : MonoBehaviour
     public List<AugmentScript> listedAugmentsTEMP; //augments being listed in the Shop, temporarily filled to prevent duplicates
     public List<AugmentScript> currentListedAugments; //holds all currently listed augments
     [SerializeField] private AugmentInventory augmentInventory;
+    Coroutine ChoosingAugmentCO;
 
     void Start()
     {
@@ -34,6 +35,7 @@ public class AugmentPool : MonoBehaviour
     {
         UpdatePoolSizes(); //Update count for randIndex
 
+        Debug.Log("pool.GetAugmentFromPool()");
         //Get a duplicate augment if the Player has all unique augments
         // if(totalUnownedAugments == 0)
         // {
@@ -81,6 +83,7 @@ public class AugmentPool : MonoBehaviour
         {
             currTier = RandomAugmentTier();
         }
+
         augmentFromPool = augmentPoolHelpers[currTier].GetRandomAugment();
         RandomizeAugmentStats(augmentFromPool);
 
@@ -105,6 +108,8 @@ public class AugmentPool : MonoBehaviour
         // Debug.Log("AugLvl: " + chosenAugment.AugmentLevel + ", ShopLvl: " + augmentLevel);
         if(ownedAugments.Count >= 10) { Debug.Log("Reached 10 Augments"); return; }
         
+        if(chosenAugment == null) Debug.Log("AugmentPool.chosenAugment NULL at function call");
+
         if(ownedAugments.Contains(chosenAugment))
         {
             augmentInventory.DuplicateAugment(chosenAugment);
@@ -112,9 +117,7 @@ public class AugmentPool : MonoBehaviour
         else
         {
             // chosenAugment.UpdateLevel(augmentLevel); //TODO: test: Manually updating level in case of duplicates
-            // TODO: rare bug here, missing reference to augment? or ownedAugments
-            // - 11/27: chosenAugment null ref
-            // if(chosenAugment == null) Debug.Log("AugmentPool.ChooseAugment ERROR - chosenAugment is null");
+            
             if(chosenAugment == null)
             {
                 Debug.Log("AugmentPool.chosenAugment NULL ref");
@@ -123,8 +126,6 @@ public class AugmentPool : MonoBehaviour
 
             if(ownedAugments == null) Debug.Log("AugmentPool.ChooseAugment ERROR - ownedAugments is null");
             if(GetAugmentList(chosenAugment) == null) Debug.Log("AugmentPool.ChooseAugment ERROR - GetAugmentList is null");
-            // bug testing ----------------
-
 
             SwapAugmentList(chosenAugment, GetAugmentList(chosenAugment), ownedAugments);
             augmentInventory.AddAugment(chosenAugment);
@@ -136,6 +137,7 @@ public class AugmentPool : MonoBehaviour
 
     public IEnumerator FillStock(List<AugmentScript> augmentsInStock, bool upgradeShop = false, int totalAugments = 3)
     {
+        //Fill all augment slots in the Shop
         for(int i=0; i<totalAugments; i++)
         {
             AugmentScript currAugment;
@@ -166,10 +168,10 @@ public class AugmentPool : MonoBehaviour
     {
         if(augment == null) 
         {
-            Debug.Log("chosenAugment list not found" + augment.Tier);
+            Debug.Log("chosenAugment list not found: Tier " + augment.Tier);
             return null;
         }
-        
+
         return augmentPoolHelpers[augment.Tier].augmentsList;
     }
 
