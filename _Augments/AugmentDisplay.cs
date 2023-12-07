@@ -40,11 +40,16 @@ public class AugmentDisplay : MonoBehaviour
     [Header("Price")]
     [SerializeField] public TextMeshProUGUI PriceDisplay;
     [SerializeField] public int Price;
-    protected Button button;
+    [SerializeField] protected Button button;
     
     [Header("Duplicate")]
     [SerializeField] protected bool randomizeLevel = false;
     [SerializeField] public bool upgradeShop = false;
+
+    protected void Awake()
+    {
+        if(selectMenu == null) selectMenu = GetComponentInParent<AugmentSelectMenu>();
+    }
 
     protected void Start()
     {
@@ -71,7 +76,7 @@ public class AugmentDisplay : MonoBehaviour
 
     protected void OnEnable()
     {
-        if(selectMenu == null) selectMenu = GetComponentInParent<AugmentSelectMenu>();
+        // if(selectMenu == null) selectMenu = GetComponentInParent<AugmentSelectMenu>();
         RefreshInfo();
 
         if(selectedOverlayText == null && selectedOverlay != null) selectedOverlayText = selectedOverlay.GetComponentInChildren<TextMeshProUGUI>();
@@ -115,13 +120,12 @@ public class AugmentDisplay : MonoBehaviour
 
     protected IEnumerator RevealAugment()
     {
+        if(button != null) button.interactable = false;
         allowInput = false;
-        // yield return new WaitForSecondsRealtime(.2f);
-        //TODO: start animation here
-        // yield return new WaitForSecondsRealtime(.2f); //Animation time
+        //start reveal animation here
+
         yield return new WaitForSecondsRealtime(.1f); //Animation time
 
-        allowInput = true;
         if(augmentScript != null && selectMenu != null)
         {
             if(selectMenu.IsOwnedAndListed(augmentScript))
@@ -143,20 +147,18 @@ public class AugmentDisplay : MonoBehaviour
                     }
                 }
             }
-            
-
-            // if(selectMenu.IsOwnedAndListed(augmentScript) && selectMenu.IsMaxLevel(augmentScript))
-            // {
-            //     //Overlay toggled if Augment is owned and listed, and is maxLevel
-            //     ToggleOverlay(true, true);
-            //     allowInput = false;
-            // }
-            // else
-            // {
-            //     ToggleOverlay(false);
-            //     allowInput = true;
-            // }
         }
+
+        //Wait for augment reference to be set before allowing input
+        while(augmentScript == null)
+        {
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(.2f); //short delay to prevent accidental buy when jumping
+
+        if(button != null) button.interactable = true;
+        allowInput = true;
     }
 
     public virtual void SelectAugment()
@@ -179,6 +181,7 @@ public class AugmentDisplay : MonoBehaviour
         }
 
         allowInput = false;
+        if(augmentScript == null) Debug.Log("AUGMENT MISSING FROM DISPLAY");
         selectMenu.SelectAugment(augmentScript, randomizeLevel);
         ToggleOverlay(true);
     }

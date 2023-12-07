@@ -4,33 +4,34 @@ using UnityEngine;
 
 public class AugmentPoolHelper : MonoBehaviour
 {
-    [Header("All Augment Pools")]
+    [Header("All Augments in Tier")]
     [SerializeField] public List<AugmentScript> augmentsList;
-    public int totalAugments;
+    // public int totalAugments;
 
     void Start()
     {
+        //Get initial count from child Augment objects
         UpdateCount();
     }
 
-    private void UpdateCount()
+    public void UpdateCount()
     {
-        totalAugments = augmentsList.Count;
+        // totalAugments = augmentsList.Count;
     }
     
     public AugmentScript GetRandomAugment()
     {
         UpdateCount();
         AugmentScript augment;
-        int randIndex = Random.Range(0, totalAugments); //maxExclusive, works for index
+        int randIndex = Random.Range(0, augmentsList.Count); //maxExclusive, works for index
         augment = augmentsList[randIndex];
         return augment;
     }
 
     public bool IsEmpty()
     {
-        UpdateCount();
-        return totalAugments == 0;
+        // UpdateCount();
+        return augmentsList.Count == 0;
     }
 
     public bool ListContains(AugmentScript augment)
@@ -42,10 +43,12 @@ public class AugmentPoolHelper : MonoBehaviour
     public void RemoveAugment(AugmentScript augment)
     {
         augmentsList.Remove(augment);
+        UpdateCount();
     }
 
     public void ReturnAugment(AugmentScript augment)
     {
         augmentsList.Add(augment);
+        UpdateCount();
     }
 }

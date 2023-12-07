@@ -9,6 +9,10 @@ public class AugmentSelectMenu_Blood : AugmentSelectMenu
     public override void SelectAugment(AugmentScript augment, bool randomizeLevel)
     {
         if(!allowInput) return;
+
+        //TODO: rare bug, debug message
+        if(augment == null) Debug.Log("AugmentSelectMenu: augment missing");
+
         if(augmentInventory == null) augmentInventory = GameManager.Instance.AugmentInventory;
         // int chosenIndex = augmentsInStock.IndexOf(augment);
 
