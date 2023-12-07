@@ -28,11 +28,11 @@ public class AnimatorManager : MonoBehaviour
 
     //Ground Attacks
     private static readonly int Attack1 = Animator.StringToHash("Attack1");
-    private static readonly int Attack2 = Animator.StringToHash("AirAttack1"); //Reusing this anim for a second attack
+    private static readonly int Attack2 = Animator.StringToHash("AirAttack1_G");
     private static readonly int Attack3 = Animator.StringToHash("Attack2");
 
     private static readonly int Attack1_HS = Animator.StringToHash("Attack1_HS");
-    private static readonly int Attack2_HS = Animator.StringToHash("AirAttack1_HS");
+    private static readonly int Attack2_HS = Animator.StringToHash("AirAttack1_G_HS");
     private static readonly int Attack3_HS = Animator.StringToHash("Attack2_HS");
 
     //Air Attacks
