@@ -66,6 +66,22 @@ public class AugmentDisplay_HealOnly : AugmentDisplay
         return healAmount;
     }
 
+    protected override IEnumerator RevealAugment()
+    {
+        //overriding augment check
+        if(button != null) button.interactable = false;
+        allowInput = false;
+        //start reveal animation here
+
+        yield return new WaitForSecondsRealtime(.1f); //Animation time
+
+
+        yield return new WaitForSecondsRealtime(.2f); //short delay to prevent accidental buy when jumping
+
+        if(button != null) button.interactable = true;
+        allowInput = true;
+    }
+
     public override void SelectAugment()
     {
         if(!allowInput) return;
@@ -87,7 +103,6 @@ public class AugmentDisplay_HealOnly : AugmentDisplay
         GameManager.Instance.PlayerCombat.HealPlayer(healAmount);
 
         allowInput = false;
-        // selectMenu.SelectAugment(augmentScript, randomizeLevel);
         ToggleOverlay(true);
         selectMenu.CloseSelectMenu();
 

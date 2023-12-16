@@ -118,7 +118,7 @@ public class AugmentDisplay : MonoBehaviour
         selectedOverlayText.text = overlayText;
     }
 
-    protected IEnumerator RevealAugment()
+    protected virtual IEnumerator RevealAugment()
     {
         if(button != null) button.interactable = false;
         allowInput = false;
